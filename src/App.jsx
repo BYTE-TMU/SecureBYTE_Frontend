@@ -28,6 +28,10 @@ function App() {
   // Submission form state
   const [newSubmissionFilename, setNewSubmissionFilename] = useState("");
   const [newSubmissionCode, setNewSubmissionCode] = useState("");
+  const [newSecurityRev, setNewSecurityRev] = useState("");
+  const [newLogicRev, setNewLogicRev] = useState("");
+  const [newTestCases, setNewTestCases] = useState("");
+  const [newReviewPdf, setNewReviewPdf] = useState("");
   const [editingSubmission, setEditingSubmission] = useState(null);
   const [editSubmissionFilename, setEditSubmissionFilename] = useState("");
   const [editSubmissionCode, setEditSubmissionCode] = useState("");
@@ -176,6 +180,31 @@ function App() {
       });
       setNewSubmissionFilename("");
       setNewSubmissionCode("");
+      loadSubmissions(selectedProject.projectid);
+      setError("");
+    } catch (error) {
+      console.error('Error creating submission:', error);
+      setError('Failed to create submission.');
+    }
+  };
+
+  const handleCreateSubmissionWithFields = async () => {
+    if (!newSubmissionFilename.trim() || !selectedProject || !user) return;
+    try {
+      await createSubmission(user.uid, selectedProject.projectid, {
+        filename: newSubmissionFilename,
+        code: newSubmissionCode || "",
+        securityrev: newSecurityRev ? [newSecurityRev] : [],
+        logicrev: newLogicRev ? [newLogicRev] : [],
+        testcases: newTestCases ? [newTestCases] : [],
+        reviewpdf: newReviewPdf
+      });
+      setNewSubmissionFilename("");
+      setNewSubmissionCode("");
+      setNewSecurityRev("");
+      setNewLogicRev("");
+      setNewTestCases("");
+      setNewReviewPdf("");
       loadSubmissions(selectedProject.projectid);
       setError("");
     } catch (error) {
@@ -456,7 +485,44 @@ function App() {
                   onChange={(e) => setNewSubmissionCode(e.target.value)}
                   style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '100px', fontFamily: 'monospace' }}
                 />
-                <button onClick={handleCreateSubmission} style={{ padding: '8px 16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ color: '#fff' }}>Security Review (JSON):</label>
+                  <textarea
+                    placeholder="Security Review JSON"
+                    value={newSecurityRev}
+                    onChange={e => setNewSecurityRev(e.target.value)}
+                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ color: '#fff' }}>Logic Review (JSON):</label>
+                  <textarea
+                    placeholder="Logic Review JSON"
+                    value={newLogicRev}
+                    onChange={e => setNewLogicRev(e.target.value)}
+                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ color: '#fff' }}>Test Cases (JSON):</label>
+                  <textarea
+                    placeholder="Test Cases JSON"
+                    value={newTestCases}
+                    onChange={e => setNewTestCases(e.target.value)}
+                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <label style={{ color: '#fff' }}>Review PDF (path or identifier):</label>
+                  <input
+                    type="text"
+                    placeholder="Review PDF Path/ID"
+                    value={newReviewPdf}
+                    onChange={e => setNewReviewPdf(e.target.value)}
+                    style={{ padding: 8, borderRadius: '4px', border: 'none' }}
+                  />
+                </div>
+                <button onClick={() => { handleCreateSubmissionWithFields(); }} style={{ padding: '8px 16px' }}>
                   Add Submission
                 </button>
               </div>
@@ -539,6 +605,60 @@ function App() {
                                 }}>
                                   {submission.code}
                                 </pre>
+                              )}
+                              {submission.securityrev && submission.securityrev.length > 0 && (
+                                <div style={{ margin: '5px 0' }}>
+                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Security Review:</h6>
+                                  <pre style={{ 
+                                    background: 'rgba(255,0,0,0.1)', 
+                                    padding: '8px', 
+                                    borderRadius: '4px', 
+                                    fontSize: '11px',
+                                    maxHeight: '100px',
+                                    overflow: 'auto',
+                                    whiteSpace: 'pre-wrap'
+                                  }}>
+                                    {submission.securityrev.join('\n')}
+                                  </pre>
+                                </div>
+                              )}
+                              {submission.logicrev && submission.logicrev.length > 0 && (
+                                <div style={{ margin: '5px 0' }}>
+                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Logic Review:</h6>
+                                  <pre style={{ 
+                                    background: 'rgba(0,255,0,0.1)', 
+                                    padding: '8px', 
+                                    borderRadius: '4px', 
+                                    fontSize: '11px',
+                                    maxHeight: '100px',
+                                    overflow: 'auto',
+                                    whiteSpace: 'pre-wrap'
+                                  }}>
+                                    {submission.logicrev.join('\n')}
+                                  </pre>
+                                </div>
+                              )}
+                              {submission.testcases && submission.testcases.length > 0 && (
+                                <div style={{ margin: '5px 0' }}>
+                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Test Cases:</h6>
+                                  <pre style={{ 
+                                    background: 'rgba(0,0,255,0.1)', 
+                                    padding: '8px', 
+                                    borderRadius: '4px', 
+                                    fontSize: '11px',
+                                    maxHeight: '100px',
+                                    overflow: 'auto',
+                                    whiteSpace: 'pre-wrap'
+                                  }}>
+                                    {submission.testcases.join('\n')}
+                                  </pre>
+                                </div>
+                              )}
+                              {submission.reviewpdf && (
+                                <div style={{ margin: '5px 0' }}>
+                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Review PDF:</h6>
+                                  <span style={{ color: '#ccc', fontSize: '12px' }}>{submission.reviewpdf}</span>
+                                </div>
                               )}
                               <small style={{ color: '#999' }}>Created: {new Date(submission.created_at).toLocaleDateString()}</small>
                             </div>

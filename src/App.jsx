@@ -442,6 +442,7 @@ function App() {
                                   borderRadius: '4px',
                                   cursor: 'pointer'
                                 }}
+                                className=""
                               >
                                 Edit
                               </button>

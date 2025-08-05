@@ -19,6 +19,20 @@ import {
   updateSubmission,
   deleteSubmission,
 } from './api';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './components/ui/card';
+import { Input } from './components/ui/input';
+import { Label } from './components/ui/label';
+import { Button } from './components/ui/button';
+import { Separator } from './components/ui/separator';
+import LoginPage from './components/custom-components/LoginPage';
+import SignupPage from './components/custom-components/SignupPage';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -983,63 +997,28 @@ function App() {
     );
   }
 
-  return (
-    <div className="min-h-screen w-screen grid grid-cols-2">
-      <div
-        style={{
-          width: 320,
-          padding: 32,
-          background: 'rgba(0,0,0,0.5)',
-          borderRadius: 12,
-          boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
-        >
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={handleEmailChange}
-            required
-            style={{ marginBottom: 10, padding: 8 }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-            style={{ marginBottom: 10, padding: 8 }}
-          />
-          <button type="submit" style={{ marginBottom: 10 }}>
-            {isSignUp ? 'Sign Up' : 'Sign In'}
-          </button>
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            style={{ marginBottom: 10 }}
-          >
-            Sign In with Google
-          </button>
-          <span style={{ color: 'red', minHeight: 24 }}>{error}</span>
-        </form>
-        <button
-          onClick={() => setIsSignUp((prev) => !prev)}
-          style={{ marginTop: 10 }}
-        >
-          {isSignUp
-            ? 'Already have an account? Sign In'
-            : "Don't have an account? Sign Up"}
-        </button>
-      </div>
-    </div>
+  return isSignUp ? (
+    <LoginPage
+      handleSubmit={handleSubmit}
+      handleEmailChange={handleEmailChange}
+      handlePasswordChange={handlePasswordChange}
+      handleGoogleSignIn={handleGoogleSignIn}
+      error={error}
+      setIsSignUp={setIsSignUp}
+      email={email}
+      password={password}
+    />
+  ) : (
+    <SignupPage
+      handleSubmit={handleSubmit}
+      handleEmailChange={handleEmailChange}
+      handlePasswordChange={handlePasswordChange}
+      handleGoogleSignIn={handleGoogleSignIn}
+      error={error}
+      setIsSignUp={setIsSignUp}
+      email={email}
+      password={password}
+    />
   );
 }
 

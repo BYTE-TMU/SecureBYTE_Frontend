@@ -19,20 +19,9 @@ import {
   updateSubmission,
   deleteSubmission,
 } from './api';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './components/ui/card';
-import { Input } from './components/ui/input';
-import { Label } from './components/ui/label';
-import { Button } from './components/ui/button';
-import { Separator } from './components/ui/separator';
-import LoginPage from './components/custom-components/LoginPage';
-import SignupPage from './components/custom-components/SignupPage';
+
+import LoginPage from './components/pages/LoginPage';
+import SignupPage from './components/pages/SignupPage';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();

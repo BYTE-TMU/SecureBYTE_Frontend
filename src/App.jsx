@@ -1,47 +1,67 @@
-import React, { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { app } from "./firebase";
-import { getProjects, createProject, updateProject, deleteProject, getSubmissions, createSubmission, updateSubmission, deleteSubmission } from "./api";
+import React, { useState, useEffect } from 'react';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
+import { app } from './firebase';
+import {
+  getProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  getSubmissions,
+  createSubmission,
+  updateSubmission,
+  deleteSubmission,
+} from './api';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 function App() {
   const [user, setUser] = useState(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  
+
   // Project management state
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [submissions, setSubmissions] = useState([]);
-  
+
   // Project form state
-  const [newProjectName, setNewProjectName] = useState("");
-  const [newProjectDesc, setNewProjectDesc] = useState("");
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectDesc, setNewProjectDesc] = useState('');
   const [editingProject, setEditingProject] = useState(null);
-  const [editProjectName, setEditProjectName] = useState("");
-  const [editProjectDesc, setEditProjectDesc] = useState("");
-  
+  const [editProjectName, setEditProjectName] = useState('');
+  const [editProjectDesc, setEditProjectDesc] = useState('');
+
   // Submission form state
-  const [newSubmissionFilename, setNewSubmissionFilename] = useState("");
-  const [newSubmissionCode, setNewSubmissionCode] = useState("");
-  const [newSecurityRev, setNewSecurityRev] = useState("");
-  const [newLogicRev, setNewLogicRev] = useState("");
-  const [newTestCases, setNewTestCases] = useState("");
-  const [newReviewPdf, setNewReviewPdf] = useState("");
+  const [newSubmissionFilename, setNewSubmissionFilename] = useState('');
+  const [newSubmissionCode, setNewSubmissionCode] = useState('');
+  const [newSecurityRev, setNewSecurityRev] = useState('');
+  const [newLogicRev, setNewLogicRev] = useState('');
+  const [newTestCases, setNewTestCases] = useState('');
+  const [newReviewPdf, setNewReviewPdf] = useState('');
   const [editingSubmission, setEditingSubmission] = useState(null);
-  const [editSubmissionFilename, setEditSubmissionFilename] = useState("");
-  const [editSubmissionCode, setEditSubmissionCode] = useState("");
-  
+  const [editSubmissionFilename, setEditSubmissionFilename] = useState('');
+  const [editSubmissionCode, setEditSubmissionCode] = useState('');
+
   // View state
   const [currentView, setCurrentView] = useState('projects'); // 'projects' or 'submissions'
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth state changed:', user ? `User logged in: ${user.uid}` : 'User logged out');
+      console.log(
+        'Auth state changed:',
+        user ? `User logged in: ${user.uid}` : 'User logged out',
+      );
       setUser(user);
       if (user) {
         // Load projects when user is authenticated
@@ -66,58 +86,69 @@ function App() {
       const response = await getProjects(user.uid);
       console.log('Projects response:', response.data); // Debug log
       setProjects(response.data);
-      setError(""); // Clear any previous errors
+      setError(''); // Clear any previous errors
     } catch (error) {
       console.error('Error loading projects:', error);
       console.error('Error details:', error.response?.data); // More detailed error
-      setError(`Failed to load projects: ${error.response?.data?.error || error.message}`);
+      setError(
+        `Failed to load projects: ${
+          error.response?.data?.error || error.message
+        }`,
+      );
       setProjects([]);
     }
   };
 
   const handleCreateProject = async () => {
     if (!newProjectName.trim() || !user) return;
-    
+
     console.log('Creating project for user:', user.uid); // Debug log
-    console.log('Project data:', { project_name: newProjectName, project_desc: newProjectDesc }); // Debug log
-    
+    console.log('Project data:', {
+      project_name: newProjectName,
+      project_desc: newProjectDesc,
+    }); // Debug log
+
     try {
       const response = await createProject(user.uid, {
         project_name: newProjectName,
-        project_desc: newProjectDesc || "",
-        fileids: []
+        project_desc: newProjectDesc || '',
+        fileids: [],
       });
       console.log('Project created:', response.data); // Debug log
-      setNewProjectName("");
-      setNewProjectDesc("");
+      setNewProjectName('');
+      setNewProjectDesc('');
       loadProjects();
-      setError(""); // Clear any previous errors
+      setError(''); // Clear any previous errors
     } catch (error) {
       console.error('Error creating project:', error);
       console.error('Error details:', error.response?.data); // More detailed error
-      setError(`Failed to create project: ${error.response?.data?.error || error.message}`);
+      setError(
+        `Failed to create project: ${
+          error.response?.data?.error || error.message
+        }`,
+      );
     }
   };
 
   const handleEditProject = (project) => {
     setEditingProject(project.projectid);
     setEditProjectName(project.project_name);
-    setEditProjectDesc(project.project_desc || "");
+    setEditProjectDesc(project.project_desc || '');
   };
 
   const handleUpdateProject = async (projectId) => {
     if (!editProjectName.trim() || !user) return;
-    
+
     try {
       await updateProject(user.uid, projectId, {
         project_name: editProjectName,
-        project_desc: editProjectDesc
+        project_desc: editProjectDesc,
       });
       setEditingProject(null);
-      setEditProjectName("");
-      setEditProjectDesc("");
+      setEditProjectName('');
+      setEditProjectDesc('');
       loadProjects();
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error updating project:', error);
       setError('Failed to update project.');
@@ -134,7 +165,7 @@ function App() {
         setCurrentView('projects');
       }
       loadProjects();
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error deleting project:', error);
       setError('Failed to delete project.');
@@ -143,8 +174,8 @@ function App() {
 
   const handleCancelProjectEdit = () => {
     setEditingProject(null);
-    setEditProjectName("");
-    setEditProjectDesc("");
+    setEditProjectName('');
+    setEditProjectDesc('');
   };
 
   // Submission management functions
@@ -153,7 +184,7 @@ function App() {
     try {
       const response = await getSubmissions(user.uid, projectId);
       setSubmissions(response.data);
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error loading submissions:', error);
       setError('Failed to load submissions.');
@@ -168,20 +199,20 @@ function App() {
 
   const handleCreateSubmission = async () => {
     if (!newSubmissionFilename.trim() || !selectedProject || !user) return;
-    
+
     try {
       await createSubmission(user.uid, selectedProject.projectid, {
         filename: newSubmissionFilename,
-        code: newSubmissionCode || "",
+        code: newSubmissionCode || '',
         securityrev: [],
         logicrev: [],
         testcases: [],
-        reviewpdf: ""
+        reviewpdf: '',
       });
-      setNewSubmissionFilename("");
-      setNewSubmissionCode("");
+      setNewSubmissionFilename('');
+      setNewSubmissionCode('');
       loadSubmissions(selectedProject.projectid);
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error creating submission:', error);
       setError('Failed to create submission.');
@@ -193,20 +224,20 @@ function App() {
     try {
       await createSubmission(user.uid, selectedProject.projectid, {
         filename: newSubmissionFilename,
-        code: newSubmissionCode || "",
+        code: newSubmissionCode || '',
         securityrev: newSecurityRev ? [newSecurityRev] : [],
         logicrev: newLogicRev ? [newLogicRev] : [],
         testcases: newTestCases ? [newTestCases] : [],
-        reviewpdf: newReviewPdf
+        reviewpdf: newReviewPdf,
       });
-      setNewSubmissionFilename("");
-      setNewSubmissionCode("");
-      setNewSecurityRev("");
-      setNewLogicRev("");
-      setNewTestCases("");
-      setNewReviewPdf("");
+      setNewSubmissionFilename('');
+      setNewSubmissionCode('');
+      setNewSecurityRev('');
+      setNewLogicRev('');
+      setNewTestCases('');
+      setNewReviewPdf('');
       loadSubmissions(selectedProject.projectid);
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error creating submission:', error);
       setError('Failed to create submission.');
@@ -216,22 +247,22 @@ function App() {
   const handleEditSubmission = (submission) => {
     setEditingSubmission(submission.id);
     setEditSubmissionFilename(submission.filename);
-    setEditSubmissionCode(submission.code || "");
+    setEditSubmissionCode(submission.code || '');
   };
 
   const handleUpdateSubmission = async (submissionId) => {
     if (!editSubmissionFilename.trim() || !user) return;
-    
+
     try {
       await updateSubmission(user.uid, submissionId, {
         filename: editSubmissionFilename,
-        code: editSubmissionCode
+        code: editSubmissionCode,
       });
       setEditingSubmission(null);
-      setEditSubmissionFilename("");
-      setEditSubmissionCode("");
+      setEditSubmissionFilename('');
+      setEditSubmissionCode('');
       loadSubmissions(selectedProject.projectid);
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error updating submission:', error);
       setError('Failed to update submission.');
@@ -243,7 +274,7 @@ function App() {
     try {
       await deleteSubmission(user.uid, submissionId);
       loadSubmissions(selectedProject.projectid);
-      setError("");
+      setError('');
     } catch (error) {
       console.error('Error deleting submission:', error);
       setError('Failed to delete submission.');
@@ -252,8 +283,8 @@ function App() {
 
   const handleCancelSubmissionEdit = () => {
     setEditingSubmission(null);
-    setEditSubmissionFilename("");
-    setEditSubmissionCode("");
+    setEditSubmissionFilename('');
+    setEditSubmissionCode('');
   };
 
   const handleEmailChange = (e) => setEmail(e.target.value);
@@ -261,7 +292,7 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
@@ -274,7 +305,7 @@ function App() {
   };
 
   const handleGoogleSignIn = async () => {
-    setError("");
+    setError('');
     try {
       await signInWithPopup(auth, provider);
     } catch (err) {
@@ -288,38 +319,76 @@ function App() {
 
   if (user) {
     return (
-      <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', padding: '20px' }}>
-        <div style={{ width: '100%', maxWidth: '800px', padding: 32, background: 'rgba(0,0,0,0.5)', borderRadius: 12, boxShadow: '0 2px 16px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          width: '100vw',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          padding: '20px',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '800px',
+            padding: 32,
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: 12,
+            boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
           <h2>Welcome, {user.displayName || user.email}!</h2>
-          <button onClick={handleSignOut} style={{ marginBottom: '20px', padding: '8px 16px' }}>Sign Out</button>
-          
-          {error && <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>{error}</div>}
-          
+          <button
+            onClick={handleSignOut}
+            style={{ marginBottom: '20px', padding: '8px 16px' }}
+          >
+            Sign Out
+          </button>
+
+          {error && (
+            <div
+              style={{
+                color: 'red',
+                marginBottom: '10px',
+                textAlign: 'center',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           {/* Navigation */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-            <button 
+            <button
               onClick={() => setCurrentView('projects')}
-              style={{ 
+              style={{
                 padding: '8px 16px',
                 background: currentView === 'projects' ? '#007acc' : '#666',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Projects
             </button>
             {selectedProject && (
-              <button 
+              <button
                 onClick={() => setCurrentView('submissions')}
-                style={{ 
+                style={{
                   padding: '8px 16px',
-                  background: currentView === 'submissions' ? '#007acc' : '#666',
+                  background:
+                    currentView === 'submissions' ? '#007acc' : '#666',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
                 }}
               >
                 Submissions ({selectedProject.project_name})
@@ -331,7 +400,15 @@ function App() {
             // Projects View
             <>
               <h3>Project Management</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', width: '100%' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  marginBottom: '20px',
+                  width: '100%',
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Project name"
@@ -343,67 +420,100 @@ function App() {
                   placeholder="Project description (optional)"
                   value={newProjectDesc}
                   onChange={(e) => setNewProjectDesc(e.target.value)}
-                  style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '60px' }}
+                  style={{
+                    padding: 8,
+                    borderRadius: '4px',
+                    border: 'none',
+                    minHeight: '60px',
+                  }}
                 />
-                <button onClick={handleCreateProject} style={{ padding: '8px 16px' }}>
+                <button
+                  onClick={handleCreateProject}
+                  style={{ padding: '8px 16px' }}
+                >
                   Create Project
                 </button>
               </div>
-              
+
               <div style={{ width: '100%' }}>
                 <h4>Projects List:</h4>
                 {projects.length === 0 ? (
                   <p style={{ color: '#ccc' }}>No projects found</p>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, width: '100%' }}>
-                    {projects.map(project => (
-                      <li key={project.projectid} style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        padding: '15px', 
-                        margin: '10px 0', 
-                        background: 'rgba(255,255,255,0.1)', 
-                        borderRadius: '6px' 
-                      }}>
+                    {projects.map((project) => (
+                      <li
+                        key={project.projectid}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          padding: '15px',
+                          margin: '10px 0',
+                          background: 'rgba(255,255,255,0.1)',
+                          borderRadius: '6px',
+                        }}
+                      >
                         {editingProject === project.projectid ? (
                           // Edit mode
                           <>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                                marginBottom: '10px',
+                              }}
+                            >
                               <input
                                 type="text"
                                 value={editProjectName}
-                                onChange={(e) => setEditProjectName(e.target.value)}
-                                style={{ padding: '8px', borderRadius: '4px', border: 'none' }}
+                                onChange={(e) =>
+                                  setEditProjectName(e.target.value)
+                                }
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '4px',
+                                  border: 'none',
+                                }}
                               />
                               <textarea
                                 value={editProjectDesc}
-                                onChange={(e) => setEditProjectDesc(e.target.value)}
-                                style={{ padding: '8px', borderRadius: '4px', border: 'none', minHeight: '60px' }}
+                                onChange={(e) =>
+                                  setEditProjectDesc(e.target.value)
+                                }
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '4px',
+                                  border: 'none',
+                                  minHeight: '60px',
+                                }}
                               />
                             </div>
                             <div style={{ display: 'flex', gap: '5px' }}>
-                              <button 
-                                onClick={() => handleUpdateProject(project.projectid)}
-                                style={{ 
-                                  background: 'green', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                              <button
+                                onClick={() =>
+                                  handleUpdateProject(project.projectid)
+                                }
+                                style={{
+                                  background: 'green',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Save
                               </button>
-                              <button 
+                              <button
                                 onClick={handleCancelProjectEdit}
-                                style={{ 
-                                  background: 'gray', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                                style={{
+                                  background: 'gray',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Cancel
@@ -414,47 +524,66 @@ function App() {
                           // Display mode
                           <>
                             <div style={{ marginBottom: '10px' }}>
-                              <h5 style={{ margin: '0 0 5px 0', color: '#fff' }}>{project.project_name}</h5>
-                              <p style={{ margin: 0, color: '#ccc', fontSize: '14px' }}>{project.project_desc || 'No description'}</p>
-                              <small style={{ color: '#999' }}>Created: {new Date(project.created_at).toLocaleDateString()}</small>
+                              <h5
+                                style={{ margin: '0 0 5px 0', color: '#fff' }}
+                              >
+                                {project.project_name}
+                              </h5>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  color: '#ccc',
+                                  fontSize: '14px',
+                                }}
+                              >
+                                {project.project_desc || 'No description'}
+                              </p>
+                              <small style={{ color: '#999' }}>
+                                Created:{' '}
+                                {new Date(
+                                  project.created_at,
+                                ).toLocaleDateString()}
+                              </small>
                             </div>
                             <div style={{ display: 'flex', gap: '5px' }}>
-                              <button 
+                              <button
                                 onClick={() => handleSelectProject(project)}
-                                style={{ 
-                                  background: '#007acc', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                                style={{
+                                  background: '#007acc',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 View Submissions
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleEditProject(project)}
-                                style={{ 
-                                  background: 'blue', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                                style={{
+                                  background: 'blue',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                                 className=""
                               >
                                 Edit
                               </button>
-                              <button 
-                                onClick={() => handleDeleteProject(project.projectid)}
-                                style={{ 
-                                  background: 'red', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                              <button
+                                onClick={() =>
+                                  handleDeleteProject(project.projectid)
+                                }
+                                style={{
+                                  background: 'red',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Delete
@@ -472,7 +601,15 @@ function App() {
             // Submissions View
             <>
               <h3>Submissions for: {selectedProject.project_name}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', width: '100%' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  marginBottom: '20px',
+                  width: '100%',
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Filename"
@@ -484,104 +621,187 @@ function App() {
                   placeholder="Code (optional)"
                   value={newSubmissionCode}
                   onChange={(e) => setNewSubmissionCode(e.target.value)}
-                  style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '100px', fontFamily: 'monospace' }}
+                  style={{
+                    padding: 8,
+                    borderRadius: '4px',
+                    border: 'none',
+                    minHeight: '100px',
+                    fontFamily: 'monospace',
+                  }}
                 />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ color: '#fff' }}>Security Review (JSON):</label>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
+                  <label style={{ color: '#fff' }}>
+                    Security Review (JSON):
+                  </label>
                   <textarea
                     placeholder="Security Review JSON"
                     value={newSecurityRev}
-                    onChange={e => setNewSecurityRev(e.target.value)}
-                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                    onChange={(e) => setNewSecurityRev(e.target.value)}
+                    style={{
+                      padding: 8,
+                      borderRadius: '4px',
+                      border: 'none',
+                      minHeight: '50px',
+                      fontFamily: 'monospace',
+                    }}
                   />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
                   <label style={{ color: '#fff' }}>Logic Review (JSON):</label>
                   <textarea
                     placeholder="Logic Review JSON"
                     value={newLogicRev}
-                    onChange={e => setNewLogicRev(e.target.value)}
-                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                    onChange={(e) => setNewLogicRev(e.target.value)}
+                    style={{
+                      padding: 8,
+                      borderRadius: '4px',
+                      border: 'none',
+                      minHeight: '50px',
+                      fontFamily: 'monospace',
+                    }}
                   />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
                   <label style={{ color: '#fff' }}>Test Cases (JSON):</label>
                   <textarea
                     placeholder="Test Cases JSON"
                     value={newTestCases}
-                    onChange={e => setNewTestCases(e.target.value)}
-                    style={{ padding: 8, borderRadius: '4px', border: 'none', minHeight: '50px', fontFamily: 'monospace' }}
+                    onChange={(e) => setNewTestCases(e.target.value)}
+                    style={{
+                      padding: 8,
+                      borderRadius: '4px',
+                      border: 'none',
+                      minHeight: '50px',
+                      fontFamily: 'monospace',
+                    }}
                   />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <label style={{ color: '#fff' }}>Review PDF (path or identifier):</label>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                  }}
+                >
+                  <label style={{ color: '#fff' }}>
+                    Review PDF (path or identifier):
+                  </label>
                   <input
                     type="text"
                     placeholder="Review PDF Path/ID"
                     value={newReviewPdf}
-                    onChange={e => setNewReviewPdf(e.target.value)}
+                    onChange={(e) => setNewReviewPdf(e.target.value)}
                     style={{ padding: 8, borderRadius: '4px', border: 'none' }}
                   />
                 </div>
-                <button onClick={() => { handleCreateSubmissionWithFields(); }} style={{ padding: '8px 16px' }}>
+                <button
+                  onClick={() => {
+                    handleCreateSubmissionWithFields();
+                  }}
+                  style={{ padding: '8px 16px' }}
+                >
                   Add Submission
                 </button>
               </div>
-              
+
               <div style={{ width: '100%' }}>
                 <h4>Submissions List:</h4>
                 {submissions.length === 0 ? (
                   <p style={{ color: '#ccc' }}>No submissions found</p>
                 ) : (
                   <ul style={{ listStyle: 'none', padding: 0, width: '100%' }}>
-                    {submissions.map(submission => (
-                      <li key={submission.id} style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        padding: '15px', 
-                        margin: '10px 0', 
-                        background: 'rgba(255,255,255,0.1)', 
-                        borderRadius: '6px' 
-                      }}>
+                    {submissions.map((submission) => (
+                      <li
+                        key={submission.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          padding: '15px',
+                          margin: '10px 0',
+                          background: 'rgba(255,255,255,0.1)',
+                          borderRadius: '6px',
+                        }}
+                      >
                         {editingSubmission === submission.id ? (
                           // Edit mode
                           <>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '10px',
+                                marginBottom: '10px',
+                              }}
+                            >
                               <input
                                 type="text"
                                 value={editSubmissionFilename}
-                                onChange={(e) => setEditSubmissionFilename(e.target.value)}
-                                style={{ padding: '8px', borderRadius: '4px', border: 'none' }}
+                                onChange={(e) =>
+                                  setEditSubmissionFilename(e.target.value)
+                                }
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '4px',
+                                  border: 'none',
+                                }}
                               />
                               <textarea
                                 value={editSubmissionCode}
-                                onChange={(e) => setEditSubmissionCode(e.target.value)}
-                                style={{ padding: '8px', borderRadius: '4px', border: 'none', minHeight: '100px', fontFamily: 'monospace' }}
+                                onChange={(e) =>
+                                  setEditSubmissionCode(e.target.value)
+                                }
+                                style={{
+                                  padding: '8px',
+                                  borderRadius: '4px',
+                                  border: 'none',
+                                  minHeight: '100px',
+                                  fontFamily: 'monospace',
+                                }}
                               />
                             </div>
                             <div style={{ display: 'flex', gap: '5px' }}>
-                              <button 
-                                onClick={() => handleUpdateSubmission(submission.id)}
-                                style={{ 
-                                  background: 'green', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                              <button
+                                onClick={() =>
+                                  handleUpdateSubmission(submission.id)
+                                }
+                                style={{
+                                  background: 'green',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Save
                               </button>
-                              <button 
+                              <button
                                 onClick={handleCancelSubmissionEdit}
-                                style={{ 
-                                  background: 'gray', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                                style={{
+                                  background: 'gray',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Cancel
@@ -592,100 +812,158 @@ function App() {
                           // Display mode
                           <>
                             <div style={{ marginBottom: '10px' }}>
-                              <h5 style={{ margin: '0 0 5px 0', color: '#fff' }}>{submission.filename}</h5>
+                              <h5
+                                style={{ margin: '0 0 5px 0', color: '#fff' }}
+                              >
+                                {submission.filename}
+                              </h5>
                               {submission.code && (
-                                <pre style={{ 
-                                  background: 'rgba(0,0,0,0.3)', 
-                                  padding: '10px', 
-                                  borderRadius: '4px', 
-                                  fontSize: '12px',
-                                  maxHeight: '150px',
-                                  overflow: 'auto',
-                                  margin: '5px 0',
-                                  whiteSpace: 'pre-wrap'
-                                }}>
+                                <pre
+                                  style={{
+                                    background: 'rgba(0,0,0,0.3)',
+                                    padding: '10px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    maxHeight: '150px',
+                                    overflow: 'auto',
+                                    margin: '5px 0',
+                                    whiteSpace: 'pre-wrap',
+                                  }}
+                                >
                                   {submission.code}
                                 </pre>
                               )}
-                              {submission.securityrev && submission.securityrev.length > 0 && (
-                                <div style={{ margin: '5px 0' }}>
-                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Security Review:</h6>
-                                  <pre style={{ 
-                                    background: 'rgba(255,0,0,0.1)', 
-                                    padding: '8px', 
-                                    borderRadius: '4px', 
-                                    fontSize: '11px',
-                                    maxHeight: '100px',
-                                    overflow: 'auto',
-                                    whiteSpace: 'pre-wrap'
-                                  }}>
-                                    {submission.securityrev.join('\n')}
-                                  </pre>
-                                </div>
-                              )}
-                              {submission.logicrev && submission.logicrev.length > 0 && (
-                                <div style={{ margin: '5px 0' }}>
-                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Logic Review:</h6>
-                                  <pre style={{ 
-                                    background: 'rgba(0,255,0,0.1)', 
-                                    padding: '8px', 
-                                    borderRadius: '4px', 
-                                    fontSize: '11px',
-                                    maxHeight: '100px',
-                                    overflow: 'auto',
-                                    whiteSpace: 'pre-wrap'
-                                  }}>
-                                    {submission.logicrev.join('\n')}
-                                  </pre>
-                                </div>
-                              )}
-                              {submission.testcases && submission.testcases.length > 0 && (
-                                <div style={{ margin: '5px 0' }}>
-                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Test Cases:</h6>
-                                  <pre style={{ 
-                                    background: 'rgba(0,0,255,0.1)', 
-                                    padding: '8px', 
-                                    borderRadius: '4px', 
-                                    fontSize: '11px',
-                                    maxHeight: '100px',
-                                    overflow: 'auto',
-                                    whiteSpace: 'pre-wrap'
-                                  }}>
-                                    {submission.testcases.join('\n')}
-                                  </pre>
-                                </div>
-                              )}
+                              {submission.securityrev &&
+                                submission.securityrev.length > 0 && (
+                                  <div style={{ margin: '5px 0' }}>
+                                    <h6
+                                      style={{
+                                        margin: '0 0 3px 0',
+                                        color: '#fff',
+                                        fontSize: '14px',
+                                      }}
+                                    >
+                                      Security Review:
+                                    </h6>
+                                    <pre
+                                      style={{
+                                        background: 'rgba(255,0,0,0.1)',
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        maxHeight: '100px',
+                                        overflow: 'auto',
+                                        whiteSpace: 'pre-wrap',
+                                      }}
+                                    >
+                                      {submission.securityrev.join('\n')}
+                                    </pre>
+                                  </div>
+                                )}
+                              {submission.logicrev &&
+                                submission.logicrev.length > 0 && (
+                                  <div style={{ margin: '5px 0' }}>
+                                    <h6
+                                      style={{
+                                        margin: '0 0 3px 0',
+                                        color: '#fff',
+                                        fontSize: '14px',
+                                      }}
+                                    >
+                                      Logic Review:
+                                    </h6>
+                                    <pre
+                                      style={{
+                                        background: 'rgba(0,255,0,0.1)',
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        maxHeight: '100px',
+                                        overflow: 'auto',
+                                        whiteSpace: 'pre-wrap',
+                                      }}
+                                    >
+                                      {submission.logicrev.join('\n')}
+                                    </pre>
+                                  </div>
+                                )}
+                              {submission.testcases &&
+                                submission.testcases.length > 0 && (
+                                  <div style={{ margin: '5px 0' }}>
+                                    <h6
+                                      style={{
+                                        margin: '0 0 3px 0',
+                                        color: '#fff',
+                                        fontSize: '14px',
+                                      }}
+                                    >
+                                      Test Cases:
+                                    </h6>
+                                    <pre
+                                      style={{
+                                        background: 'rgba(0,0,255,0.1)',
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        maxHeight: '100px',
+                                        overflow: 'auto',
+                                        whiteSpace: 'pre-wrap',
+                                      }}
+                                    >
+                                      {submission.testcases.join('\n')}
+                                    </pre>
+                                  </div>
+                                )}
                               {submission.reviewpdf && (
                                 <div style={{ margin: '5px 0' }}>
-                                  <h6 style={{ margin: '0 0 3px 0', color: '#fff', fontSize: '14px' }}>Review PDF:</h6>
-                                  <span style={{ color: '#ccc', fontSize: '12px' }}>{submission.reviewpdf}</span>
+                                  <h6
+                                    style={{
+                                      margin: '0 0 3px 0',
+                                      color: '#fff',
+                                      fontSize: '14px',
+                                    }}
+                                  >
+                                    Review PDF:
+                                  </h6>
+                                  <span
+                                    style={{ color: '#ccc', fontSize: '12px' }}
+                                  >
+                                    {submission.reviewpdf}
+                                  </span>
                                 </div>
                               )}
-                              <small style={{ color: '#999' }}>Created: {new Date(submission.created_at).toLocaleDateString()}</small>
+                              <small style={{ color: '#999' }}>
+                                Created:{' '}
+                                {new Date(
+                                  submission.created_at,
+                                ).toLocaleDateString()}
+                              </small>
                             </div>
                             <div style={{ display: 'flex', gap: '5px' }}>
-                              <button 
+                              <button
                                 onClick={() => handleEditSubmission(submission)}
-                                style={{ 
-                                  background: 'blue', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                                style={{
+                                  background: 'blue',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Edit
                               </button>
-                              <button 
-                                onClick={() => handleDeleteSubmission(submission.id)}
-                                style={{ 
-                                  background: 'red', 
-                                  color: 'white', 
-                                  border: 'none', 
-                                  padding: '6px 12px', 
+                              <button
+                                onClick={() =>
+                                  handleDeleteSubmission(submission.id)
+                                }
+                                style={{
+                                  background: 'red',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
                                   borderRadius: '4px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Delete
@@ -706,10 +984,24 @@ function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', width: '100vw', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ width: 320, padding: 32, background: 'rgba(0,0,0,0.5)', borderRadius: 12, boxShadow: '0 2px 16px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h2>{isSignUp ? "Sign Up" : "Sign In"}</h2>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", width: '100%' }}>
+    <div className="min-h-screen w-screen grid grid-cols-2">
+      <div
+        style={{
+          width: 320,
+          padding: 32,
+          background: 'rgba(0,0,0,0.5)',
+          borderRadius: 12,
+          boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+        >
           <input
             type="email"
             placeholder="Email"
@@ -727,15 +1019,24 @@ function App() {
             style={{ marginBottom: 10, padding: 8 }}
           />
           <button type="submit" style={{ marginBottom: 10 }}>
-            {isSignUp ? "Sign Up" : "Sign In"}
+            {isSignUp ? 'Sign Up' : 'Sign In'}
           </button>
-          <button type="button" onClick={handleGoogleSignIn} style={{ marginBottom: 10 }}>
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            style={{ marginBottom: 10 }}
+          >
             Sign In with Google
           </button>
-          <span style={{ color: "red", minHeight: 24 }}>{error}</span>
+          <span style={{ color: 'red', minHeight: 24 }}>{error}</span>
         </form>
-        <button onClick={() => setIsSignUp((prev) => !prev)} style={{ marginTop: 10 }}>
-          {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+        <button
+          onClick={() => setIsSignUp((prev) => !prev)}
+          style={{ marginTop: 10 }}
+        >
+          {isSignUp
+            ? 'Already have an account? Sign In'
+            : "Don't have an account? Sign Up"}
         </button>
       </div>
     </div>

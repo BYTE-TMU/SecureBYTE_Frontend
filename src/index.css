@@ -17,6 +17,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
+  --secure-blue: #003092;
+  --secure-orange: #f39422;
+  --secure-light-blue: #4e7ddc;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -109,6 +112,9 @@ button:focus-visible {
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-secure-blue: var(--secure-blue);
+  --color-secure-orange: var(--secure-orange);
+  --color-secure-light-blue: var(--secure-light-blue);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -143,6 +149,9 @@ button:focus-visible {
 }
 
 .dark {
+  --secure-blue: #003092;
+  --secure-orange: #f39422;
+  --secure-light-blue: #4e7ddc;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

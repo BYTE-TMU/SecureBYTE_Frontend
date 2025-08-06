@@ -20,8 +20,8 @@ import {
   deleteSubmission,
 } from './api';
 
-import LoginPage from './components/pages/LoginPage';
-import SignupPage from './components/pages/SignupPage';
+import LoginPage from './components/pages/SignUpPage';
+import SignupPage from './components/pages/LoginPage';
 import Dashboard from './components/pages/Dashboard';
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import AppSidebar from './components/custom-components/AppSidebar';
@@ -329,55 +329,56 @@ function App() {
     return (
       <SidebarProvider defaultOpen={false}>
         <NavigationBar />
-
-        <AppSidebar />
-        <AppHeader />
-        {/* <SidebarTrigger /> */}
-        <Dashboard
-          user={user}
-          handleSignOut={handleSignOut}
-          selectedProject={selectedProject}
-          handleSelectProject={handleSelectProject}
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          newProjectName={newProjectName}
-          setNewProjectName={setNewProjectName}
-          handleCreateProject={handleCreateProject}
-          projects={projects}
-          editingProject={editingProject}
-          handleEditProject={handleEditProject}
-          newProjectDesc={newProjectDesc}
-          editProjectName={editProjectName}
-          setEditProjectName={setEditProjectName}
-          editProjectDesc={editProjectDesc}
-          setEditProjectDesc={setEditProjectDesc}
-          handleUpdateProject={handleUpdateProject}
-          handleCancelProjectEdit={handleCancelProjectEdit}
-          handleDeleteProject={handleDeleteProject}
-          newSubmissionFilename={newSubmissionFilename}
-          setNewSubmissionFilename={setNewSubmissionFilename}
-          newSubmissionCode={newSubmissionCode}
-          setNewSubmissionCode={setNewSubmissionCode}
-          newSecurityRev={newSecurityRev}
-          setNewSecurityRev={setNewSecurityRev}
-          newLogicRev={newLogicRev}
-          setNewLogicRev={setNewLogicRev}
-          newTestCases={newTestCases}
-          setNewTestCases={setNewTestCases}
-          newReviewPdf={newReviewPdf}
-          setNewReviewPdf={setNewReviewPdf}
-          handleCreateSubmissionWithFields={handleCreateSubmissionWithFields}
-          submissions={submissions}
-          editingSubmission={editingSubmission}
-          handleEditSubmission={handleEditSubmission}
-          editSubmissionFilename={editSubmissionFilename}
-          setEditSubmissionFilename={setEditSubmissionFilename}
-          editSubmissionCode={editSubmissionCode}
-          setEditSubmissionCode={setEditSubmissionCode}
-          handleUpdateSubmission={handleUpdateSubmission}
-          handleCancelSubmissionEdit={handleCancelSubmissionEdit}
-          handleDeleteSubmission={handleDeleteSubmission}
-        />
+        <AppSidebar handleSignOut={handleSignOut} />
+        <main>
+          <AppHeader />
+          <Dashboard
+            user={user}
+            handleSignOut={handleSignOut}
+            selectedProject={selectedProject}
+            handleSelectProject={handleSelectProject}
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            newProjectName={newProjectName}
+            setNewProjectName={setNewProjectName}
+            handleCreateProject={handleCreateProject}
+            projects={projects}
+            editingProject={editingProject}
+            handleEditProject={handleEditProject}
+            setNewProjectDesc={setNewProjectDesc}
+            newProjectDesc={newProjectDesc}
+            editProjectName={editProjectName}
+            setEditProjectName={setEditProjectName}
+            editProjectDesc={editProjectDesc}
+            setEditProjectDesc={setEditProjectDesc}
+            handleUpdateProject={handleUpdateProject}
+            handleCancelProjectEdit={handleCancelProjectEdit}
+            handleDeleteProject={handleDeleteProject}
+            newSubmissionFilename={newSubmissionFilename}
+            setNewSubmissionFilename={setNewSubmissionFilename}
+            newSubmissionCode={newSubmissionCode}
+            setNewSubmissionCode={setNewSubmissionCode}
+            newSecurityRev={newSecurityRev}
+            setNewSecurityRev={setNewSecurityRev}
+            newLogicRev={newLogicRev}
+            setNewLogicRev={setNewLogicRev}
+            newTestCases={newTestCases}
+            setNewTestCases={setNewTestCases}
+            newReviewPdf={newReviewPdf}
+            setNewReviewPdf={setNewReviewPdf}
+            handleCreateSubmissionWithFields={handleCreateSubmissionWithFields}
+            submissions={submissions}
+            editingSubmission={editingSubmission}
+            handleEditSubmission={handleEditSubmission}
+            editSubmissionFilename={editSubmissionFilename}
+            setEditSubmissionFilename={setEditSubmissionFilename}
+            editSubmissionCode={editSubmissionCode}
+            setEditSubmissionCode={setEditSubmissionCode}
+            handleUpdateSubmission={handleUpdateSubmission}
+            handleCancelSubmissionEdit={handleCancelSubmissionEdit}
+            handleDeleteSubmission={handleDeleteSubmission}
+          />
+        </main>
       </SidebarProvider>
     );
   }

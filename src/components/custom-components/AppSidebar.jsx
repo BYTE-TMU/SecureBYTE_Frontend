@@ -14,7 +14,7 @@ import {
 import blackLogo from '../../assets/black-logo.svg';
 import { CirclePlus, History, LayoutDashboard, LogOut } from 'lucide-react';
 
-export default function AppSidebar() {
+export default function AppSidebar({ handleSignOut }) {
   return (
     <Sidebar
       className="border-secure-blue pt-16"
@@ -61,7 +61,8 @@ export default function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <LogOut /> Log out
+              <LogOut />
+              <span onClick={handleSignOut}>Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

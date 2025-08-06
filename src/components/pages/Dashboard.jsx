@@ -1,4 +1,6 @@
 import React from 'react';
+import ProjectsMasterTable from '../custom-components/projects-master-table/ProjectsMasterTable';
+import { columns } from '../custom-components/projects-master-table/columns';
 
 export default function Dashboard({
   error,
@@ -8,17 +10,18 @@ export default function Dashboard({
   handleSelectProject,
   currentView,
   setCurrentView,
+  projects,
   newProjectName,
   setNewProjectName,
-  handleCreateProject,
-  projects,
-  editingProject,
-  handleEditProject,
-  editProjectName,
   newProjectDesc,
+  setNewProjectDesc,
+  editingProject,
+  handleCreateProject,
+  editProjectName,
   setEditProjectName,
   editProjectDesc,
   setEditProjectDesc,
+  handleEditProject,
   handleUpdateProject,
   handleCancelProjectEdit,
   handleDeleteProject,
@@ -46,10 +49,37 @@ export default function Dashboard({
   handleCancelSubmissionEdit,
   handleDeleteSubmission,
 }) {
+  const demoData = [
+    {
+      id: '728ed52f',
+      amount: 100,
+      status: 'pending',
+      email: 'm@example.com',
+    },
+    {
+      id: '728ed52f',
+      amount: 100,
+      status: 'pending',
+      email: 'm@example.com',
+    },
+    {
+      id: '728ed52f',
+      amount: 100,
+      status: 'pending',
+      email: 'm@example.com',
+    },
+  ];
   return (
-    <div className="w-screen h-screen bg-secondary">
-      Dashboard
-      <div
+    <div className="w-screen min-h-screen flex flex-col p-4">
+      <h1>Dashboard</h1>
+
+      <ProjectsMasterTable columns={columns} data={projects} />
+    </div>
+  );
+}
+
+{
+  /* <div
         style={{
           minHeight: '100vh',
           width: '100vw',
@@ -94,7 +124,7 @@ export default function Dashboard({
             </div>
           )}
 
-          {/* Navigation */}
+          {/* Navigation 
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
             <button
               onClick={() => setCurrentView('projects')}
@@ -717,7 +747,5 @@ export default function Dashboard({
             </>
           )}
         </div>
-      </div>
-    </div>
-  );
+      </div> */
 }

@@ -13,6 +13,7 @@ import {
 } from '../ui/sidebar';
 import blackLogo from '../../assets/black-logo.svg';
 import { CirclePlus, History, LayoutDashboard, LogOut } from 'lucide-react';
+import UploadFileDialog from './UploadFileDialog';
 
 export default function AppSidebar({ handleSignOut }) {
   return (
@@ -34,16 +35,9 @@ export default function AppSidebar({ handleSignOut }) {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem key={'Upload Code'}>
-                <SidebarMenuButton
-                  asChild
-                  className="bg-secure-orange duration-500 ease-in-out hover:bg-secure-blue hover:dark:text-white"
-                >
-                  <a href={'/upload-code'}>
-                    <CirclePlus className="stroke-white" />
-                    <span className="text-white">Upload Code</span>
-                  </a>
-                </SidebarMenuButton>
+
+              <SidebarMenuItem key={'Upload Files'}>
+                <UploadFileDialog />
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>

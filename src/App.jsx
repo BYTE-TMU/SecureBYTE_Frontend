@@ -330,7 +330,7 @@ function App() {
       <SidebarProvider defaultOpen={false}>
         <NavigationBar />
         <AppSidebar handleSignOut={handleSignOut} />
-        <main>
+        <main className="w-screen">
           <AppHeader />
           <Dashboard
             user={user}

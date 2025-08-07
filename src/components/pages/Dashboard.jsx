@@ -70,16 +70,11 @@ export default function Dashboard({
     },
   ];
   return (
-    <div className="w-screen min-h-screen flex flex-col p-4">
-      <h1>Dashboard</h1>
+    <div className="w-full min-h-screen flex flex-col p-4">
+      <h1 className="font-bold text-4xl text-secure-blue">Dashboard</h1>
 
       <ProjectsMasterTable columns={columns} data={projects} />
-    </div>
-  );
-}
-
-{
-  /* <div
+      <div
         style={{
           minHeight: '100vh',
           width: '100vw',
@@ -124,7 +119,6 @@ export default function Dashboard({
             </div>
           )}
 
-          {/* Navigation 
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
             <button
               onClick={() => setCurrentView('projects')}
@@ -747,5 +741,7 @@ export default function Dashboard({
             </>
           )}
         </div>
-      </div> */
+      </div>
+    </div>
+  );
 }

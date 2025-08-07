@@ -17,7 +17,7 @@ import { CirclePlus, History, LayoutDashboard, LogOut } from 'lucide-react';
 export default function AppSidebar({ handleSignOut }) {
   return (
     <Sidebar
-      className="border-secure-blue pt-16"
+      className="border-secure-blue pt-18 "
       collapsible="icon"
       variant="sidebar"
     >
@@ -25,7 +25,7 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className='flex gap-4'>
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>
                   <a href={'/dashboard'}>

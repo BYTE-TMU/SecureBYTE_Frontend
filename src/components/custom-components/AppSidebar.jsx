@@ -12,8 +12,15 @@ import {
   SidebarMenuItem,
 } from '../ui/sidebar';
 import blackLogo from '../../assets/black-logo.svg';
-import { CirclePlus, History, LayoutDashboard, LogOut } from 'lucide-react';
+import {
+  CirclePlus,
+  CodeXml,
+  History,
+  LayoutDashboard,
+  LogOut,
+} from 'lucide-react';
 import UploadFileDialog from './UploadFileDialog';
+import { Link } from 'react-router';
 
 export default function AppSidebar({ handleSignOut }) {
   return (
@@ -26,7 +33,7 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className='flex gap-4'>
+            <SidebarMenu className="flex gap-4">
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>
                   <a href={'/dashboard'}>
@@ -45,6 +52,14 @@ export default function AppSidebar({ handleSignOut }) {
                     <History className="stroke-black" />
                     <span className="text-primary">Upload History</span>
                   </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key={'Code Editor'}>
+                <SidebarMenuButton asChild>
+                  <Link href={'/code-editor'}>
+                    <CodeXml className="stroke-black" />
+                    <span className="text-primary">Code Editor</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

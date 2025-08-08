@@ -15,25 +15,21 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="w-full h-full">
-      <Editor
-        height="100%"
-        width="100%"
-        theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
-        language={language}
-        value={value}
-        onChange={onChange}
-        onMount={onMount}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-          lineNumbers: 'on',
-          roundedSelection: false,
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-        }}
-        className="border border-border"
-      />
-    </div>
+    <Editor
+      theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
+      language={language}
+      value={value}
+      onChange={onChange}
+      onMount={onMount}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 12,
+        lineNumbers: 'on',
+        roundedSelection: false,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+      }}
+      className="w-full h-full"
+    />
   );
 }

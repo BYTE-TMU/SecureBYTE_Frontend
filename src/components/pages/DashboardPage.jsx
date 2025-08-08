@@ -7,7 +7,7 @@ import { getAuth, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/firebase';
 import { getProjects } from '@/api';
 
-export default function Dashboard({
+export default function DashboardPage({
   // error,
   user,
   handleSignOut,

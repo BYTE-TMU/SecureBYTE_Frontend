@@ -48,15 +48,15 @@ export default function AppSidebar({ handleSignOut }) {
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>
-                  <a href={'/upload-history'}>
+                  <Link to={'/upload-history'}>
                     <History className="stroke-black" />
                     <span className="text-primary">Upload History</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key={'Code Editor'}>
                 <SidebarMenuButton asChild>
-                  <Link href={'/code-editor'}>
+                  <Link to={'/code-editor'}>
                     <CodeXml className="stroke-black" />
                     <span className="text-primary">Code Editor</span>
                   </Link>

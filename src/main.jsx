@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import './index.css';
 import App from './App.jsx';
-import Dashboard from './components/pages/Dashboard';
+import DashboardPage from './components/pages/DashboardPage';
 import CodeEditorPage from './components/pages/CodeEditorPage';
 import CoreLayout from './components/layouts/CoreLayout';
 import { SidebarProvider } from './components/ui/sidebar';
-import IndividualProject from './components/pages/IndividualProject';
+import IndividualProjectPage from './components/pages/IndividualProjectPage';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
@@ -19,9 +19,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/code-editor" element={<CodeEditorPage />} />
           //TODO: change it to be a dashboard page with the logic pulled out
           into individual components
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/projects">
-            <Route path=":projectid" element={<IndividualProject />} />
+            <Route path=":projectid" element={<IndividualProjectPage />} />
           </Route>
         </Route>
       </Routes>

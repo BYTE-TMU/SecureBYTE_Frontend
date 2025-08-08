@@ -3,7 +3,7 @@ import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
 import { getSubmissions } from '@/api';
 
-export default function IndividualProject() {
+export default function IndividualProjectPage() {
   const mockData = [
     {
       submissionDate: 'Today',
@@ -39,7 +39,7 @@ export default function IndividualProject() {
   return (
     <div className="w-full min-h-screen flex flex-col p-4">
       <h1 className="font-bold text-4xl text-secure-blue">Project</h1>
-      <IndividualProjectTable columns={columns} data={submissions} />
+      <IndividualProjectTable columns={columns} data={mockData} />
     </div>
   );
 }

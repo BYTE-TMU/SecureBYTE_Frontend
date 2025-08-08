@@ -22,7 +22,7 @@ import {
 
 import LoginPage from './components/pages/SignUpPage';
 import SignupPage from './components/pages/LoginPage';
-import Dashboard from './components/pages/Dashboard';
+import Dashboard from './components/pages/DashboardPage';
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import AppSidebar from './components/custom-components/AppSidebar';
 import NavigationBar from './components/custom-components/NavigationBar';

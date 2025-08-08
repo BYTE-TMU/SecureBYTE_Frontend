@@ -25,7 +25,8 @@ import { FileUploadInput } from './FileUploadInput';
 
 export default function SubmissionDialog() {
   return (
-    //TODO: add in a functionality to uplaod files to existing, project or new proejct first
+    //TODO: add in a functionality to uplaod files to existing, project or new project first
+    //TODO: add in context functions where if the dialog is passed a context variable, then it adds to the project, else you get to pick project
     <Dialog>
       <DialogTrigger asChild>
         <SidebarMenuButton

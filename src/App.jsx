@@ -327,10 +327,10 @@ function App() {
 
   if (user) {
     return (
-      <SidebarProvider defaultOpen={false}>
-        <NavigationBar />
+      <SidebarProvider defaultOpen={false} name={'primary_sidebar'}>
+        <NavigationBar isSignedIn={isSignUp} />
         <AppSidebar handleSignOut={handleSignOut} />
-        <main>
+        <main className="w-screen">
           <AppHeader />
           <Dashboard
             user={user}

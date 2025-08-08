@@ -12,7 +12,15 @@ import {
   SidebarMenuItem,
 } from '../ui/sidebar';
 import blackLogo from '../../assets/black-logo.svg';
-import { CirclePlus, History, LayoutDashboard, LogOut } from 'lucide-react';
+import {
+  CirclePlus,
+  CodeXml,
+  History,
+  LayoutDashboard,
+  LogOut,
+} from 'lucide-react';
+import UploadFileDialog from './UploadFileDialog';
+import { Link } from 'react-router';
 
 export default function AppSidebar({ handleSignOut }) {
   return (
@@ -25,7 +33,8 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className='flex gap-4'>
+
+            <SidebarMenu className="flex gap-4">
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>
                   <a href={'/dashboard'}>
@@ -34,16 +43,9 @@ export default function AppSidebar({ handleSignOut }) {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem key={'Upload Code'}>
-                <SidebarMenuButton
-                  asChild
-                  className="bg-secure-orange duration-500 ease-in-out hover:bg-secure-blue hover:dark:text-white"
-                >
-                  <a href={'/upload-code'}>
-                    <CirclePlus className="stroke-white" />
-                    <span className="text-white">Upload Code</span>
-                  </a>
-                </SidebarMenuButton>
+
+              <SidebarMenuItem key={'Upload Files'}>
+                <UploadFileDialog />
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>
@@ -51,6 +53,14 @@ export default function AppSidebar({ handleSignOut }) {
                     <History className="stroke-black" />
                     <span className="text-primary">Upload History</span>
                   </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key={'Code Editor'}>
+                <SidebarMenuButton asChild>
+                  <Link href={'/code-editor'}>
+                    <CodeXml className="stroke-black" />
+                    <span className="text-primary">Code Editor</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

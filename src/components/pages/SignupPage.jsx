@@ -18,6 +18,7 @@ export default function SignupPage({
   handleEmailChange,
   handlePasswordChange,
   handleGoogleSignIn,
+  handleGithubSignIn,
   error,
   setIsSignUp,
   email,
@@ -71,6 +72,9 @@ export default function SignupPage({
             <Button onClick={handleGoogleSignIn} size="xl">
               <img src={googleLogo} className="size-5"></img>
               Login with Google
+            </Button>
+            <Button onClick={handleGithubSignIn} size="xl">
+              Login with GitHub
             </Button>
             {error ? (
               <span className="text-destructive min-h-24">{error}</span>

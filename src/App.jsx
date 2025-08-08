@@ -7,6 +7,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  GithubAuthProvider,
 } from 'firebase/auth';
 import { app } from './firebase';
 import {
@@ -25,6 +26,10 @@ import SignupPage from './components/pages/SignupPage';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
+// Optional scopes for email access
+githubProvider.addScope('read:user');
+githubProvider.addScope('user:email');
 
 function App() {
   const [user, setUser] = useState(null);
@@ -313,6 +318,16 @@ function App() {
       await signInWithPopup(auth, provider);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    setError('');
+    try {
+      await signInWithPopup(auth, githubProvider);
+    } catch (err) {
+      // Common error to surface clearly when account exists with different provider
+      setError(err.message || 'GitHub sign-in failed');
     }
   };
 
@@ -992,6 +1007,7 @@ function App() {
       handleEmailChange={handleEmailChange}
       handlePasswordChange={handlePasswordChange}
       handleGoogleSignIn={handleGoogleSignIn}
+      handleGithubSignIn={handleGithubSignIn}
       error={error}
       setIsSignUp={setIsSignUp}
       email={email}
@@ -1003,6 +1019,7 @@ function App() {
       handleEmailChange={handleEmailChange}
       handlePasswordChange={handlePasswordChange}
       handleGoogleSignIn={handleGoogleSignIn}
+      handleGithubSignIn={handleGithubSignIn}
       error={error}
       setIsSignUp={setIsSignUp}
       email={email}

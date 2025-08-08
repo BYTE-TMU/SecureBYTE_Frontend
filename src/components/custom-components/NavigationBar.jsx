@@ -37,11 +37,13 @@ export default function NavigationBar() {
             className="rounded-r-full"
           >
             <Bell className="h-9 w-9" />
+
           </Button>
         </div>
         <ProfilePicture />
       </div>
     </nav>
+
   ) : (
     <nav className="w-screen h-16 bg-secure-blue z-11 flex flex-row justify-between p-5 items-center fixed">
       <img src={whiteLogo} className="h-6"></img>

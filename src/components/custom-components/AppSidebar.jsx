@@ -33,6 +33,7 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
+
             <SidebarMenu className="flex gap-4">
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>

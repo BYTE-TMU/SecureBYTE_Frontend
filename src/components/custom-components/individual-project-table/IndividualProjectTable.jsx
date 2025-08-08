@@ -19,10 +19,9 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CirclePlus } from 'lucide-react';
-import { NewProjectDialog } from '../NewProjectDialog';
+import SubmissionDialog from '../UploadFileDialog';
 
-export default function ProjectsMasterTable({
+export default function IndividualProjectTable({
   columns,
   data,
   user,
@@ -35,8 +34,6 @@ export default function ProjectsMasterTable({
   const table = useReactTable({
     data,
     columns,
-    user,
-    loadProjects,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -56,13 +53,13 @@ export default function ProjectsMasterTable({
     <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <NewProjectDialog user={user} loadProjects={loadProjects} />
+          <SubmissionDialog />
           <Input
             placeholder="Filter projects..."
-            value={table.getColumn('project_name')?.getFilterValue() ?? ''}
+            value={table.getColumn('submissionType')?.getFilterValue() ?? ''}
             onChange={(event) =>
               table
-                .getColumn('project_name')
+                .getColumn('submissionType')
                 ?.setFilterValue(event.target.value)
             }
             className="max-w-sm"

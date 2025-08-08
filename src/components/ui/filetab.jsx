@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CodeEditor from '../custom-components/CodeEditor';
+import CodeEditor from '../custom-components/code-editor/CodeEditor';
 import { cn } from '@/lib/utils';
 
 const TAB_HEIGHT = '32px';

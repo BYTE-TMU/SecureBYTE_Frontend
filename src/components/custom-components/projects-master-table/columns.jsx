@@ -2,8 +2,9 @@ import { Button } from '@/components/ui/button';
 
 import { ArrowUpDown } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router';
 
-export const columns = [
+export const projectsMasterTableColumns = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -27,6 +28,16 @@ export const columns = [
   {
     accessorKey: 'project_name',
     header: 'Project Name',
+    cell: ({ row }) => {
+      const project = row.original;
+      const name = project.project_name;
+      const id = project.projectid;
+      return (
+        <Link to={`/projects/${id}`}>
+          <span>{name}</span>
+        </Link>
+      );
+    },
   },
   {
     accessorKey: 'project_desc',
@@ -44,6 +55,14 @@ export const columns = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const date = row.getValue('updated_at');
+      return new Date(date).toLocaleTimeString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
     },
   },
 ];

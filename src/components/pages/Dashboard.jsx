@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProjectsMasterTable from '../custom-components/projects-master-table/ProjectsMasterTable';
-import { columns } from '../custom-components/projects-master-table/columns';
+import { projectsMasterTableColumns } from '../custom-components/projects-master-table/columns';
 import { FileTab } from '../ui/filetab';
 import OldDashboard from '../custom-components/OldDashboard';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
+import { app } from '@/firebase';
+import { getProjects } from '@/api';
 
 export default function Dashboard({
-  error,
+  // error,
   user,
   handleSignOut,
-  selectedProject,
+  // selectedProject,
   handleSelectProject,
-  currentView,
-  setCurrentView,
-  projects,
+  // currentView,
+  // setCurrentView,
+  // projects,
   newProjectName,
   setNewProjectName,
   newProjectDesc,
@@ -40,7 +43,7 @@ export default function Dashboard({
   newReviewPdf,
   setNewReviewPdf,
   handleCreateSubmissionWithFields,
-  submissions,
+  // submissions,
   editingSubmission,
   handleEditSubmission,
   editSubmissionFilename,
@@ -51,31 +54,70 @@ export default function Dashboard({
   handleCancelSubmissionEdit,
   handleDeleteSubmission,
 }) {
-  const demoData = [
-    {
-      id: '728ed52f',
-      amount: 100,
-      status: 'pending',
-      email: 'm@example.com',
-    },
-    {
-      id: '728ed52f',
-      amount: 100,
-      status: 'pending',
-      email: 'm@example.com',
-    },
-    {
-      id: '728ed52f',
-      amount: 100,
-      status: 'pending',
-      email: 'm@example.com',
-    },
-  ];
+  // const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [currentView, setCurrentView] = useState('projects'); // 'projects' or 'submissions'
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log(
+        'Auth state changed:',
+        user ? `User logged in: ${user.uid}` : 'User logged out',
+      );
+      setUser(user);
+      if (user) {
+        // Load projects when user is authenticated
+        console.log('About to load projects for user:', user.uid);
+        loadProjects();
+        setCurrentView('projects');
+      } else {
+        // Reset state when user logs out
+        setProjects([]);
+        setSelectedProject(null);
+        setSubmissions([]);
+        setCurrentView('projects');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Project management functions
+  const loadProjects = async () => {
+    if (!user) return;
+    console.log('Loading projects for user:', user.uid); // Debug log
+    try {
+      const response = await getProjects(user.uid);
+      console.log('Projects response:', response.data); // Debug log
+      setProjects(response.data);
+      setError(''); // Clear any previous errors
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      console.error('Error details:', error.response?.data); // More detailed error
+      setError(
+        `Failed to load projects: ${
+          error.response?.data?.error || error.message
+        }`,
+      );
+      setProjects([]);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen flex flex-col p-4">
       <h1 className="font-bold text-4xl text-secure-blue">Dashboard</h1>
 
-      <ProjectsMasterTable columns={columns} data={projects} />
+      <ProjectsMasterTable
+        columns={projectsMasterTableColumns}
+        data={projects}
+        user={user}
+        loadProjects={loadProjects}
+      />
       <FileTab />
       <OldDashboard
         user={user}

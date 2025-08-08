@@ -19,8 +19,8 @@ import {
   LayoutDashboard,
   LogOut,
 } from 'lucide-react';
-import UploadFileDialog from './UploadFileDialog';
 import { Link } from 'react-router';
+import SubmissionDialog from './UploadFileDialog';
 
 export default function AppSidebar({ handleSignOut }) {
   return (
@@ -33,7 +33,6 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
-
             <SidebarMenu className="flex gap-4">
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>
@@ -45,7 +44,7 @@ export default function AppSidebar({ handleSignOut }) {
               </SidebarMenuItem>
 
               <SidebarMenuItem key={'Upload Files'}>
-                <UploadFileDialog />
+                <SubmissionDialog />
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>

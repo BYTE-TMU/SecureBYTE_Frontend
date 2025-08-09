@@ -4,6 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   signInWithPopup,
+  GithubAuthProvider,
+  getAuth,
 } from 'firebase/auth';
 import { app } from './firebase';
 import {
@@ -24,8 +26,15 @@ import NavigationBar from './components/custom-components/NavigationBar';
 import AppHeader from './components/custom-components/AppHeader';
 import { useAuth } from './hooks/auth/AuthContext';
 
+
 // const auth = getAuth(app);
 // const provider = new GoogleAuthProvider();
+
+const githubProvider = new GithubAuthProvider();
+// Optional scopes for email access
+githubProvider.addScope('read:user');
+githubProvider.addScope('user:email');
+
 
 function App() {
   // const [user, setUser] = useState(null);
@@ -221,6 +230,16 @@ function App() {
     }
   };
 
+  const handleGithubSignIn = async () => {
+    setError('');
+    try {
+      await signInWithPopup(auth, githubProvider);
+    } catch (err) {
+      // Common error to surface clearly when account exists with different provider
+      setError(err.message || 'GitHub sign-in failed');
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut(auth);
   };
@@ -279,6 +298,7 @@ function App() {
   }
 
   return isSignUp ? <LoginPage /> : <SignupPage />;
+
 }
 
 export default App;

@@ -21,12 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import SubmissionDialog from '../UploadFileDialog';
 
-export default function IndividualProjectTable({
-  columns,
-  data,
-  user,
-  loadProjects,
-}) {
+export default function IndividualProjectTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -55,12 +50,10 @@ export default function IndividualProjectTable({
         <div className="flex items-center gap-2">
           <SubmissionDialog />
           <Input
-            placeholder="Filter projects..."
-            value={table.getColumn('submissionType')?.getFilterValue() ?? ''}
+            placeholder="Filter files..."
+            value={table.getColumn('filename')?.getFilterValue() ?? ''}
             onChange={(event) =>
-              table
-                .getColumn('submissionType')
-                ?.setFilterValue(event.target.value)
+              table.getColumn('filename')?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />

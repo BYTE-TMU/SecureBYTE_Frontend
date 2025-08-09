@@ -7,10 +7,8 @@ import AppHeader from '../custom-components/AppHeader';
 export default function CoreLayout() {
   return (
     <>
-      {/* <NavigationBar isSignedIn={isSignUp} /> */}
       <NavigationBar />
       <AppSidebar />
-      {/* <AppSidebar handleSignOut={handleSignOut} /> */}
       <main className="w-screen">
         <AppHeader />
         <Outlet />

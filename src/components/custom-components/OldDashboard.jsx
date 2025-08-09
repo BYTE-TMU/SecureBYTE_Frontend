@@ -1,20 +1,15 @@
+import { useAuth } from '@/hooks/auth/AuthContext';
 import React from 'react';
 
 export default function OldDashboard({
   error,
   user,
-  handleSignOut,
   selectedProject,
   handleSelectProject,
   currentView,
   setCurrentView,
   projects,
-  newProjectName,
-  setNewProjectName,
-  newProjectDesc,
-  setNewProjectDesc,
   editingProject,
-  handleCreateProject,
   editProjectName,
   setEditProjectName,
   editProjectDesc,
@@ -47,6 +42,7 @@ export default function OldDashboard({
   handleCancelSubmissionEdit,
   handleDeleteSubmission,
 }) {
+  const { logout } = useAuth();
   return (
     <div
       style={{
@@ -75,7 +71,7 @@ export default function OldDashboard({
       >
         <h2>Welcome, {user.displayName || user.email}!</h2>
         <button
-          onClick={handleSignOut}
+          onClick={logout}
           style={{ marginBottom: '20px', padding: '8px 16px' }}
         >
           Sign Out
@@ -136,32 +132,7 @@ export default function OldDashboard({
                 marginBottom: '20px',
                 width: '100%',
               }}
-            >
-              <input
-                type="text"
-                placeholder="Project name"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                style={{ padding: 8, borderRadius: '4px', border: 'none' }}
-              />
-              <textarea
-                placeholder="Project description (optional)"
-                value={newProjectDesc}
-                onChange={(e) => setNewProjectDesc(e.target.value)}
-                style={{
-                  padding: 8,
-                  borderRadius: '4px',
-                  border: 'none',
-                  minHeight: '60px',
-                }}
-              />
-              <button
-                onClick={handleCreateProject}
-                style={{ padding: '8px 16px' }}
-              >
-                Create Project
-              </button>
-            </div>
+            ></div>
 
             <div style={{ width: '100%' }}>
               <h4>Projects List:</h4>

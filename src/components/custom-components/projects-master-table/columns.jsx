@@ -1,8 +1,19 @@
 import { Button } from '@/components/ui/button';
-
-import { ArrowUpDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+
+import { MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router';
+import EditProjectSheet from '../EditProjectSheet';
+import { DeleteProjectAlert } from '../DeleteProjectAlert';
 
 export const projectsMasterTableColumns = [
   {
@@ -63,6 +74,38 @@ export const projectsMasterTableColumns = [
         month: '2-digit',
         day: '2-digit',
       });
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const project = row.original;
+      return (
+        //TODO: change to just icons
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              //TODO: add delete project
+
+              onClick={() => navigator.clipboard.writeText(payment.id)}
+              className="text-destructive hover:text-destructive"
+            >
+              Delete Project
+            </DropdownMenuItem>
+            <DeleteProjectAlert project={project} />
+            <DropdownMenuSeparator />
+            <EditProjectSheet project={project} />
+            {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
     },
   },
 ];

@@ -12,44 +12,50 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/auth/AuthContext';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
 
-export function NewProjectDialog({ user, loadProjects }) {
+export function NewProjectDialog() {
+  const { user } = useAuth();
+
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [error, setError] = useState('');
 
-  const handleCreateProject = async () => {
+  const createNewProject = async () => {
+    //TODO: in hte future, add an error
     if (!newProjectName.trim() || !user) return;
 
-    console.log('Creating project for user:', user.uid); // Debug log
-    console.log('Project data:', {
-      project_name: newProjectName,
-      project_desc: newProjectDesc,
-    }); // Debug log
-
     try {
+      console.log('Creating project for user:', user.uid); // Debug log
+      console.log('Project data:', {
+        project_name: newProjectName,
+        project_desc: newProjectDesc,
+      }); // Debug log
+
       const response = await createProject(user.uid, {
         project_name: newProjectName,
         project_desc: newProjectDesc || '',
         fileids: [],
       });
-      console.log('Project created:', response.data); // Debug log
+      console.log(response);
       setNewProjectName('');
       setNewProjectDesc('');
-      loadProjects();
-      setError(''); // Clear any previous errors
-    } catch (error) {
+
+      //TODO: add in a page refresh here too
+      setError('');
+    } catch (err) {
       console.error('Error creating project:', error);
       console.error('Error details:', error.response?.data); // More detailed error
       setError(
-        `Failed to create project: ${
-          error.response?.data?.error || error.message
+        `Failed to create new project: ${
+          err.response?.data?.error || err.message
         }`,
       );
     }
   };
+
   return (
     <Dialog>
       <form>
@@ -95,7 +101,7 @@ export function NewProjectDialog({ user, loadProjects }) {
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <DialogClose asChild>
-              <Button type="submit" onClick={handleCreateProject}>
+              <Button type="submit" onClick={createNewProject}>
                 Save changes
                 {/* //TODO: add in success and error toasts */}
               </Button>

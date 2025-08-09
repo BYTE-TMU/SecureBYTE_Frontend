@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  getAuth,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
 import { app } from './firebase';
 import {
-  getProjects,
-  createProject,
   updateProject,
   deleteProject,
   getSubmissions,
@@ -22,17 +17,19 @@ import {
 
 import LoginPage from './components/pages/SignUpPage';
 import SignupPage from './components/pages/LoginPage';
-import Dashboard from './components/pages/DashboardPage';
+import DashboardPage from './components/pages/DashboardPage';
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import AppSidebar from './components/custom-components/AppSidebar';
 import NavigationBar from './components/custom-components/NavigationBar';
 import AppHeader from './components/custom-components/AppHeader';
+import { useAuth } from './hooks/auth/AuthContext';
 
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+// const auth = getAuth(app);
+// const provider = new GoogleAuthProvider();
 
 function App() {
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -44,8 +41,7 @@ function App() {
   const [submissions, setSubmissions] = useState([]);
 
   // Project form state
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDesc, setNewProjectDesc] = useState('');
+
   const [editingProject, setEditingProject] = useState(null);
   const [editProjectName, setEditProjectName] = useState('');
   const [editProjectDesc, setEditProjectDesc] = useState('');
@@ -63,80 +59,6 @@ function App() {
 
   // View state
   const [currentView, setCurrentView] = useState('projects'); // 'projects' or 'submissions'
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log(
-        'Auth state changed:',
-        user ? `User logged in: ${user.uid}` : 'User logged out',
-      );
-      setUser(user);
-      if (user) {
-        // Load projects when user is authenticated
-        console.log('About to load projects for user:', user.uid);
-        loadProjects();
-      } else {
-        // Reset state when user logs out
-        setProjects([]);
-        setSelectedProject(null);
-        setSubmissions([]);
-        setCurrentView('projects');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Project management functions
-  const loadProjects = async () => {
-    if (!user) return;
-    console.log('Loading projects for user:', user.uid); // Debug log
-    try {
-      const response = await getProjects(user.uid);
-      console.log('Projects response:', response.data); // Debug log
-      setProjects(response.data);
-      setError(''); // Clear any previous errors
-    } catch (error) {
-      console.error('Error loading projects:', error);
-      console.error('Error details:', error.response?.data); // More detailed error
-      setError(
-        `Failed to load projects: ${
-          error.response?.data?.error || error.message
-        }`,
-      );
-      setProjects([]);
-    }
-  };
-
-  const handleCreateProject = async () => {
-    if (!newProjectName.trim() || !user) return;
-
-    console.log('Creating project for user:', user.uid); // Debug log
-    console.log('Project data:', {
-      project_name: newProjectName,
-      project_desc: newProjectDesc,
-    }); // Debug log
-
-    try {
-      const response = await createProject(user.uid, {
-        project_name: newProjectName,
-        project_desc: newProjectDesc || '',
-        fileids: [],
-      });
-      console.log('Project created:', response.data); // Debug log
-      setNewProjectName('');
-      setNewProjectDesc('');
-      loadProjects();
-      setError(''); // Clear any previous errors
-    } catch (error) {
-      console.error('Error creating project:', error);
-      console.error('Error details:', error.response?.data); // More detailed error
-      setError(
-        `Failed to create project: ${
-          error.response?.data?.error || error.message
-        }`,
-      );
-    }
-  };
 
   const handleEditProject = (project) => {
     setEditingProject(project.projectid);
@@ -203,28 +125,6 @@ function App() {
     setSelectedProject(project);
     setCurrentView('submissions');
     loadSubmissions(project.projectid);
-  };
-
-  const handleCreateSubmission = async () => {
-    if (!newSubmissionFilename.trim() || !selectedProject || !user) return;
-
-    try {
-      await createSubmission(user.uid, selectedProject.projectid, {
-        filename: newSubmissionFilename,
-        code: newSubmissionCode || '',
-        securityrev: [],
-        logicrev: [],
-        testcases: [],
-        reviewpdf: '',
-      });
-      setNewSubmissionFilename('');
-      setNewSubmissionCode('');
-      loadSubmissions(selectedProject.projectid);
-      setError('');
-    } catch (error) {
-      console.error('Error creating submission:', error);
-      setError('Failed to create submission.');
-    }
   };
 
   const handleCreateSubmissionWithFields = async () => {
@@ -332,21 +232,16 @@ function App() {
         <AppSidebar handleSignOut={handleSignOut} />
         <main className="w-screen">
           <AppHeader />
-          <Dashboard
+          <DashboardPage
             user={user}
             handleSignOut={handleSignOut}
             selectedProject={selectedProject}
             handleSelectProject={handleSelectProject}
             currentView={currentView}
             setCurrentView={setCurrentView}
-            newProjectName={newProjectName}
-            setNewProjectName={setNewProjectName}
-            handleCreateProject={handleCreateProject}
             projects={projects}
             editingProject={editingProject}
             handleEditProject={handleEditProject}
-            setNewProjectDesc={setNewProjectDesc}
-            newProjectDesc={newProjectDesc}
             editProjectName={editProjectName}
             setEditProjectName={setEditProjectName}
             editProjectDesc={editProjectDesc}
@@ -383,29 +278,7 @@ function App() {
     );
   }
 
-  return isSignUp ? (
-    <LoginPage
-      handleSubmit={handleSubmit}
-      handleEmailChange={handleEmailChange}
-      handlePasswordChange={handlePasswordChange}
-      handleGoogleSignIn={handleGoogleSignIn}
-      error={error}
-      setIsSignUp={setIsSignUp}
-      email={email}
-      password={password}
-    />
-  ) : (
-    <SignupPage
-      handleSubmit={handleSubmit}
-      handleEmailChange={handleEmailChange}
-      handlePasswordChange={handlePasswordChange}
-      handleGoogleSignIn={handleGoogleSignIn}
-      error={error}
-      setIsSignUp={setIsSignUp}
-      email={email}
-      password={password}
-    />
-  );
+  return isSignUp ? <LoginPage /> : <SignupPage />;
 }
 
 export default App;

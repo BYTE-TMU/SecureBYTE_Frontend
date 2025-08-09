@@ -22,12 +22,7 @@ import { Input } from '@/components/ui/input';
 import { CirclePlus } from 'lucide-react';
 import { NewProjectDialog } from '../NewProjectDialog';
 
-export default function ProjectsMasterTable({
-  columns,
-  data,
-  user,
-  loadProjects,
-}) {
+export default function ProjectsMasterTable({ columns, data, user }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -36,7 +31,6 @@ export default function ProjectsMasterTable({
     data,
     columns,
     user,
-    loadProjects,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -56,7 +50,7 @@ export default function ProjectsMasterTable({
     <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <NewProjectDialog user={user} loadProjects={loadProjects} />
+          <NewProjectDialog user={user} />
           <Input
             placeholder="Filter projects..."
             value={table.getColumn('project_name')?.getFilterValue() ?? ''}

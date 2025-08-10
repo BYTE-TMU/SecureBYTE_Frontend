@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import SubmissionDialog from './UploadFileDialog';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
-export default function AppSidebar({ handleSignOut }) {
+export default function AppSidebar() {
+  const { logout } = useAuth();
   return (
     <Sidebar
       className="border-secure-blue pt-18 "
@@ -71,7 +73,7 @@ export default function AppSidebar({ handleSignOut }) {
           <SidebarMenuItem>
             <SidebarMenuButton>
               <LogOut />
-              <span onClick={handleSignOut}>Log out</span>
+              <span onClick={logout}>Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

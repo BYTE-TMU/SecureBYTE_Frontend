@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { MoreHorizontal } from 'lucide-react';
+import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
+import EditSubmissionSheet from '../EditSubmissionSheet';
 
 export const columns = [
   {
@@ -39,6 +41,7 @@ export const columns = [
   {
     id: 'actions',
     cell: ({ row }) => {
+      const submission = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -55,7 +58,9 @@ export const columns = [
             >
               Delete Submission
             </DropdownMenuItem>
+            <DeleteSubmissionAlert submission={submission} />
             <DropdownMenuSeparator />
+            <EditSubmissionSheet submission={submission} />
             <DropdownMenuItem>Edit Submission</DropdownMenuItem>
             <DropdownMenuItem>View payment details</DropdownMenuItem>
           </DropdownMenuContent>

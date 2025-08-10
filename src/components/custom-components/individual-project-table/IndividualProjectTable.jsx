@@ -20,8 +20,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import SubmissionDialog from '../UploadFileDialog';
+import { NewSubmissionDialog } from '../NewSubmissionDialog';
+import { useParams } from 'react-router';
 
 export default function IndividualProjectTable({ columns, data }) {
+  const { projectId } = useParams();
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -48,6 +51,7 @@ export default function IndividualProjectTable({ columns, data }) {
     <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <NewSubmissionDialog projectId={projectId} />
           <SubmissionDialog />
           <Input
             placeholder="Filter files..."

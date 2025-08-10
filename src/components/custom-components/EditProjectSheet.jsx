@@ -13,13 +13,14 @@ import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { updateProject } from '@/api';
 
 export default function EditProjectSheet({ project }) {
-  console.log(project);
   const { user } = useAuth();
+  const [error, setError] = useState('');
+
   const [editedProjectName, setEditedProjectName] = useState('');
   const [editedProjectDesc, setEditedProjectDesc] = useState('');
-  //TODO: add this as being trigggered when edit button is hit?
 
   const handleEditProject = (project) => {
     setEditedProjectName(project.project_name);
@@ -28,12 +29,6 @@ export default function EditProjectSheet({ project }) {
 
   useEffect(() => {
     handleEditProject(project);
-    // return () => {
-    //   console.log('Component unmounted or cleanup before re-run');
-
-    //   setEditedProjectName('');
-    //   setEditedProjectDesc('');
-    // };
   }, [user]);
 
   const editProject = async () => {
@@ -77,6 +72,7 @@ export default function EditProjectSheet({ project }) {
           <div className="flex flex-col gap-2">
             <Label>Project Name</Label>
             <Input
+              defaultValue={editedProjectName}
               value={editedProjectName}
               onChange={(e) => setEditedProjectName(e.target.value)}
             />
@@ -84,6 +80,7 @@ export default function EditProjectSheet({ project }) {
           <div className="flex flex-col gap-2 mb-110">
             <Label>Project Description</Label>
             <Input
+              defaultValue={editedProjectDesc}
               value={editedProjectDesc}
               onChange={(e) => setEditedProjectDesc(e.target.value)}
             />

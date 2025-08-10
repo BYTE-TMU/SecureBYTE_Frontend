@@ -91,14 +91,13 @@ export const projectsMasterTableColumns = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              //TODO: add delete project
+            {/* <DropdownMenuItem
 
               onClick={() => navigator.clipboard.writeText(payment.id)}
               className="text-destructive hover:text-destructive"
             >
               Delete Project
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DeleteProjectAlert project={project} />
             <DropdownMenuSeparator />
             <EditProjectSheet project={project} />

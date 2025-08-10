@@ -13,76 +13,78 @@ import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { updateSubmission } from '@/api';
 
-export default function EditSubmissionSheet({ project }) {
+export default function EditSubmissionSheet({ submission }) {
   const { user } = useAuth();
-  const [editedProjectName, setEditedProjectName] = useState('');
-  const [editedProjectDesc, setEditedProjectDesc] = useState('');
-  //TODO: add this as being trigggered when edit button is hit?
+  const [error, setError] = useState('');
 
-  const handleEditProject = (project) => {
-    setEditedProjectName(project.project_name);
-    setEditedProjectDesc(project.project_desc || '');
+  const [newSubmissionFilename, setNewSubmissionFilename] = useState('');
+  const [newSubmissionCode, setNewSubmissionCode] = useState('');
+  const [newSecurityRev, setNewSecurityRev] = useState('');
+  const [newLogicRev, setNewLogicRev] = useState('');
+  const [newTestCases, setNewTestCases] = useState('');
+  const [newReviewPdf, setNewReviewPdf] = useState('');
+
+  const [editedSubmissionFilename, setEditedSubmissionFilename] = useState('');
+  const [editedSubmissionCode, setEditedSubmissionCode] = useState('');
+
+  const handleEditSubmission = (submission) => {
+    setEditedSubmissionFilename(submission.filename);
+    setEditedSubmissionCode(submission.code || '');
   };
 
   useEffect(() => {
-    handleEditProject(project);
-    // return () => {
-    //   console.log('Component unmounted or cleanup before re-run');
-
-    //   setEditedProjectName('');
-    //   setEditedProjectDesc('');
-    // };
+    handleEditSubmission(submission);
   }, [user]);
 
-  const editProject = async () => {
-    //TODO: in hte future, add an error
-    if (!editedProjectName.trim() || !user) return;
+  const editSubmission = async () => {
+    if (!editedSubmissionFilename.trim() || !user) return;
 
     try {
-      const response = await updateProject(user.uid, project.projectId, {
-        project_name: editedProjectName,
-        project_desc: editedProjectDesc,
+      await updateSubmission(user.uid, submission.id, {
+        filename: editedSubmissionFilename,
+        code: editedSubmissionCode,
       });
-      console.log(response);
-      setEditedProjectName('');
-      setEditedProjectDesc('');
-
-      //TODO: add in a page refresh here too
+      setEditSubmissionFilename('');
+      setEditSubmissionCode('');
       setError('');
-    } catch (err) {
-      console.error('Error editing project:', error);
+    } catch (error) {
+      console.error('Error editing submission:', error);
       console.error('Error details:', error.response?.data); // More detailed error
       setError(
-        `Failed to edit a project: ${err.response?.data?.error || err.message}`,
+        `Failed to edit a submission: ${
+          error.response?.data?.error || error.message
+        }`,
       );
     }
   };
+
   return (
     <Sheet>
       <SheetTrigger className=" p-2 w-full text-left font-normal justify-start text-sm hover:bg-secondary hover:rounded-md hover:cursor-pointer ">
-        Edit Project
+        Edit Submission
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{project.project_name}</SheetTitle>
+          <SheetTitle>{submission.filename}</SheetTitle>
           <SheetDescription>
-            Edit your project's name or description.
+            Edit your submission file's name or the code.
           </SheetDescription>
         </SheetHeader>
-        <form className="p-5 flex flex-col gap-5" onSubmit={editProject}>
+        <form className="p-5 flex flex-col gap-5" onSubmit={editSubmission}>
           <div className="flex flex-col gap-2">
-            <Label>Project Name</Label>
+            <Label>File Name</Label>
             <Input
-              value={editedProjectName}
-              onChange={(e) => setEditedProjectName(e.target.value)}
+              value={editedSubmissionFilename}
+              onChange={(e) => setEditedSubmissionFilename(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2 mb-110">
-            <Label>Project Description</Label>
+            <Label>File Code</Label>
             <Input
-              value={editedProjectDesc}
-              onChange={(e) => setEditedProjectDesc(e.target.value)}
+              value={editedSubmissionCode}
+              onChange={(e) => setEditedSubmissionCode(e.target.value)}
             />
           </div>
           <SheetFooter className=" p-0">

@@ -8,9 +8,9 @@ export default function IndividualProjectPage() {
   const { submissions } = useGetSubmissions(projectId);
 
   return (
-    <div className="w-full min-h-screen flex flex-col p-4">
+    <main className="w-full min-h-screen flex flex-col p-5">
       <h1 className="font-bold text-4xl text-secure-blue">Project</h1>
       <IndividualProjectTable columns={columns} data={submissions} />
-    </div>
+    </main>
   );
 }

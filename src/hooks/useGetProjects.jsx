@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/auth/AuthContext';
 import { useEffect, useState } from 'react';
 import { getProjects } from '@/api';
 
-export function useGetAllProjects() {
+export function useGetProjects() {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [error, setError] = useState('');

@@ -1,4 +1,4 @@
-import { deleteProject } from '@/api';
+import { deleteProject, deleteSubmission } from '@/api';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,20 +14,19 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { useState } from 'react';
 
-export function DeleteProjectAlert({ project }) {
+export function DeleteSubmissionAlert({ submission }) {
   const { user } = useAuth();
   const [error, setError] = useState('');
 
-  const handleDeleteProject = async () => {
-    if (!user || !project.projectid) return;
+  const handleDeleteSubmission = async () => {
+    if (!user || !submission.id) return;
     try {
-      await deleteProject(user.uid, project.projectid);
-      //TODO: add in succes/error toast
+      await deleteSubmission(user.uid, submission.id);
       setError('');
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error('Error deleting submission:', error);
       setError(
-        `Failed to delete a project: ${
+        `Failed to delete a submission: ${
           error.response?.data?.error || error.message
         }`,
       );
@@ -40,7 +39,7 @@ export function DeleteProjectAlert({ project }) {
           variant="ghost"
           className=" p-2 w-full text-left font-normal justify-start text-sm hover:bg-secondary hover:rounded-sm hover:cursor-pointer text-destructive "
         >
-          Delete Project
+          Delete Submission
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -48,12 +47,12 @@ export function DeleteProjectAlert({ project }) {
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete your
-            project and remove your data from our servers.
+            submission and remove your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeleteProject}>
+          <AlertDialogAction onClick={handleDeleteSubmission}>
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

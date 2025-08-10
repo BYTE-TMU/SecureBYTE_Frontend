@@ -16,28 +16,21 @@ import SignUpPage from './components/pages/SignUpPage';
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
     <SidebarProvider defaultOpen={false}>
-      {/* <StrictMode> */}
       <BrowserRouter>
         <Routes>
-          //TODO: make App.jsx the layout piece
-          <Route path="/" element={<App />} />
-          <Route path="/auth" element={<AuthLayout />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="signup" element={<SignUpPage />} />
-          </Route>
-          <Route element={<CoreLayout />}>
+          <Route element={<App />}>
             <Route path="/code-editor" element={<CodeEditorPage />} />
-            //TODO: change it to be a dashboard page with the logic pulled out
-            into individual components
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects">
               <Route path=":projectId" element={<IndividualProjectPage />} />
             </Route>
           </Route>
+          <Route path="/auth" element={<AuthLayout />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="signup" element={<SignUpPage />} />
+          </Route>
         </Routes>
       </BrowserRouter>
-      {/* </StrictMode> */}
     </SidebarProvider>
-    ,
   </AuthProvider>,
 );

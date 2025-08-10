@@ -15,7 +15,6 @@ import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { Link } from 'react-router';
 
-
 export default function LoginPage() {
   // Email & Password state & handlers
   const [email, setEmail] = useState('');
@@ -25,9 +24,7 @@ export default function LoginPage() {
   console.log(email);
   const handlePasswordChange = (e) => setPassword(e.target.value);
 
-
-  const { login, googleSignin, error } = useAuth();
-
+  const { login, googleSignin, githubSignIn, error } = useAuth();
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center ">
@@ -81,13 +78,15 @@ export default function LoginPage() {
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
               Or Continue With
-
             </span>
           </div>
 
           <Button onClick={googleSignin} size="lg" className="font-bold">
             <img src={googleLogo} className="size-5"></img>
             Login with Google
+          </Button>
+          <Button onClick={githubSignIn} size="lg">
+            Login with GitHub
           </Button>
           {error ? (
             <span className="text-destructive min-h-24">{error}</span>

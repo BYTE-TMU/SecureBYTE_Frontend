@@ -24,8 +24,7 @@ export default function SignUpPage() {
   console.log(email);
   const handlePasswordChange = (e) => setPassword(e.target.value);
 
-  const { signup, googleSignin, error } = useAuth();
-
+  const { signup, googleSignin, githubSignIn, error } = useAuth();
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center">
@@ -78,7 +77,6 @@ export default function SignUpPage() {
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-white text-secure-blue relative z-10 px-2">
               Or Continue With
-
             </span>
           </div>
 
@@ -89,6 +87,9 @@ export default function SignUpPage() {
           >
             <img src={googleLogo} className="size-5"></img>
             Login with Google
+          </Button>
+          <Button onClick={githubSignIn} size="lg">
+            Login with GitHub
           </Button>
           {error ? (
             <span className="text-destructive min-h-24">{error}</span>

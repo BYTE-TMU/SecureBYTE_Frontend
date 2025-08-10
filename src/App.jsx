@@ -11,9 +11,6 @@ import { GithubAuthProvider } from 'firebase/auth';
 function App() {
   const { user } = useAuth();
   const [error, setError] = useState('');
-  const githubProvider = new GithubAuthProvider();
-  githubProvider.addScope('read:user');
-  githubProvider.addScope('user:email');
 
   // Submission form state
   const [newSecurityRev, setNewSecurityRev] = useState('');

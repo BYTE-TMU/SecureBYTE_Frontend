@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import { createSubmission } from './api';
 import { SidebarProvider } from './components/ui/sidebar';
 import AppSidebar from './components/custom-components/AppSidebar';
@@ -7,10 +6,14 @@ import NavigationBar from './components/custom-components/NavigationBar';
 import AppHeader from './components/custom-components/AppHeader';
 import { useAuth } from './hooks/auth/AuthContext';
 import { Outlet } from 'react-router';
+import { GithubAuthProvider } from 'firebase/auth';
 
 function App() {
   const { user } = useAuth();
   const [error, setError] = useState('');
+  const githubProvider = new GithubAuthProvider();
+  githubProvider.addScope('read:user');
+  githubProvider.addScope('user:email');
 
   // Submission form state
   const [newSecurityRev, setNewSecurityRev] = useState('');

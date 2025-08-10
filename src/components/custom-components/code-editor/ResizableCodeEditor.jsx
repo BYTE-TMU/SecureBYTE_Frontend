@@ -3,10 +3,10 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from '../ui/resizable';
+} from '../../ui/resizable';
 import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
-import { FileTab } from '../ui/filetab';
+import { FileTab } from '../../ui/filetab';
 
 export default function ResizableCodeEditor() {
   return (

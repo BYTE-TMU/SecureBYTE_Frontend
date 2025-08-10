@@ -1,34 +1,17 @@
 import React, { useState } from 'react';
 import {
-  Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from '../ui/sidebar';
-import { Link } from 'react-router';
-import {
-  ChevronDown,
-  ChevronRight,
-  FileCode,
-  FolderCode,
-  LogOut,
-} from 'lucide-react';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '../ui/resizable';
-import CodeEditor from './CodeEditor';
-import { Collapsible } from '../ui/collapsible';
+} from '../../ui/sidebar';
+import { ChevronDown, ChevronRight, FileCode, FolderCode } from 'lucide-react';
+
+import { Collapsible } from '../../ui/collapsible';
 import {
   CollapsibleContent,
   CollapsibleTrigger,

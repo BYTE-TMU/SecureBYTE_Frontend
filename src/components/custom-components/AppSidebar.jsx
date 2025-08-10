@@ -19,10 +19,12 @@ import {
   LayoutDashboard,
   LogOut,
 } from 'lucide-react';
-import UploadFileDialog from './UploadFileDialog';
 import { Link } from 'react-router';
+import SubmissionDialog from './UploadFileDialog';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
-export default function AppSidebar({ handleSignOut }) {
+export default function AppSidebar() {
+  const { logout } = useAuth();
   return (
     <Sidebar
       className="border-secure-blue pt-18 "
@@ -33,7 +35,6 @@ export default function AppSidebar({ handleSignOut }) {
         <SidebarGroup>
           <SidebarGroupLabel>Core</SidebarGroupLabel>
           <SidebarGroupContent>
-
             <SidebarMenu className="flex gap-4">
               <SidebarMenuItem key={'Dashboard'}>
                 <SidebarMenuButton asChild>
@@ -45,19 +46,19 @@ export default function AppSidebar({ handleSignOut }) {
               </SidebarMenuItem>
 
               <SidebarMenuItem key={'Upload Files'}>
-                <UploadFileDialog />
+                <SubmissionDialog />
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>
-                  <a href={'/upload-history'}>
+                  <Link to={'/upload-history'}>
                     <History className="stroke-black" />
                     <span className="text-primary">Upload History</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem key={'Code Editor'}>
                 <SidebarMenuButton asChild>
-                  <Link href={'/code-editor'}>
+                  <Link to={'/code-editor'}>
                     <CodeXml className="stroke-black" />
                     <span className="text-primary">Code Editor</span>
                   </Link>
@@ -72,7 +73,7 @@ export default function AppSidebar({ handleSignOut }) {
           <SidebarMenuItem>
             <SidebarMenuButton>
               <LogOut />
-              <span onClick={handleSignOut}>Log out</span>
+              <span onClick={logout}>Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -4,10 +4,12 @@ import ProfilePicture from './ProfilePicture';
 import { Button } from '../ui/button';
 import { Plus, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
 export default function NavigationBar() {
+  const { user } = useAuth();
   // { isSignedIn }
-  return false ? (
+  return user ? (
     <nav className="w-screen h-16 bg-secure-blue z-11 flex flex-row justify-between p-5 items-center fixed">
       <img src={whiteLogo} className="h-6"></img>
       <div className="flex gap-7">
@@ -37,13 +39,11 @@ export default function NavigationBar() {
             className="rounded-r-full"
           >
             <Bell className="h-9 w-9" />
-
           </Button>
         </div>
         <ProfilePicture />
       </div>
     </nav>
-
   ) : (
     <nav className="w-screen h-16 bg-secure-blue z-11 flex flex-row justify-between p-5 items-center fixed">
       <img src={whiteLogo} className="h-6"></img>

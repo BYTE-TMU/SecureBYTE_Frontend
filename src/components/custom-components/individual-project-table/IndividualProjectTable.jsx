@@ -19,10 +19,12 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CirclePlus } from 'lucide-react';
-import { NewProjectDialog } from '../NewProjectDialog';
+import SubmissionDialog from '../UploadFileDialog';
+import { NewSubmissionDialog } from '../NewSubmissionDialog';
+import { useParams } from 'react-router';
 
-export default function ProjectsMasterTable({ columns, data }) {
+export default function IndividualProjectTable({ columns, data }) {
+  const { projectId } = useParams();
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -49,14 +51,13 @@ export default function ProjectsMasterTable({ columns, data }) {
     <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <NewProjectDialog />
+          <NewSubmissionDialog projectId={projectId} />
+          <SubmissionDialog />
           <Input
-            placeholder="Filter projects..."
-            value={table.getColumn('project_name')?.getFilterValue() ?? ''}
+            placeholder="Filter files..."
+            value={table.getColumn('filename')?.getFilterValue() ?? ''}
             onChange={(event) =>
-              table
-                .getColumn('project_name')
-                ?.setFilterValue(event.target.value)
+              table.getColumn('filename')?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />

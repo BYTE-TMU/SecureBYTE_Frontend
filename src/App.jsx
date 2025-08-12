@@ -394,31 +394,33 @@ function App() {
     );
   }
 
-  return isSignUp ? (
-    <LoginPage
-      handleSubmit={handleSubmit}
-      handleEmailChange={handleEmailChange}
-      handlePasswordChange={handlePasswordChange}
-      handleGoogleSignIn={handleGoogleSignIn}
-      handleGithubSignIn={handleGithubSignIn}
-      error={error}
-      setIsSignUp={setIsSignUp}
-      email={email}
-      password={password}
-    />
-  ) : (
-    <SignupPage
-      handleSubmit={handleSubmit}
-      handleEmailChange={handleEmailChange}
-      handlePasswordChange={handlePasswordChange}
-      handleGoogleSignIn={handleGoogleSignIn}
-      handleGithubSignIn={handleGithubSignIn}
-      error={error}
-      setIsSignUp={setIsSignUp}
-      email={email}
-      password={password}
-    />
-  );
+  return null; 
+
+  // return isSignUp ? (
+  //   <LoginPage
+  //     handleSubmit={handleSubmit}
+  //     handleEmailChange={handleEmailChange}
+  //     handlePasswordChange={handlePasswordChange}
+  //     handleGoogleSignIn={handleGoogleSignIn}
+  //     handleGithubSignIn={handleGithubSignIn}
+  //     error={error}
+  //     setIsSignUp={setIsSignUp}
+  //     email={email}
+  //     password={password}
+  //   />
+  // ) : (
+  //   <SignupPage
+  //     handleSubmit={handleSubmit}
+  //     handleEmailChange={handleEmailChange}
+  //     handlePasswordChange={handlePasswordChange}
+  //     handleGoogleSignIn={handleGoogleSignIn}
+  //     handleGithubSignIn={handleGithubSignIn}
+  //     error={error}
+  //     setIsSignUp={setIsSignUp}
+  //     email={email}
+  //     password={password}
+  //   />
+  // );
 }
 
 export default App;

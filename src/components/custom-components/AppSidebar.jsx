@@ -19,12 +19,14 @@ import {
   LayoutDashboard,
   LogOut,
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import SubmissionDialog from './UploadFileDialog';
 import { useAuth } from '@/hooks/auth/AuthContext';
 
 export default function AppSidebar() {
   const { logout } = useAuth();
+  const navigate = useNavigate(); 
+
   return (
     <Sidebar
       className="border-secure-blue pt-18 "
@@ -72,8 +74,24 @@ export default function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <LogOut />
-              <span onClick={logout}>Log out</span>
+              <LogOut onClick={
+                async () => {
+                console.log("About to log out"); 
+                await logout();
+
+                console.log("Finish log out"); 
+                console.log("Navigate to login page");
+                navigate("/auth/login"); 
+              }
+              }/>
+              <span onClick={async () => {
+                console.log("About to log out"); 
+                await logout();
+
+                console.log("Finish log out"); 
+                console.log("Navigate to login page");
+                navigate("/auth/login"); 
+              }}>Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

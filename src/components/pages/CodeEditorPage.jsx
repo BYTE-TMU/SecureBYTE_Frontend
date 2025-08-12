@@ -1,8 +1,11 @@
 import React from 'react';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 import ReviewModal from '../custom-components/ai-review-panel/ReviewModal';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
 export default function CodeEditorPage() {
+  const { user } = useAuth();
+
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       <h2 className="font-bold text-4xl text-secure-blue">Code Editor</h2>

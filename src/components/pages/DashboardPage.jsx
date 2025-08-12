@@ -16,23 +16,12 @@ export default function DashboardPage(
     // setNewTestCases,
     // newReviewPdf,
     // setNewReviewPdf,
-    resetStateUponLogOut,
+    // resetStateUponLogOut,
   },
 ) {
   const { projects, error } = useGetProjects();
 
-
-  const { user } = useAuth(); 
-
-  useEffect(() => {
-    if (user) {
-      // Load projects when user is authenticated
-      console.log('About to load projects for user:', user.uid);
-    } else {
-      // Reset state when user logs out
-      resetStateUponLogOut(); 
-    }
-  }, [user])
+  const { user } = useAuth();
 
   return (
     <main className="w-full min-h-screen flex flex-col p-5">

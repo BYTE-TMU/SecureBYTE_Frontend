@@ -80,17 +80,17 @@ export function NewProjectDialog() {
                 id="project-name"
                 name="project-name"
                 type="text"
-                placeholder="Project name"
+                placeholder="E.g., Hello World"
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
               />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="project-desc">Username</Label>
+              <Label htmlFor="project-desc">Project Description</Label>
               <Input
                 id="project-desc"
                 name="project-desc"
-                placeholder="Project description (optional)"
+                placeholder="(Optional) E.g., First programming project"
                 value={newProjectDesc}
                 onChange={(e) => setNewProjectDesc(e.target.value)}
               />

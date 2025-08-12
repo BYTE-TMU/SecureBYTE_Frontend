@@ -16,7 +16,6 @@ export default function DashboardPage(
     // setNewTestCases,
     // newReviewPdf,
     // setNewReviewPdf,
-    loadProjects, 
     resetStateUponLogOut,
   },
 ) {
@@ -29,7 +28,6 @@ export default function DashboardPage(
     if (user) {
       // Load projects when user is authenticated
       console.log('About to load projects for user:', user.uid);
-      loadProjects(); 
     } else {
       // Reset state when user logs out
       resetStateUponLogOut(); 

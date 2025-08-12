@@ -386,7 +386,6 @@ function App() {
             handleUpdateSubmission={handleUpdateSubmission}
             handleCancelSubmissionEdit={handleCancelSubmissionEdit}
             handleDeleteSubmission={handleDeleteSubmission}
-            loadProjects={loadProjects}
             resetStateUponLogOut={resetStateUponLogOut}
           />
         </main>

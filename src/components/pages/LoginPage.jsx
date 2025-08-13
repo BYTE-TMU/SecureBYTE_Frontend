@@ -27,8 +27,8 @@ export default function LoginPage() {
 
   const { login, googleSignin, githubSignIn, error } = useAuth();
 
-  // Hide and show password 
-  const [showPassword, setShowPassword] = useState(false); 
+  // Hide and show password
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center ">
@@ -64,18 +64,24 @@ export default function LoginPage() {
             <Label className="font-bold text-lg">Password</Label>
             <div className="flex gap-2 items-center">
               <Input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
                 onChange={handlePasswordChange}
                 required
                 className="py-8 rounded-xl border-secure-light-blue"
               />
-              {
-                showPassword 
-                ? <EyeIcon className="select-none" onClick={() => setShowPassword(false)}/>
-                : <EyeOffIcon className="select-none" onClick={() => setShowPassword(true)}/>
-              }
+              {showPassword ? (
+                <EyeIcon
+                  className="select-none"
+                  onClick={() => setShowPassword(false)}
+                />
+              ) : (
+                <EyeOffIcon
+                  className="select-none"
+                  onClick={() => setShowPassword(true)}
+                />
+              )}
             </div>
           </div>
           <Button

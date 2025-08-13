@@ -7,6 +7,7 @@ export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { submissions } = useGetSubmissions(projectId);
 
+  console.log('inside indiv project');
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       <h1 className="font-bold text-4xl text-secure-blue">Project</h1>

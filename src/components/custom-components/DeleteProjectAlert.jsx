@@ -1,4 +1,3 @@
-import { deleteProject } from '@/api';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,26 +10,24 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/auth/AuthContext';
+import { useProject } from '@/hooks/project/ProjectContext'; 
 import { useState } from 'react';
 
-export function DeleteProjectAlert({ project }) {
-  const { user } = useAuth();
+export function DeleteProjectAlert({ project, closeDropdown }) {
   const [error, setError] = useState('');
+  const { deleteOneProject } = useProject(); 
 
   const handleDeleteProject = async () => {
-    if (!user || !project.projectid) return;
     try {
-      await deleteProject(user.uid, project.projectid);
-      //TODO: add in succes/error toast
-      setError('');
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      setError(
-        `Failed to delete a project: ${
-          error.response?.data?.error || error.message
-        }`,
-      );
+      await deleteOneProject({ project }); 
+      setError(''); 
+
+    } catch (err) {
+      console.error('Error deleting project:', err); 
+      setError(`Failed to delete project: ${err.response?.data?.error || err.message}`); 
+    } finally {
+      // Close the dropdown menu of the project - whether the project is deleted successfully or not
+      closeDropdown(); 
     }
   };
   return (

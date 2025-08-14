@@ -29,6 +29,8 @@ import NavigationBar from './components/custom-components/NavigationBar';
 import AppHeader from './components/custom-components/AppHeader';
 import { Outlet, useNavigate } from 'react-router';
 import { useAuth } from './hooks/auth/AuthContext';
+import { ProjectProvider } from './hooks/project/ProjectContext';
+
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -88,14 +90,16 @@ function App() {
 
   if (user) {
     return (
-      <SidebarProvider defaultOpen={false} name={'primary_sidebar'}>
-        <NavigationBar isSignedIn={isSignUp} />
-        <AppSidebar />
-        <main className="w-screen">
-          <AppHeader />
-          <Outlet />
-        </main>
-      </SidebarProvider>
+      <ProjectProvider autoFetch={true}>
+        <SidebarProvider defaultOpen={false} name={'primary_sidebar'}>
+          <NavigationBar isSignedIn={isSignUp} />
+          <AppSidebar />
+          <main className="w-screen">
+            <AppHeader />
+            <Outlet />
+          </main>
+        </SidebarProvider>
+      </ProjectProvider>
     );
   }
 

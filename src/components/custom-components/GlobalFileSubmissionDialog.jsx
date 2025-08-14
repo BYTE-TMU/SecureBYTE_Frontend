@@ -26,7 +26,7 @@ import { Input } from '../ui/input';
 import { FileUploadInput } from './FileUploadInput';
 import { useProject } from '../../hooks/project/ProjectContext'; 
 
-export default function FileSubmissionDialog() {
+export default function GlobalFileSubmissionDialog() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState(''); 
  
@@ -34,7 +34,7 @@ export default function FileSubmissionDialog() {
 
   const prepareForAnalysis = async () => {
     // Create a new project 
-    await createNewProject({newProjectName, newProjectDesc}); 
+    await createNewProject({ newProjectName, newProjectDesc }); 
 
     // Add uploaded files to the new project
 

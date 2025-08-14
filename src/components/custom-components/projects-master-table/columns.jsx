@@ -1,3 +1,4 @@
+import React, { useState } from 'react'; 
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +16,7 @@ import { Link } from 'react-router';
 import EditProjectSheet from '../EditProjectSheet';
 import { DeleteProjectAlert } from '../DeleteProjectAlert';
 
-export const projectsMasterTableColumns = [
+export const getProjectsMasterTableColumns = (openDropdowns, setOpenDropdowns) => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -80,9 +81,14 @@ export const projectsMasterTableColumns = [
     id: 'actions',
     cell: ({ row }) => {
       const project = row.original;
+      const isOpen = openDropdowns[project.id] || false; 
+      const setOpen = (open) => setOpenDropdowns(prev => ({
+        ...prev, 
+        [project.id]: open
+      })); 
       return (
         //TODO: change to just icons
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
@@ -98,7 +104,12 @@ export const projectsMasterTableColumns = [
             >
               Delete Project
             </DropdownMenuItem> */}
-            <DeleteProjectAlert project={project} />
+            <DeleteProjectAlert 
+              project={project}
+              closeDropdown={() => {
+                setOpen(false); 
+              }}
+            />
             <DropdownMenuSeparator />
             <EditProjectSheet project={project} />
             {/* <DropdownMenuItem>View payment details</DropdownMenuItem> */}

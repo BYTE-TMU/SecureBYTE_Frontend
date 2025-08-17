@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,7 +16,10 @@ import { Link } from 'react-router';
 import EditProjectSheet from '../EditProjectSheet';
 import { DeleteProjectAlert } from '../DeleteProjectAlert';
 
-export const getProjectsMasterTableColumns = (openDropdowns, setOpenDropdowns) => [
+export const getProjectsMasterTableColumns = (
+  openDropdowns,
+  setOpenDropdowns,
+) => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -81,11 +84,17 @@ export const getProjectsMasterTableColumns = (openDropdowns, setOpenDropdowns) =
     id: 'actions',
     cell: ({ row }) => {
       const project = row.original;
-      const isOpen = openDropdowns[project.id] || false; 
-      const setOpen = (open) => setOpenDropdowns(prev => ({
-        ...prev, 
-        [project.id]: open
-      })); 
+      const isOpen = openDropdowns[project.projectid] || false;
+      const setOpen = (open) => {
+        setOpenDropdowns((prev) => {
+          const newState = {
+            ...prev,
+            [project.projectid]: open,
+          };
+          console.log('New dropdown state:', newState); // Debug
+          return newState;
+        });
+      };
       return (
         //TODO: change to just icons
         <DropdownMenu open={isOpen} onOpenChange={setOpen}>
@@ -104,10 +113,10 @@ export const getProjectsMasterTableColumns = (openDropdowns, setOpenDropdowns) =
             >
               Delete Project
             </DropdownMenuItem> */}
-            <DeleteProjectAlert 
+            <DeleteProjectAlert
               project={project}
               closeDropdown={() => {
-                setOpen(false); 
+                setOpen(false);
               }}
             />
             <DropdownMenuSeparator />

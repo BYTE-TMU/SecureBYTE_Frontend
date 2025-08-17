@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { getProjects, createProject, deleteProject } from '@/api';
+import { getProjects, createProject, deleteProject, getProjectById } from '@/api';
 
 const ProjectContext = createContext();
 
@@ -8,7 +8,9 @@ export function ProjectProvider({ children, autoFetch = false }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState([]); 
-  const [fetchError, setFetchError] = useState(''); 
+  const [fetchError, setFetchError] = useState('');
+  const [singleProject, setSingleProject] = useState(''); 
+  const [projectFiles, setProjectFiles] = useState({}); 
 
   useEffect(() => {
     if (user && autoFetch) {
@@ -34,6 +36,20 @@ export function ProjectProvider({ children, autoFetch = false }) {
     }
   }
 
+  const fetchProjectById = async ({ projectId }) => {
+    try {
+      setLoading(true); 
+      const response = await getProjectById(user.uid, projectId); 
+      setSingleProject(response.data); 
+      setFetchError(''); 
+    } catch (err) {
+      console.error(`Failed to load project: ${err.response?.data?.error || err.message}`);
+      throw new Error(`Failed to load project with id ${projectId}`);                 
+    } finally {
+      setLoading(false); 
+    }
+  }
+
   const createNewProject = async ({ newProjectName, newProjectDesc }) => {
     //TODO: in the future, add an error
     console.log("Create a new project from Provider"); 
@@ -45,8 +61,8 @@ export function ProjectProvider({ children, autoFetch = false }) {
       const response = await createProject(user.uid, {
         project_name: newProjectName,
         project_desc: newProjectDesc || '',
-        fileids: [],
-      });
+        fileIds: [],
+      }); 
 
       // Success case: Refresh projects lists 
       await fetchProjects(); 
@@ -76,6 +92,19 @@ export function ProjectProvider({ children, autoFetch = false }) {
     }
   };
 
+  const setFilesForProject = ({ projectId, files }) => {
+    console.log("Calling setFilesForProject");
+    console.log(files); 
+    setProjectFiles(prev => ({
+      ...prev, 
+      [projectId]: [...(prev[projectId] || []), ...files]
+    })); 
+  }
+
+  const getFilesFromProject = (projectId) => {
+    return projectFiles[projectId] || []; 
+  }
+
   return (
     <ProjectContext.Provider
       value={{
@@ -83,7 +112,10 @@ export function ProjectProvider({ children, autoFetch = false }) {
         loading,
         projects,
         fetchProjects,
+        fetchProjectById,
         fetchError,
+        getFilesFromProject,
+        setFilesForProject,
         createNewProject,
         deleteOneProject,
       }}

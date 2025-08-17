@@ -13,9 +13,7 @@ import { Upload, X } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'sonner';
 
-export function FileUploadInput() {
-  const [files, setFiles] = React.useState([]);
-
+export function FileUploadInput({ files, setFiles }) {
   const onFileReject = React.useCallback((file, message) => {
     toast(message, {
       description: `"${

@@ -18,6 +18,9 @@ export function DeleteProjectAlert({ project, closeDropdown }) {
   const { deleteOneProject } = useProject(); 
 
   const handleDeleteProject = async () => {
+    // Close the dropdown menu of the project - whether the project is deleted successfully or not
+    closeDropdown(); 
+    
     try {
       await deleteOneProject({ project }); 
       setError(''); 
@@ -25,10 +28,7 @@ export function DeleteProjectAlert({ project, closeDropdown }) {
     } catch (err) {
       console.error('Error deleting project:', err); 
       setError(`Failed to delete project: ${err.response?.data?.error || err.message}`); 
-    } finally {
-      // Close the dropdown menu of the project - whether the project is deleted successfully or not
-      closeDropdown(); 
-    }
+    } 
   };
   return (
     <AlertDialog>

@@ -26,17 +26,24 @@ import { Input } from '../ui/input';
 import { FileUploadInput } from './FileUploadInput';
 import { useProject } from '../../hooks/project/ProjectContext'; 
 
-export default function FileSubmissionDialog() {
+export default function GlobalFileSubmissionDialog() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState(''); 
+  const [files, setFiles] = useState([]); 
  
-  const { createNewProject } = useProject(); 
+  const { createNewProject, setFilesForProject } = useProject(); 
 
   const prepareForAnalysis = async () => {
+    console.log('Files to upload', files); 
+
     // Create a new project 
-    await createNewProject({newProjectName, newProjectDesc}); 
+    const newProject = await createNewProject({ newProjectName, newProjectDesc }); 
+    const projectId = newProject.id; 
 
     // Add uploaded files to the new project
+    setFilesForProject({ projectId, files })
+
+    // TODO: Show the project files in the IndividualProjectPage
 
     // Redirect users to the code editor, with the new project open
   }
@@ -89,7 +96,10 @@ export default function FileSubmissionDialog() {
             ></Input>
           </div>
         </div>
-        <FileUploadInput />
+        <FileUploadInput
+          files={files}
+          setFiles={setFiles}
+        />
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>

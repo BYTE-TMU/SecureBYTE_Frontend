@@ -1,4 +1,3 @@
-import { createProject } from '@/api';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,47 +11,25 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/auth/AuthContext';
+import { useProject } from '@/hooks/project/ProjectContext';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
 
 export function NewProjectDialog() {
-  const { user } = useAuth();
-
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [error, setError] = useState('');
+  const { createNewProject } = useProject(); 
 
-  const createNewProject = async () => {
-    //TODO: in hte future, add an error
-    if (!newProjectName.trim() || !user) return;
-
+  // Use ProjectProvider to create a new project and handle errors locally.
+  const handleCreateProject = async () => {
     try {
-      console.log('Creating project for user:', user.uid); // Debug log
-      console.log('Project data:', {
-        project_name: newProjectName,
-        project_desc: newProjectDesc,
-      }); // Debug log
+      await createNewProject({ newProjectName, newProjectDesc}); 
+      setError(''); 
 
-      const response = await createProject(user.uid, {
-        project_name: newProjectName,
-        project_desc: newProjectDesc || '',
-        fileids: [],
-      });
-      console.log(response);
-      setNewProjectName('');
-      setNewProjectDesc('');
-
-      //TODO: add in a page refresh here too
-      setError('');
-    } catch (err) {
-      console.error('Error creating project:', error);
-      console.error('Error details:', error.response?.data); // More detailed error
-      setError(
-        `Failed to create new project: ${
-          err.response?.data?.error || err.message
-        }`,
-      );
+    } catch(err) {
+      console.error('Error creating project:', err); 
+      setError(`Failed to create a new project: ${err.response?.data?.error || err.message}`); 
     }
   };
 
@@ -101,9 +78,9 @@ export function NewProjectDialog() {
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <DialogClose asChild>
-              <Button type="submit" onClick={createNewProject}>
+              <Button type="submit" onClick={handleCreateProject}>
                 Save changes
-                {/* //TODO: add in success and error toasts */}
+                {/* TODO: Add in success and error toasts */}
               </Button>
             </DialogClose>
           </DialogFooter>

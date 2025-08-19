@@ -19,6 +19,9 @@ export const updateProject = (userId, projectId, project) =>
   });
 export const deleteProject = (userId, projectId) =>
   axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
+export const getProjectById = async (userId, projectId) => {
+  return axios.get(`${API_URL}/users/${userId}/projects/${projectId}`); 
+}
 
 // Submissions API - matching your backend exactly
 export const getSubmissions = (userId, projectId) =>

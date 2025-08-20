@@ -13,7 +13,7 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Eye, EyeClosed, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export default function SignUpPage() {
@@ -92,7 +92,7 @@ export default function SignUpPage() {
           </div>
 
           <Button
-            onClick={googleSignin}
+            onClick={googleSignIn}
             size="lg"
             className="bg-secure-light-blue font-bold"
           >

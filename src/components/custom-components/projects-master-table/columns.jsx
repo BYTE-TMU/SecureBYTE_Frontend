@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 import { MoreHorizontal } from 'lucide-react';
 import { ArrowUpDown } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import EditProjectSheet from '../EditProjectSheet';
 import { DeleteProjectAlert } from '../DeleteProjectAlert';
 

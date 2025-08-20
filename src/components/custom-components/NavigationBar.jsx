@@ -3,7 +3,7 @@ import whiteLogo from '../../assets/white-logo.svg';
 import ProfilePicture from './ProfilePicture';
 import { Button } from '../ui/button';
 import { Plus, Settings, Bell } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/AuthContext';
 
 export default function NavigationBar() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router';
+import { Outlet } from 'react-router-dom';
 import NavigationBar from '../custom-components/NavigationBar';
 import AppSidebar from '../custom-components/AppSidebar';
 import AppHeader from '../custom-components/AppHeader';

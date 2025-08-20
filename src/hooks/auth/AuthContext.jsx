@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   getAuth,
   onAuthStateChanged,
@@ -10,7 +11,7 @@ import {
   GithubAuthProvider,
 } from 'firebase/auth';
 import { app } from '@/firebase';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 const auth = getAuth(app);
@@ -18,6 +19,7 @@ const provider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 githubProvider.addScope('read:user');
 githubProvider.addScope('user:email');
+githubProvider.addScope('repo');
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -26,6 +28,12 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate(); 
 
   useEffect(() => {
+    // Initialize GitHub token from storage on load
+    const token = localStorage.getItem('github_access_token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log(
         'Auth state changed:',
@@ -74,7 +82,13 @@ export function AuthProvider({ children }) {
   const githubSignIn = async () => {
     setError('');
     try {
-      await signInWithPopup(auth, githubProvider);
+      const result = await signInWithPopup(auth, githubProvider);
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const accessToken = credential?.accessToken;
+      if (accessToken) {
+        localStorage.setItem('github_access_token', accessToken);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      }
       navigate("/dashboard", { replace: true })
 
     } catch (err) {
@@ -85,6 +99,11 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await signOut(auth);
+    // Clear any persisted GitHub token
+    try {
+      localStorage.removeItem('github_access_token');
+      delete axios.defaults.headers.common['Authorization'];
+    } catch (_) {}
     navigate("/dashboard", { replace: true })
   };
 

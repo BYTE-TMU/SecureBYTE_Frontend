@@ -179,7 +179,10 @@ function FileTab({
       {...props}
     >
       <span className="truncate flex-1">{fileName}</span>
-      <button
+
+      <span
+        role='button'
+        tabIndex={0}
         onClick={handleCloseClick}
         className={cn(
           'flex items-center justify-center w-4 h-4 rounded-sm',
@@ -200,7 +203,7 @@ function FileTab({
         >
           <path d="M18 6L6 18M6 6l12 12" />
         </svg>
-      </button>
+      </span>
     </button>
   );
 }

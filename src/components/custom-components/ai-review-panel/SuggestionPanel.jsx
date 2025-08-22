@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 export function SecuritySuggestionPanel() {
   return (
@@ -19,6 +20,7 @@ export function SecuritySuggestionPanel() {
   );
 }
 export function LogicSuggestionPanel() {
+  
   return (
     <Card className="h-full rounded-md shadow-none">
       <CardHeader>

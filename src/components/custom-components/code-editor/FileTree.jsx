@@ -47,9 +47,9 @@ export default function FileTree() {
             <SidebarMenu>
               {fileStructure.map((item, index) =>
                 item.type === 'folder' ? (
-                  <Folder folder={item} index={index} />
+                  <Folder folder={item} key={index} />
                 ) : (
-                  <File file={item} index={index} />
+                  <File file={item} key={index} />
                 ),
               )}
             </SidebarMenu>
@@ -80,9 +80,9 @@ function Folder({ folder, index }) {
           <CollapsibleContent>
             <SidebarMenuSub>
               {item.type === 'folder' ? (
-                <Folder folder={item} index={index} />
+                <Folder folder={item} key={index} />
               ) : (
-                <File file={item} index={index} />
+                <File file={item} key={index} />
               )}
             </SidebarMenuSub>
           </CollapsibleContent>

@@ -10,11 +10,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { toast } from 'sonner';
-import ShikiHighlighter from 'react-shiki';
-import 'react-shiki/css';
-import './TestCasesSuggestionPanel.css';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import * as themes from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function TestCasesSuggestionPanel() {
@@ -25,13 +21,15 @@ export default function TestCasesSuggestionPanel() {
   const [testAvailable, setTestAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // TODO: Connect the currently active file to Test Cases review tab, and pass that file to backend for AI-generated review
+
   const handleGenerateTestCases = async () => {
     // if (!user || !testFile) return;
 
     try {
       setLoading(true);
-      // Generate test cases with testFile and testProject (for context)
-      // const testCases = await generateTestCases({ testFile, testProject });
+      // Generate test cases with active test file 
+      // const testCases = await generateTestCases(testFile);
 
       // TODO: Format the code (from backend) with Prettier before displaying it
       const sampleTestCases = { 
@@ -71,8 +69,8 @@ export default function TestCasesSuggestionPanel() {
       setTestCases(sampleTestCases);
 
       // Display test cases, and 'Run All Tests" button
-      setLoading(false);
       setTestAvailable(true);
+      setError(false); 
     } catch (err) {
       // Show error toast for failed generation of test cases.
       toast.error('Generate Test Cases Failed', {
@@ -81,6 +79,9 @@ export default function TestCasesSuggestionPanel() {
       });
       setError(err.response?.data?.error || err.message);
       console.error(`Error generating test cases ${error}`);
+    } finally {
+      // Set loading state to false
+      setLoading(false); 
     }
   };
 
@@ -94,16 +95,14 @@ export default function TestCasesSuggestionPanel() {
 
   return (
     <Card
-      className={`h-[90%] rounded-md shadow-none ${
-        testAvailable ? 'w-[90%]' : 'w-full'
-      }`}
+      className="w-full h-[90%] rounded-md shadow-none overflow-hidden"
     >
       <CardHeader>
         <CardTitle>Test Cases</CardTitle>
         <CardDescription>
           {!testAvailable
             ? 'Click below to generate test cases for [file_name]'
-            : 'See your test cases below'}
+            : 'View your test cases below'}
         </CardDescription>
         {!testAvailable && (
           <Button variant="default" onClick={handleGenerateTestCases}>
@@ -111,19 +110,19 @@ export default function TestCasesSuggestionPanel() {
           </Button>
         )}
       </CardHeader>
-      <CardContent className="w-full h-full">
+      <CardContent className="w-full h-full overflow-hidden">
         {testAvailable && (
-          <div className="space-y-4 h-100 overflow-y-scroll p-5 border-2">
+          <div className="space-y-4 h-100 overflow-y-auto w-full overflow-x-hidden">
             {Object.entries(testCases).map(([testType, tests]) => (
-              <Card key={testType} className="border shadow-sm gap-0">
+              <Card key={testType} className="border shadow-sm gap-0 w-full">
                 <CardHeader>
                   <CardTitle className="text-lg">{testType}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="w-full max-w-full">
                   {Array.from(tests).map(
                     (test, index) =>
                       test && (
-                        <div key={index} className="w-full max-w-full">
+                        <div key={index} className="w-full">
                           <SyntaxHighlighter
                             key={index}
                             language="javascript"
@@ -131,15 +130,15 @@ export default function TestCasesSuggestionPanel() {
                             wrapLines={true}
                             wrapLongLines={true}
                             customStyle={{
-                              maxwidth: '100%',
-                              width: '100%',
+                              maxWidth: '100%',
+                              width: '300px', // Enforce a fixed width to avoid overflowing
                               height: 'auto',
                               minHeight: 'fit-content',
                               whiteSpace: 'pre-wrap',
                               wordBreak: 'break-word',
                               overflowWrap: 'break-word',
                               lineHeight: '1.5rem',
-                              padding: '1rem',
+                              padding: '1rem'                              
                             }}
                             className="m-3"
                             showLineNumbers={true}

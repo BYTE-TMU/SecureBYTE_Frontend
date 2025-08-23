@@ -19,15 +19,3 @@ export function SecuritySuggestionPanel() {
     </Card>
   );
 }
-export function LogicSuggestionPanel() {
-  
-  return (
-    <Card className="h-full rounded-md shadow-none">
-      <CardHeader>
-        <CardTitle>Logic Review</CardTitle>
-        <CardDescription>Find your logic analysis here. </CardDescription>
-      </CardHeader>
-      <CardContent></CardContent>
-    </Card>
-  );
-}

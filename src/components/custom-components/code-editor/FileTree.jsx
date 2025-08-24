@@ -10,12 +10,12 @@ import {
   SidebarMenuSub,
 } from '../../ui/sidebar';
 import { ChevronDown, ChevronRight, FileCode, FolderCode } from 'lucide-react';
-
 import { Collapsible } from '../../ui/collapsible';
 import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@radix-ui/react-collapsible';
+
 export default function FileTree() {
   const fileStructure = [
     {
@@ -47,9 +47,9 @@ export default function FileTree() {
             <SidebarMenu>
               {fileStructure.map((item, index) =>
                 item.type === 'folder' ? (
-                  <Folder folder={item} index={index} />
+                  <Folder folder={item} key={index} />
                 ) : (
-                  <File file={item} index={index} />
+                  <File file={item} key={index} />
                 ),
               )}
             </SidebarMenu>
@@ -77,12 +77,12 @@ function Folder({ folder, index }) {
           </SidebarMenuButton>
         </CollapsibleTrigger>
         {folder.children?.map((item, index) => (
-          <CollapsibleContent>
+          <CollapsibleContent key={`${item.name}-${index}`}>
             <SidebarMenuSub>
               {item.type === 'folder' ? (
-                <Folder folder={item} index={index} />
+                <Folder folder={item} key={index} />
               ) : (
-                <File file={item} index={index} />
+                <File file={item} key={index} />
               )}
             </SidebarMenuSub>
           </CollapsibleContent>

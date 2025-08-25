@@ -14,29 +14,24 @@ import EditSubmissionSheet from '../EditSubmissionSheet';
 
 export const columns = [
   {
-    code: 'code 1 ',
-    created_at: '2025-08-08T23:39:56.986751',
-    filename: 'sub 2',
-    id: '2fdaa928-007f-4cb6-bb3f-0356c576cb4f',
-    projectid: '7fb74dcb-69c0-48db-8ad1-76ca566451b3',
-    reviewpdf: '',
-    updated_at: '2025-08-08T23:39:56.987655',
-  },
-  {
     accessorKey: 'filename',
     header: 'File Name',
   },
   {
     accessorKey: 'updated_at',
     header: 'Updated At',
+    cell: ({ row }) => {
+      const date = row.getValue('updated_at');
+      return new Date(date).toLocaleString();
+    },
   },
   {
-    accessorKey: 'submissionDate',
-    header: 'Submission Date',
-  },
-  {
-    accessorKey: 'submissionType',
-    header: 'Submission Type',
+    accessorKey: 'created_at',
+    header: 'Created At',
+    cell: ({ row }) => {
+      const date = row.getValue('created_at');
+      return new Date(date).toLocaleString();
+    },
   },
   {
     id: 'actions',
@@ -54,7 +49,7 @@ export const columns = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               //TODO: add delete submission
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(submission.id)}
             >
               Delete Submission
             </DropdownMenuItem>

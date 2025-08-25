@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
 import ProjectsMasterTable from '../custom-components/projects-master-table/ProjectsMasterTable';
-import { projectsMasterTableColumns } from '../custom-components/projects-master-table/columns';
+import { getProjectsMasterTableColumns } from '../custom-components/projects-master-table/columns';
 import { FileTab } from '../ui/filetab';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { useGetProjects } from '@/hooks/useGetProjects';
 import OldDashboard from '../custom-components/OldDashboard';
+import { useProject } from '@/hooks/project/ProjectContext';
+import React, { useState } from 'react'; 
 
 export default function DashboardPage(
   {
@@ -19,7 +19,10 @@ export default function DashboardPage(
     // resetStateUponLogOut,
   },
 ) {
-  const { projects, error } = useGetProjects();
+  const { projects, fetchError } = useProject(); 
+  const [openDropdowns, setOpenDropdowns] = useState({}); 
+  const columns = getProjectsMasterTableColumns(openDropdowns, setOpenDropdowns); 
+
 
   const { user } = useAuth();
 
@@ -27,7 +30,7 @@ export default function DashboardPage(
     <main className="w-full min-h-screen flex flex-col p-5">
       <h1 className="font-bold text-4xl text-secure-blue">Dashboard</h1>
       <ProjectsMasterTable
-        columns={projectsMasterTableColumns}
+        columns={columns}
         data={projects}
       />
       {/* <OldDashboard

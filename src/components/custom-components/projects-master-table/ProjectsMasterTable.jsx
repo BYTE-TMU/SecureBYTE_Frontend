@@ -21,11 +21,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CirclePlus } from 'lucide-react';
 import { NewProjectDialog } from '../NewProjectDialog';
+import { useProject } from '@/hooks/project/ProjectContext';
+import { toast } from 'sonner';
 
 export default function ProjectsMasterTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
+  const { loading, deleteProjectInBulk } = useProject();
 
   const table = useReactTable({
     data,
@@ -45,6 +48,58 @@ export default function ProjectsMasterTable({ columns, data }) {
     },
   });
 
+  // Check if any rows are selected by users
+  const hasSelectedRows = table.getFilteredSelectedRowModel().rows.length > 0;
+
+  // Handle bulk selection function
+  const handleBulkDelete = async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const projectsToDelete = selectedRows.map((row) => row.original);
+
+    console.log('Projects to delete:', projectsToDelete); // Debug
+
+    try {
+      const result = await deleteProjectInBulk({ projectsToDelete });
+
+      if (result?.successful?.length === projectsToDelete.length) {
+        toast.success('Delete Successful', {
+          description: `Successfully deleted ${result.successful.length} project(s)`,
+        });
+      }
+
+      if (result?.successful?.length === 0 && projectsToDelete.length > 0) {
+        toast.error('All Delete Failed', {
+          description: `Failed to delete ${projectsToDelete.length} projects. Please try again later`,
+        });
+      }
+
+      if (result?.successful?.length > 0 && result?.failed?.length > 0) {
+        const failedDelete = result.failed.map((r) => r.reason);
+
+        console.error('Failed to partially delete projects', failedDelete); // Debug
+
+        toast.error('Delete Failed', {
+          description: `Failed to delete ${failedDelete.length} projects. Please try again later`,
+        });
+      }
+    } catch (err) {
+      console.error(
+        `Error deleting projects in bulk:" ${
+          err.response?.data?.error || err.message
+        }`,
+      );
+      toast.error('Delete Failed', {
+        description: 'An unexpected error occurred. Please try again.',
+      });
+    } finally {
+      table.resetRowSelection(); // Clear all selected rows
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>; // Temporary loading view
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -60,6 +115,11 @@ export default function ProjectsMasterTable({ columns, data }) {
             }
             className="max-w-sm"
           />
+          {hasSelectedRows && (
+            <Button variant="destructive" onClick={handleBulkDelete}>
+              Delete selected ({table.getFilteredSelectedRowModel().rows.length})
+            </Button>
+          )}
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="text-muted-foreground flex-1 text-sm">

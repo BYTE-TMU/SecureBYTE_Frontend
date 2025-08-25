@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5000/';
+const API_URL = 'http://127.0.0.1:5000';
 
 // Configure axios defaults
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -19,6 +19,8 @@ export const updateProject = (userId, projectId, project) =>
   });
 export const deleteProject = (userId, projectId) =>
   axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
+export const getProjectById = (userId, projectId) =>
+  axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 
 // Submissions API - matching your backend exactly
 export const getSubmissions = (userId, projectId) =>
@@ -48,3 +50,45 @@ export const createItem = (item) => axios.post(`${API_URL}/items`, item);
 export const updateItem = (id, item) =>
   axios.put(`${API_URL}/items/${id}`, item);
 export const deleteItem = (id) => axios.delete(`${API_URL}/items/${id}`);
+
+// ===== GitHub Integration =====
+export const listGithubRepos = (userId, { perPage = 100, page = 1 } = {}) =>
+  axios.get(`${API_URL}/users/${userId}/github/repos`, {
+    params: { per_page: perPage, page },
+    headers: (() => {
+      const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('github_access_token') : undefined;
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    })(),
+  });
+
+export const linkGithubRepo = (
+  userId,
+  projectId,
+  { repo_full_name, branch = 'main' }
+) =>
+  axios.post(
+    `${API_URL}/users/${userId}/projects/${projectId}/github/link`,
+    { repo_full_name, branch },
+    {
+      headers: (() => {
+        const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('github_access_token') : undefined;
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      })(),
+    }
+  );
+
+export const importGithubRepo = (
+  userId,
+  projectId,
+  { repo_full_name, branch, max_files, max_bytes } = {}
+) =>
+  axios.post(
+    `${API_URL}/users/${userId}/projects/${projectId}/github/import`,
+    { repo_full_name, branch, max_files, max_bytes },
+    {
+      headers: (() => {
+        const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('github_access_token') : undefined;
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      })(),
+    }
+  );

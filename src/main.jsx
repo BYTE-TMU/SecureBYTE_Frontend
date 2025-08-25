@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router';
 import './index.css';
 import App from './App.jsx';
 import DashboardPage from './components/pages/DashboardPage';
@@ -18,6 +18,7 @@ createRoot(document.getElementById('root')).render(
     <AuthProvider>
       {/* Authentication routes */}
       <Routes>
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth" element={<AuthLayout />}>
           {console.log('About to read authentication from main.jsx')}
           <Route path="login" element={<LoginPage />} />
@@ -27,7 +28,10 @@ createRoot(document.getElementById('root')).render(
         {/* Protected routes for authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route element={<App />}>
-            <Route path="/code-editor" element={<CodeEditorPage />} />
+            <Route
+              path="/code-editor"
+              element={<CodeEditorPage className="overflow-y-hidden" />}
+            />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/loading" element={<LoadingPage />} />
             <Route path="/projects">

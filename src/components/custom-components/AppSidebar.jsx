@@ -20,7 +20,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import SubmissionDialog from './UploadFileDialog';
+import GlobalFileSubmissionDialog from './GlobalFileSubmissionDialog';
 import { useAuth } from '@/hooks/auth/AuthContext';
 
 export default function AppSidebar() {
@@ -48,7 +48,7 @@ export default function AppSidebar() {
               </SidebarMenuItem>
 
               <SidebarMenuItem key={'Upload Files'}>
-                <SubmissionDialog />
+                <GlobalFileSubmissionDialog />
               </SidebarMenuItem>
               <SidebarMenuItem key={'Upload History'}>
                 <SidebarMenuButton asChild>

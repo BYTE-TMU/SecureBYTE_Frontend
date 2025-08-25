@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   getAuth,
   onAuthStateChanged,
@@ -18,14 +19,21 @@ const provider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 githubProvider.addScope('read:user');
 githubProvider.addScope('user:email');
+githubProvider.addScope('repo');
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Initialize GitHub token from storage on load
+    const token = localStorage.getItem('github_access_token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log(
         'Auth state changed:',
@@ -37,14 +45,12 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-
   const login = async (email, password) => {
     setError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Re-direct to DashboardPage
-      navigate("/dashboard", { replace: true })
-
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -64,9 +70,7 @@ export function AuthProvider({ children }) {
     try {
       await signInWithPopup(auth, provider);
       // Re-direct to DashboardPage
-      navigate("/dashboard", { replace: true })
-      
-
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -74,9 +78,15 @@ export function AuthProvider({ children }) {
   const githubSignIn = async () => {
     setError('');
     try {
-      await signInWithPopup(auth, githubProvider);
-      navigate("/dashboard", { replace: true })
-
+      const result = await signInWithPopup(auth, githubProvider);
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const accessToken = credential?.accessToken;
+      if (accessToken) {
+        localStorage.setItem('github_access_token', accessToken);
+        axios.defaults.headers.common['Authorization'] =
+          `Bearer ${accessToken}`;
+      }
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       // Common error to surface clearly when account exists with different provider
       setError(err.message || 'GitHub sign-in failed');
@@ -85,7 +95,12 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await signOut(auth);
-    navigate("/dashboard", { replace: true })
+    // Clear any persisted GitHub token
+    try {
+      localStorage.removeItem('github_access_token');
+      delete axios.defaults.headers.common['Authorization'];
+    } catch (_) {}
+    navigate('/dashboard', { replace: true });
   };
 
   return (

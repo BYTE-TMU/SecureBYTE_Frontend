@@ -27,7 +27,7 @@ import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import AppSidebar from './components/custom-components/AppSidebar';
 import NavigationBar from './components/custom-components/NavigationBar';
 import AppHeader from './components/custom-components/AppHeader';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router';
 import { useAuth } from './hooks/auth/AuthContext';
 import { ProjectProvider } from './hooks/project/ProjectContext';
 import { Toaster } from './components/ui/sonner';

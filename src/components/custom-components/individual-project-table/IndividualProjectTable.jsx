@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import SubmissionDialog from '../UploadFileDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 export default function IndividualProjectTable({ columns, data }) {
   const { projectId } = useParams();

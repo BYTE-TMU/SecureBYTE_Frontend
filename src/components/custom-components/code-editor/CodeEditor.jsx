@@ -16,6 +16,7 @@ export default function CodeEditor({
 
   return (
     <Editor
+      className="w-full"
       theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
       language={language}
       value={value}
@@ -29,7 +30,6 @@ export default function CodeEditor({
         scrollBeyondLastLine: false,
         automaticLayout: true,
       }}
-      className="w-full h-full"
     />
   );
 }

@@ -27,7 +27,7 @@ createRoot(document.getElementById('root')).render(
         {/* Protected routes for authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route element={<App />}>
-            <Route path="/code-editor" element={<CodeEditorPage />} />
+            <Route path="/code-editor" element={<CodeEditorPage className='overflow-y-hidden'/>} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects">
               {console.log('inside')}{' '}

@@ -9,7 +9,16 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from '../../ui/sidebar';
-import { ChevronDown, ChevronRight, FileCode, FolderCode } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FilePlus,
+  FolderCode,
+  FolderPlus,
+  PlusCircleIcon,
+  PlusIcon,
+} from 'lucide-react';
 
 import { Collapsible } from '../../ui/collapsible';
 import {
@@ -38,8 +47,12 @@ export default function FileTree() {
   return (
     <div className="flex flex-col text-sm">
       {' '}
-      <SidebarHeader>
+      <SidebarHeader className="flex flex-row items-center justify-between bg-secondary">
         <h2 className="font-medium">Project Name</h2>
+        <div className="flex flex-row items-center gap-2">
+          <FilePlus className="size-4" />
+          <FolderPlus className="size-4" />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

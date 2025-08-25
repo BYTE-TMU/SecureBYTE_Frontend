@@ -1,12 +1,13 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router";
-import { useAuth } from "../hooks/auth/AuthContext"; 
+import React from 'react';
+import { Navigate, Outlet } from 'react-router';
+import { useAuth } from '../hooks/auth/AuthContext';
+import LoadingPage from '@/components/pages/LoadingPage';
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div> // Temporary loading page
+    return <LoadingPage />; // Temporary loading page
   }
 
   if (!user) {

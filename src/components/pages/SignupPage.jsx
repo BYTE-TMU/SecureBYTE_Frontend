@@ -98,7 +98,7 @@ export default function SignUpPage() {
           </div>
 
           <Button
-            onClick={googleSignIn}
+            onClick={googleSignin}
             size="lg"
             className="bg-secure-light-blue font-bold"
           >

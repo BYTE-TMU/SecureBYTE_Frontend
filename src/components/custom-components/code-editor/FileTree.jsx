@@ -9,7 +9,6 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from '../../ui/sidebar';
-<<<<<<< HEAD
 import {
   ChevronDown,
   ChevronRight,
@@ -17,18 +16,12 @@ import {
   FilePlus,
   FolderCode,
   FolderPlus,
-  PlusCircleIcon,
-  PlusIcon,
 } from 'lucide-react';
-
-=======
-import { ChevronDown, ChevronRight, FileCode, FolderCode } from 'lucide-react';
->>>>>>> cac57c541fdf697535b955e2b896b123c0d37a0c
-import { Collapsible } from '../../ui/collapsible';
 import {
+  Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@radix-ui/react-collapsible';
+} from '../../ui/collapsible';
 
 export default function FileTree() {
   const fileStructure = [

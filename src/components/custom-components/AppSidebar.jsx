@@ -19,7 +19,7 @@ import {
   LayoutDashboard,
   LogOut,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import GlobalFileSubmissionDialog from './GlobalFileSubmissionDialog';
 import { useAuth } from '@/hooks/auth/AuthContext';
 

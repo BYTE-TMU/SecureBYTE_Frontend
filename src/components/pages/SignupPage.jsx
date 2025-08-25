@@ -13,7 +13,7 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Eye, EyeClosed, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export default function SignUpPage() {
@@ -27,8 +27,8 @@ export default function SignUpPage() {
 
   const { signup, googleSignin, githubSignIn, error } = useAuth();
 
-  // Hide and show password 
-  const [showPassword, setShowPassword] = useState(false); 
+  // Hide and show password
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center">
@@ -63,18 +63,24 @@ export default function SignUpPage() {
             <Label className="font-bold text-lg">Password</Label>
             <div className="flex gap-2 items-center">
               <Input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
                 onChange={handlePasswordChange}
                 required
                 className="py-8 rounded-xl border-secure-light-blue"
               />
-              {
-                showPassword 
-                ? <EyeIcon className="select-none" onClick={() => setShowPassword(false)}/> 
-                : <EyeOffIcon className="select-none" onClick={() => setShowPassword(true)}/>
-              }
+              {showPassword ? (
+                <EyeIcon
+                  className="select-none"
+                  onClick={() => setShowPassword(false)}
+                />
+              ) : (
+                <EyeOffIcon
+                  className="select-none"
+                  onClick={() => setShowPassword(true)}
+                />
+              )}
             </div>
           </div>
           <Button

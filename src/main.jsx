@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router';
 import './index.css';
 import App from './App.jsx';
 import DashboardPage from './components/pages/DashboardPage';
@@ -27,7 +27,10 @@ createRoot(document.getElementById('root')).render(
         {/* Protected routes for authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route element={<App />}>
-            <Route path="/code-editor" element={<CodeEditorPage className='overflow-y-hidden'/>} />
+            <Route
+              path="/code-editor"
+              element={<CodeEditorPage className="overflow-y-hidden" />}
+            />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects">
               {console.log('inside')}{' '}

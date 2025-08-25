@@ -1,6 +1,6 @@
 import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { useGetSubmissions } from '@/hooks/useGetSubmissions';
 import { toast } from 'sonner';
 import { useProject } from '../../hooks/project/ProjectContext';
@@ -35,28 +35,36 @@ export default function IndividualProjectPage() {
 
   useEffect(() => {
     if (!projectId) {
-      console.log("Missing projectId"); 
-      return; 
+      console.log('Missing projectId');
+      return;
     }
 
     async function fetchData() {
       console.log(projectId);
       try {
         const projectData = await fetchProjectById({ projectId });
-        console.log(`Printing project data: ${projectData}`) ; 
-        // setProjectName(projectData['project_name']); 
+        console.log(`Printing project data: ${projectData}`);
+        // setProjectName(projectData['project_name']);
       } catch (err) {
-        console.error(`Failed to load project: ${err.response?.data?.error || err.message}`); 
+        console.error(
+          `Failed to load project: ${err.response?.data?.error || err.message}`,
+        );
       }
-
     }
 
-    fetchData(); 
+    fetchData();
   }, [projectId]);
 
-  const { submissions, error: submissionsError, refetch } = useGetSubmissions(projectId);
-  
-  console.log(`[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`, submissions);
+  const {
+    submissions,
+    error: submissionsError,
+    refetch,
+  } = useGetSubmissions(projectId);
+
+  console.log(
+    `[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`,
+    submissions,
+  );
 
   const hasGithubToken = useMemo(() => {
     return Boolean(localStorage.getItem('github_access_token'));
@@ -90,7 +98,10 @@ export default function IndividualProjectPage() {
     try {
       setIsWorking(true);
       console.log('[FRONTEND] Linking repo:', selectedRepo);
-      await linkGithubRepo(user.uid, projectId, { repo_full_name: selectedRepo, branch });
+      await linkGithubRepo(user.uid, projectId, {
+        repo_full_name: selectedRepo,
+        branch,
+      });
       // After linking, immediately import to populate files
       console.log('[FRONTEND] Starting import after link');
       const resp = await importGithubRepo(user.uid, projectId, {
@@ -102,7 +113,9 @@ export default function IndividualProjectPage() {
       console.log('[FRONTEND] Import response:', resp.data);
       setIsRepoDialogOpen(false);
       const count = resp?.data?.files_imported;
-      toast.success(`Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`);
+      toast.success(
+        `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`,
+      );
       console.log('[FRONTEND] Refetching submissions');
       await refetch();
       console.log('[FRONTEND] Link+import complete');
@@ -111,8 +124,9 @@ export default function IndividualProjectPage() {
       console.error('[FRONTEND] Link/import failed:', err);
       setRepoError(msg);
       toast.error(`Failed: ${msg}`);
+    } finally {
+      setIsWorking(false);
     }
-    finally { setIsWorking(false); }
   };
 
   const handleImportRepo = async () => {
@@ -120,7 +134,10 @@ export default function IndividualProjectPage() {
     setRepoError('');
     try {
       setIsWorking(true);
-      console.log('[FRONTEND] Importing files from repo:', selectedRepo || 'linked repo');
+      console.log(
+        '[FRONTEND] Importing files from repo:',
+        selectedRepo || 'linked repo',
+      );
       const resp = await importGithubRepo(user.uid, projectId, {
         repo_full_name: selectedRepo || undefined,
         branch: branch || undefined,
@@ -130,7 +147,9 @@ export default function IndividualProjectPage() {
       console.log('[FRONTEND] Import response:', resp.data);
       setIsRepoDialogOpen(false);
       const count = resp?.data?.files_imported;
-      toast.success(`Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`);
+      toast.success(
+        `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`,
+      );
       console.log('[FRONTEND] Refetching submissions');
       await refetch();
       console.log('[FRONTEND] Import complete');
@@ -139,8 +158,9 @@ export default function IndividualProjectPage() {
       console.error('[FRONTEND] Import failed:', err);
       setRepoError(msg);
       toast.error(`Failed: ${msg}`);
+    } finally {
+      setIsWorking(false);
     }
-    finally { setIsWorking(false); }
   };
 
   console.log(`inside indiv project: ${projectId}`);
@@ -150,7 +170,9 @@ export default function IndividualProjectPage() {
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
       {hasGithubToken && (
         <div className="mt-4">
-          <Button onClick={openRepoDialog} className="bg-secure-orange">Link GitHub Repository</Button>
+          <Button onClick={openRepoDialog} className="bg-secure-orange">
+            Link GitHub Repository
+          </Button>
         </div>
       )}
       {submissionsError ? (
@@ -160,7 +182,10 @@ export default function IndividualProjectPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Link your GitHub repository</DialogTitle>
-            <DialogDescription>Select a repository and optionally a branch to link or import files.</DialogDescription>
+            <DialogDescription>
+              Select a repository and optionally a branch to link or import
+              files.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             {loadingRepos ? (
@@ -191,10 +216,17 @@ export default function IndividualProjectPage() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleLinkRepo} disabled={!selectedRepo || isWorking}>
+            <Button
+              onClick={handleLinkRepo}
+              disabled={!selectedRepo || isWorking}
+            >
               {isWorking ? 'Working...' : 'Link'}
             </Button>
-            <Button onClick={handleImportRepo} disabled={isWorking} variant="secondary">
+            <Button
+              onClick={handleImportRepo}
+              disabled={isWorking}
+              variant="secondary"
+            >
               {isWorking ? 'Working...' : 'Import Files'}
             </Button>
           </DialogFooter>

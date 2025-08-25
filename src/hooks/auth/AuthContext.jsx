@@ -11,7 +11,7 @@ import {
   GithubAuthProvider,
 } from 'firebase/auth';
 import { app } from '@/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 const AuthContext = createContext();
 const auth = getAuth(app);
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Initialize GitHub token from storage on load
@@ -45,14 +45,12 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-
   const login = async (email, password) => {
     setError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Re-direct to DashboardPage
-      navigate("/dashboard", { replace: true })
-
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -72,9 +70,7 @@ export function AuthProvider({ children }) {
     try {
       await signInWithPopup(auth, provider);
       // Re-direct to DashboardPage
-      navigate("/dashboard", { replace: true })
-      
-
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -87,10 +83,10 @@ export function AuthProvider({ children }) {
       const accessToken = credential?.accessToken;
       if (accessToken) {
         localStorage.setItem('github_access_token', accessToken);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        axios.defaults.headers.common['Authorization'] =
+          `Bearer ${accessToken}`;
       }
-      navigate("/dashboard", { replace: true })
-
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       // Common error to surface clearly when account exists with different provider
       setError(err.message || 'GitHub sign-in failed');
@@ -104,7 +100,7 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('github_access_token');
       delete axios.defaults.headers.common['Authorization'];
     } catch (_) {}
-    navigate("/dashboard", { replace: true })
+    navigate('/dashboard', { replace: true });
   };
 
   return (

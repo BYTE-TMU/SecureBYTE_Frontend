@@ -13,7 +13,7 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export default function LoginPage() {

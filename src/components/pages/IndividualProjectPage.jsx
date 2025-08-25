@@ -1,14 +1,37 @@
 import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import { useGetSubmissions } from '@/hooks/useGetSubmissions';
+import { toast } from 'sonner';
 import { useProject } from '../../hooks/project/ProjectContext';
+import { useAuth } from '@/hooks/auth/AuthContext';
+import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import React, { useState, useEffect } from 'react';
 
 export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const [projectName, setProjectName] = useState('');
   const { fetchProjectById } = useProject();
+  const { user } = useAuth();
+
+  const [isRepoDialogOpen, setIsRepoDialogOpen] = useState(false);
+  const [repos, setRepos] = useState([]);
+  const [selectedRepo, setSelectedRepo] = useState('');
+  const [branch, setBranch] = useState('');
+  const [loadingRepos, setLoadingRepos] = useState(false);
+  const [repoError, setRepoError] = useState('');
+  const [isWorking, setIsWorking] = useState(false);
 
   useEffect(() => {
     if (!projectId) {
@@ -31,13 +54,152 @@ export default function IndividualProjectPage() {
     fetchData(); 
   }, [projectId]);
 
-  const { submissions } = useGetSubmissions(projectId);
+  const { submissions, error: submissionsError, refetch } = useGetSubmissions(projectId);
+  
+  console.log(`[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`, submissions);
+
+  const hasGithubToken = useMemo(() => {
+    return Boolean(localStorage.getItem('github_access_token'));
+  }, []);
+
+  const openRepoDialog = async () => {
+    if (!user) return;
+    setRepoError('');
+    setIsRepoDialogOpen(true);
+    try {
+      setLoadingRepos(true);
+      const resp = await listGithubRepos(user.uid);
+      setRepos(resp.data || []);
+    } catch (err) {
+      setRepoError(err.response?.data?.error || err.message);
+      setRepos([]);
+    } finally {
+      setLoadingRepos(false);
+    }
+  };
+
+  const handleRepoChange = (value) => {
+    setSelectedRepo(value);
+    const found = repos.find((r) => r.full_name === value);
+    setBranch('');
+  };
+
+  const handleLinkRepo = async () => {
+    if (!user || !projectId || !selectedRepo) return;
+    setRepoError('');
+    try {
+      setIsWorking(true);
+      console.log('[FRONTEND] Linking repo:', selectedRepo);
+      await linkGithubRepo(user.uid, projectId, { repo_full_name: selectedRepo, branch });
+      // After linking, immediately import to populate files
+      console.log('[FRONTEND] Starting import after link');
+      const resp = await importGithubRepo(user.uid, projectId, {
+        repo_full_name: selectedRepo,
+        branch,
+        max_files: 5000,
+        max_bytes: 5242880,
+      });
+      console.log('[FRONTEND] Import response:', resp.data);
+      setIsRepoDialogOpen(false);
+      const count = resp?.data?.files_imported;
+      toast.success(`Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`);
+      console.log('[FRONTEND] Refetching submissions');
+      await refetch();
+      console.log('[FRONTEND] Link+import complete');
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      console.error('[FRONTEND] Link/import failed:', err);
+      setRepoError(msg);
+      toast.error(`Failed: ${msg}`);
+    }
+    finally { setIsWorking(false); }
+  };
+
+  const handleImportRepo = async () => {
+    if (!user || !projectId) return;
+    setRepoError('');
+    try {
+      setIsWorking(true);
+      console.log('[FRONTEND] Importing files from repo:', selectedRepo || 'linked repo');
+      const resp = await importGithubRepo(user.uid, projectId, {
+        repo_full_name: selectedRepo || undefined,
+        branch: branch || undefined,
+        max_files: 5000,
+        max_bytes: 5242880,
+      });
+      console.log('[FRONTEND] Import response:', resp.data);
+      setIsRepoDialogOpen(false);
+      const count = resp?.data?.files_imported;
+      toast.success(`Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`);
+      console.log('[FRONTEND] Refetching submissions');
+      await refetch();
+      console.log('[FRONTEND] Import complete');
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      console.error('[FRONTEND] Import failed:', err);
+      setRepoError(msg);
+      toast.error(`Failed: ${msg}`);
+    }
+    finally { setIsWorking(false); }
+  };
 
   console.log(`inside indiv project: ${projectId}`);
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       {/* TODO: Fetch project name as title */}
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
+      {hasGithubToken && (
+        <div className="mt-4">
+          <Button onClick={openRepoDialog} className="bg-secure-orange">Link GitHub Repository</Button>
+        </div>
+      )}
+      {submissionsError ? (
+        <div className="text-destructive text-sm mt-2">{submissionsError}</div>
+      ) : null}
+      <Dialog open={isRepoDialogOpen} onOpenChange={setIsRepoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link your GitHub repository</DialogTitle>
+            <DialogDescription>Select a repository and optionally a branch to link or import files.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            {loadingRepos ? (
+              <div>Loading repositories...</div>
+            ) : (
+              <>
+                <label className="text-sm">Repository</label>
+                <select
+                  className="border rounded-md p-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  value={selectedRepo}
+                  onChange={(e) => handleRepoChange(e.target.value)}
+                >
+                  <option value="">Select repo</option>
+                  {repos.map((r) => (
+                    <option key={r.id} value={r.full_name}>
+                      {r.full_name}
+                    </option>
+                  ))}
+                </select>
+                {/* Branch optional; backend will use repo default if omitted */}
+                {repoError ? (
+                  <div className="text-destructive text-sm">{repoError}</div>
+                ) : null}
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleLinkRepo} disabled={!selectedRepo || isWorking}>
+              {isWorking ? 'Working...' : 'Link'}
+            </Button>
+            <Button onClick={handleImportRepo} disabled={isWorking} variant="secondary">
+              {isWorking ? 'Working...' : 'Import Files'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <IndividualProjectTable columns={columns} data={submissions} />
     </main>
   );

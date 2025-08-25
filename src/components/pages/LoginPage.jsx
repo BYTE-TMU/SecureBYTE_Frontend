@@ -13,7 +13,7 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export default function LoginPage() {
@@ -25,7 +25,7 @@ export default function LoginPage() {
   console.log(email);
   const handlePasswordChange = (e) => setPassword(e.target.value);
 
-  const { login, googleSignin, githubSignIn, error } = useAuth();
+  const { login, googleSignIn, githubSignIn, error } = useAuth();
 
   // Hide and show password
   const [showPassword, setShowPassword] = useState(false);
@@ -98,7 +98,7 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <Button onClick={googleSignin} size="lg" className="font-bold">
+          <Button onClick={googleSignIn} size="lg" className="font-bold">
             <img src={googleLogo} className="size-5"></img>
             Login with Google
           </Button>

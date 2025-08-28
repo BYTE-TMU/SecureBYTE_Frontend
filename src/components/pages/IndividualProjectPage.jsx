@@ -82,6 +82,7 @@ export default function IndividualProjectPage() {
     try {
       setLoadingRepos(true);
       const resp = await listGithubRepos(user.uid);
+      console.log(resp.data);
       setRepos(resp.data || []);
     } catch (err) {
       setRepoError(err.response?.data?.error || err.message);

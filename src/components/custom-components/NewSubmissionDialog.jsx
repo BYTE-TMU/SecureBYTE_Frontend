@@ -13,32 +13,41 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/auth/AuthContext';
+import { useProject } from '@/hooks/project/ProjectContext';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
+import { FileUploadInput } from './FileUploadInput';
+import { toast } from 'sonner';
 
 export function NewSubmissionDialog({ projectId }) {
   const { user } = useAuth();
+  const { setFilesForProject } = useProject();
+
   const [error, setError] = useState('');
-
-  const [newSubmissionFilename, setNewSubmissionFilename] = useState('');
-  const [newSubmissionCode, setNewSubmissionCode] = useState('');
-
+  const [files, setFiles] = useState([]);
   const createNewSubmission = async () => {
-    if (!newSubmissionFilename.trim() || !projectId || !user) return;
-
+    console.log(files);
+    if (files.length === 0)
+      return toast('Upload failed. No file selected', { type: 'error' });
+    if (!projectId || !user)
+      return toast(
+        "Missing project or user info, please ensure you're logged in ",
+        { type: 'error' },
+      );
     try {
+      console.log('about to create a submission', files[0].name);
       await createSubmission(user.uid, projectId, {
-        filename: newSubmissionFilename,
-        code: newSubmissionCode || '',
+        filename: files[0]?.name,
+        code: 'nothign for now',
         securityrev: [],
         logicrev: [],
         testcases: [],
         reviewpdf: '',
       });
-      setNewSubmissionFilename('');
-      setNewSubmissionCode('');
       setError('');
+      return toast('Uploaded file(s) successfully', { type: 'success' });
     } catch (error) {
+      //TODO: figure out how to display a toast here because no point in sharing error messages directly with users as it wont help them unless there is a specific action they can take - [JOHAN]
       console.error('Error creating project:', error);
       console.error('Error details:', error.response?.data); // More detailed error
       setError(
@@ -68,25 +77,26 @@ export function NewSubmissionDialog({ projectId }) {
           <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="project-name">File Name</Label>
-              <Input
+              {/* <Input
                 id="project-name"
                 name="project-name"
                 type="text"
                 placeholder="Project name"
                 value={newSubmissionFilename}
                 onChange={(e) => setNewSubmissionFilename(e.target.value)}
-              />
+              /> */}
             </div>
             <div className="grid gap-3">
               <Label htmlFor="project-desc">Code</Label>
-              <Input
+              {/* <Input
                 id="project-desc"
                 name="project-desc"
                 placeholder="Project description (optional)"
                 value={newSubmissionCode}
                 onChange={(e) => setNewSubmissionCode(e.target.value)}
-              />
+              /> */}
             </div>
+            <FileUploadInput files={files} setFiles={setFiles} />
           </div>
           <DialogFooter>
             <DialogClose asChild>

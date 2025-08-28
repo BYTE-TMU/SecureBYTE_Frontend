@@ -10,6 +10,7 @@ import AuthLayout from './components/layouts/AuthLayout';
 import LoginPage from './components/pages/LoginPage';
 import SignUpPage from './components/pages/SignUpPage';
 import ProtectedRoute from './utils/ProtectedRoute';
+import LoadingPage from './components/pages/LoadingPage';
 
 createRoot(document.getElementById('root')).render(
   // LATER: Separate routes into different groups (e.g., public, authentication, protected) when landing page is added.
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')).render(
               element={<CodeEditorPage className="overflow-y-hidden" />}
             />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/loading" element={<LoadingPage />} />
             <Route path="/projects">
               {console.log('inside')}{' '}
               <Route path=":projectId" element={<IndividualProjectPage />} />

@@ -17,13 +17,12 @@ import {
   FolderCode,
   FolderPlus,
 } from 'lucide-react';
+
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@radix-ui/react-collapsible';
-import { useGetFileStructure } from '@/hooks/useGetFileStructure';
-import { useParams } from 'react-router';
+} from '@/components/ui/collapsible';
 
 export default function FileTree({ tree }) {
   console.log(tree);

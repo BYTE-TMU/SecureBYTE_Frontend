@@ -18,13 +18,18 @@ import {
 } from '@/components/ui/dialog';
 import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import React, { useState, useEffect } from 'react';
+import { useGetFileStructure } from '@/hooks/useGetFileStructure';
+import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 
 export default function IndividualProjectPage() {
   let { projectId } = useParams();
-  const [projectName, setProjectName] = useState('');
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
+  const { tree } = useGetFileStructure(projectId);
+  const [projectName, setProjectName] = useState('');
 
+  console.log(tree);
+  //github repo dialog
   const [isRepoDialogOpen, setIsRepoDialogOpen] = useState(false);
   const [repos, setRepos] = useState([]);
   const [selectedRepo, setSelectedRepo] = useState('');
@@ -164,6 +169,7 @@ export default function IndividualProjectPage() {
   };
 
   console.log(`inside indiv project: ${projectId}`);
+  console.log(submissions.map((submission) => submission.filename));
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       {/* TODO: Fetch project name as title */}
@@ -232,6 +238,7 @@ export default function IndividualProjectPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ResizableCodeEditor tree={tree} />
       <IndividualProjectTable columns={columns} data={submissions} />
     </main>
   );

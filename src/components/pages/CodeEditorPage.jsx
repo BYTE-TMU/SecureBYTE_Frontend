@@ -11,7 +11,7 @@ export default function CodeEditorPage() {
       <h2 className="font-bold text-4xl text-secure-blue">Code Editor</h2>
       <div className="flex flex-row h-screen w-full mt-5 gap-2">
         <ResizableCodeEditor />
-        <ReviewModal className='w-full h-full'/>
+        <ReviewModal className="w-full h-full" />
       </div>
     </main>
   );

@@ -15,41 +15,29 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@radix-ui/react-collapsible';
+import { useGetFileStructure } from '@/hooks/useGetFileStructure';
+import { useParams } from 'react-router';
 
-export default function FileTree() {
-  const fileStructure = [
-    {
-      name: 'src',
-      type: 'folder',
-      children: [
-        {
-          name: 'components',
-          type: 'folder',
-          children: [
-            { name: 'FileTree.jsx', type: 'file' },
-            { name: 'ResizableCodeEditor.jsx', type: 'file' },
-          ],
-        },
-        { name: 'App.jsx', type: 'file' },
-      ],
-    },
-    { name: 'package.json', type: 'file' },
-  ];
+export default function FileTree({ tree }) {
+  console.log(tree);
   return (
     <div className="flex flex-col text-sm">
       {' '}
       <SidebarHeader>
         <h2 className="font-medium">Project Name</h2>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="h-2/3">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {fileStructure.map((item, index) =>
-                item.type === 'folder' ? (
-                  <Folder folder={item} key={index} />
+              {Object.entries(tree).map(([key, value]) =>
+                console.log('key: ', key, 'value: ', value),
+              )}
+              {Object.entries(tree).map(([key, value]) =>
+                value.type === 'folder' ? (
+                  <Folder folder={value} index={key} />
                 ) : (
-                  <File file={item} key={index} />
+                  <File file={value} index={key} />
                 ),
               )}
             </SidebarMenu>
@@ -76,13 +64,13 @@ function Folder({ folder, index }) {
             <span className="mr-auto">{folder.name}</span>
           </SidebarMenuButton>
         </CollapsibleTrigger>
-        {folder.children?.map((item, index) => (
-          <CollapsibleContent key={`${item.name}-${index}`}>
+        {Object.entries(folder.children).map(([key, value]) => (
+          <CollapsibleContent key={key}>
             <SidebarMenuSub>
-              {item.type === 'folder' ? (
-                <Folder folder={item} key={index} />
+              {value.type === 'folder' ? (
+                <Folder folder={value} index={key} />
               ) : (
-                <File file={item} key={index} />
+                <File file={value} index={key} />
               )}
             </SidebarMenuSub>
           </CollapsibleContent>

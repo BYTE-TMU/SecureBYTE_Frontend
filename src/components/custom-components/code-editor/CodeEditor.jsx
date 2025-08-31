@@ -4,7 +4,8 @@ import { Editor } from '@monaco-editor/react';
 export default function CodeEditor({
   isDarkTheme,
   value = '#Type your code here...',
-  language = 'python',
+  language = 'python', // Current default language is Python
+  // TODO: Add dynamic language later
   onChange,
 }) {
   const editorRef = useRef();

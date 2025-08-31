@@ -22,9 +22,32 @@ import { toast } from 'sonner';
 export function NewSubmissionDialog({ projectId }) {
   const { user } = useAuth();
   const { setFilesForProject } = useProject();
-
   const [error, setError] = useState('');
   const [files, setFiles] = useState([]);
+
+  const parseFileContent = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        console.log('File name', file.name);
+        console.log('File content', reader.result);
+        resolve(reader.result); 
+      };
+
+      reader.onerror = (err) => {
+        console.error("Error reading file content", err); 
+        reject(err); 
+      }
+
+      try {
+        reader.readAsText(file);
+      } catch (err) {
+        reject(err); 
+      }
+    });
+  };
+
   const createNewSubmission = async () => {
     console.log(files);
     if (files.length === 0)
@@ -34,11 +57,16 @@ export function NewSubmissionDialog({ projectId }) {
         "Missing project or user info, please ensure you're logged in ",
         { type: 'error' },
       );
+
     try {
-      console.log('about to create a submission', files[0].name);
+      console.log('About to create a submission', files[0].name);
+      // Parse the file content
+      const fileContent = await parseFileContent(files[0]);
+      console.log('fileContent', fileContent);
+
       await createSubmission(user.uid, projectId, {
         filename: files[0]?.name,
-        code: 'nothign for now',
+        code: fileContent === null ? 'Nothing for now' : fileContent,
         securityrev: [],
         logicrev: [],
         testcases: [],
@@ -52,7 +80,7 @@ export function NewSubmissionDialog({ projectId }) {
       console.error('Error details:', error.response?.data); // More detailed error
       setError(
         `Failed to create new submission: ${
-          err.response?.data?.error || err.message
+          error.response?.data?.error || error.message
         }`,
       );
     }

@@ -24,8 +24,9 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
-export default function FileTree({ tree }) {
-  console.log(tree);
+export default function FileTree({ tree, onFileSelectFromFileTree }) {
+  console.log("Printing file tree", tree);
+
   return (
     <div className="flex flex-col text-sm">
       {' '}
@@ -45,9 +46,9 @@ export default function FileTree({ tree }) {
               )}
               {Object.entries(tree).map(([key, value]) =>
                 value.type === 'folder' ? (
-                  <Folder folder={value} index={key} />
+                  <Folder folder={value} index={key} onFileSelect={onFileSelectFromFileTree}/>
                 ) : (
-                  <File file={value} index={key} />
+                  <File file={value} index={key} onFileSelect={onFileSelectFromFileTree} />
                 ),
               )}
             </SidebarMenu>
@@ -58,7 +59,7 @@ export default function FileTree({ tree }) {
   );
 }
 
-function Folder({ folder, index }) {
+function Folder({ folder, index, onFileSelect }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
@@ -78,9 +79,9 @@ function Folder({ folder, index }) {
           <CollapsibleContent key={key}>
             <SidebarMenuSub>
               {value.type === 'folder' ? (
-                <Folder folder={value} index={key} />
+                <Folder folder={value} index={key} onFileSelect={onFileSelect}/>
               ) : (
-                <File file={value} index={key} />
+                <File file={value} index={key} onFileSelect={onFileSelect} />
               )}
             </SidebarMenuSub>
           </CollapsibleContent>
@@ -90,9 +91,9 @@ function Folder({ folder, index }) {
   );
 }
 
-function File({ file, index }) {
+function File({ file, index, onFileSelect }) {
   return (
-    <SidebarMenuItem key={index}>
+    <SidebarMenuItem key={index} onClick={() => onFileSelect(file)}>
       <SidebarMenuButton>
         <FileCode />
         {file.name}

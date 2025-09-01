@@ -26,7 +26,7 @@ function FileTabBar({
         ...style,
       }}
       className={cn(
-        'flex h-8 w-full bg-accent/10 border border-border overflow-x-auto',
+        'flex h-8 w-full bg-accent/10 border border-border overflow-x-auto overflow-y-hidden',
         'rounded-t-lg p-0.5',
         className,
       )}

@@ -7,6 +7,7 @@ import {
 import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
+import ReviewModal from '../ai-review-panel/ReviewModal';
 
 export default function ResizableCodeEditor({ tree }) {
   const [openFiles, setOpenFiles] = useState([]);
@@ -100,6 +101,10 @@ export default function ResizableCodeEditor({ tree }) {
           onSwitchTab={switchTab}
         />
         <FileTabContent activeFile={activeFile} isDarkTheme={false} />
+      </ResizablePanel>
+      <ResizableHandle />
+       <ResizablePanel>
+        <ReviewModal />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

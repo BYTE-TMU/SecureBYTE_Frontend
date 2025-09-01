@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -6,21 +6,105 @@ import {
 } from '../../ui/resizable';
 import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
-import { FileTab } from '../../ui/filetab';
+import { FileTabBar, FileTabContent } from '../../ui/file-tab';
+import ReviewModal from '../ai-review-panel/ReviewModal';
 
 export default function ResizableCodeEditor({ tree }) {
+  const [openFiles, setOpenFiles] = useState([]);
+  const [activeFile, setActiveFile] = useState(null);
+
+  const openNewFile = (targetFile) => {
+    console.log('Current open files', openFiles);
+    console.log('About to open a file in the FileTabBar...');
+    // Check if the file is already open
+    // TODO: Consider generating a unique ID for every file
+    const existingFile = openFiles.find(
+      (file) => file.name === targetFile.name,
+    );
+
+    // If yes, switch that file to active
+    if (!existingFile) {
+      setOpenFiles((prevFiles) => [...prevFiles, targetFile]); // Add the target file to the array of currently-open files
+    }
+
+    setActiveFile(targetFile);
+  };
+
+  const closeFile = (targetFileName) => {
+    const existingFile = openFiles.find((file) => file.name === targetFileName);
+
+    if (existingFile) {
+      // Remove the file from the array of currently-open files
+      console.log('Closing file from FileTabBar');
+      setOpenFiles((prevFiles) => {
+        const updatedFiles = prevFiles.filter(
+          (file) => file.name !== targetFileName,
+        );
+
+        if (activeFile && activeFile.name === targetFileName) {
+          if (updatedFiles.length > 0) {
+            const lastOpenedFile = updatedFiles[updatedFiles.length - 1];
+            setActiveFile(lastOpenedFile);
+          } else {
+            setActiveFile(null);
+          }
+        }
+        return updatedFiles;
+      });
+    }
+  };
+
+  const switchTab = (targetFile) => {
+    console.log('Switching the tab in FileTabBar... ');
+    const existingFile = openFiles.find(
+      (file) => file.name === targetFile.name,
+    );
+
+    // If the file is currently open, set it to be active
+    if (existingFile) {
+      setActiveFile(targetFile);
+    }
+  };
+
+  // TODO: Save file content to backend when users close the file tab
+  const updateFileContent = (targetFile, newContent) => {
+    // Check if the file is currently open
+    const existingFile = openFiles.find((file) => file.id === targetFile.id);
+
+    if (existingFile) {
+      setOpenFiles((prevFiles) =>
+        prevFiles.map((file) =>
+          file.id === targetFile.id ? { ...file, content: newContent } : file,
+        ),
+      );
+    }
+  };
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
       className="border rounded-lg w-full"
     >
       <ResizablePanel defaultSize={20}>
-        <FileTree tree={tree} />{' '}
+        <FileTree
+          tree={tree}
+          onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
+        />{' '}
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel className="h-screen">
-        <FileTab className="border w-full border-none rounded-none" />
-        <CodeEditor />
+        <FileTabBar
+          openFiles={openFiles}
+          activeFile={activeFile}
+          onOpenFile={openNewFile}
+          onCloseFile={closeFile}
+          onSwitchTab={switchTab}
+        />
+        <FileTabContent activeFile={activeFile} isDarkTheme={false} />
+      </ResizablePanel>
+      <ResizableHandle />
+       <ResizablePanel>
+        <ReviewModal />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

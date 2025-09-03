@@ -103,7 +103,7 @@ export default function ResizableCodeEditor({ tree }) {
         <FileTabContent activeFile={activeFile} isDarkTheme={false} />
       </ResizablePanel>
       <ResizableHandle />
-       <ResizablePanel>
+       <ResizablePanel defaultSize={25}>
         <ReviewModal />
       </ResizablePanel>
     </ResizablePanelGroup>

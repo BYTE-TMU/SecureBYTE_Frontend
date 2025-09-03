@@ -11,7 +11,7 @@ export default function NavigationBar() {
   // { isSignedIn }
   return user ? (
     <nav className="w-screen h-16 bg-secure-blue z-11 flex flex-row justify-between p-5 items-center fixed">
-      <img src={whiteLogo} className="h-6"></img>
+      <img src={whiteLogo} className="h-9"></img>
       <div className="flex gap-7">
         <Button
           type="button"

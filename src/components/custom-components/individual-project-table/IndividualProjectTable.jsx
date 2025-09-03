@@ -50,10 +50,10 @@ export default function IndividualProjectTable({ columns, data }) {
 
   return (
     <div>
+      <h2 className='font-bold text-3xl mt-6 text-primary'>Analysis History</h2>
+      <p className='mb-1'>All AI-generated analysis you've generated on this project</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <NewSubmissionDialog projectId={projectId} />
-          <SubmissionDialog />
           <Input
             placeholder="Filter files..."
             value={table.getColumn('filename')?.getFilterValue() ?? ''}

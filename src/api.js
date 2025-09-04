@@ -19,10 +19,20 @@ export const updateProject = (userId, projectId, project) =>
   });
 export const deleteProject = (userId, projectId) =>
   axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
-export const getProjectById = (userId, projectId) =>
+export const getProject = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 
-// Submissions API - matching your backend exactly
+// AI Review API
+export const getSecurityReview = (userId, projectId) =>
+  axios.post(
+    `${API_URL}/users/${userId}/projects/${projectId}/security-review`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+// File submissions API - matching your backend exactly
 export const getSubmissions = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}/submissions`);
 export const createSubmission = (userId, projectId, submission) =>

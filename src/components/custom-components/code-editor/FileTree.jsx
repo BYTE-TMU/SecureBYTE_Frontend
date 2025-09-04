@@ -16,6 +16,7 @@ import {
   FilePlus,
   FolderCode,
   FolderPlus,
+  ShieldCheck
 } from 'lucide-react';
 
 import {

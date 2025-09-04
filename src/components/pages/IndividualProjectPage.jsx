@@ -20,6 +20,7 @@ import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import React, { useState, useEffect } from 'react';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
+import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
 
 export default function IndividualProjectPage() {
   let { projectId } = useParams();
@@ -169,26 +170,31 @@ export default function IndividualProjectPage() {
     }
   };
 
+  const openSecurityReviewPanel = () => {
+    console.log("Open Security Review Panel..."); 
+  }
+
   console.log(`inside indiv project: ${projectId}`);
   console.log(submissions.map((submission) => submission.filename));
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       {/* TODO: Fetch project name as title */}
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
-      {hasGithubToken && (
-        <div className="mt-4">
+      <div className="my-3 flex gap-2">
+        {hasGithubToken && (
           <Button onClick={openRepoDialog} className="bg-secure-orange">
             Link GitHub Repository
           </Button>
-        </div>
-      )}
+        )}
+        <GenerateSecurityReviewSheet submissions={submissions} projectId={projectId}/>
+      </div>
       {submissionsError ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
       ) : null}
       <Dialog open={isRepoDialogOpen} onOpenChange={setIsRepoDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Link your GitHub repository</DialogTitle>
+            <DialogTitle>Link your GitHub Repository</DialogTitle>
             <DialogDescription>
               Select a repository and optionally a branch to link or import
               files.

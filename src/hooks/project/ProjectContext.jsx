@@ -4,7 +4,7 @@ import {
   getProjects,
   createProject,
   deleteProject,
-  getProjectById,
+  getProject
 } from '@/api';
 
 const ProjectContext = createContext();
@@ -44,7 +44,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
   const fetchProjectById = async ({ projectId }) => {
     try {
       setLoading(true);
-      const response = await getProjectById(user.uid, projectId);
+      const response = await getProject(user.uid, projectId);
       setSingleProject(response.data);
       setFetchError('');
     } catch (err) {
@@ -159,6 +159,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         user,
         loading,
         projects,
+        singleProject,
         fetchProjects,
         fetchProjectById,
         fetchError,

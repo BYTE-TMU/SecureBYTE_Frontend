@@ -50,8 +50,8 @@ export default function IndividualProjectTable({ columns, data }) {
 
   return (
     <div>
-      <h2 className='font-bold text-3xl mt-6 text-primary'>Analysis History</h2>
-      <p className='mb-1'>All AI-generated analysis you've generated on this project</p>
+      <h2 className='font-bold text-3xl mt-6 text-primary'>Review History</h2>
+      <p className='mb-1'>All AI-generated review(s) you've generated on this project</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Input

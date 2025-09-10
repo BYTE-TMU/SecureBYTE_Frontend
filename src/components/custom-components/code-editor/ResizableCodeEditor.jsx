@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -9,15 +9,20 @@ import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
 
-export default function ResizableCodeEditor({ tree }) {
+export default function ResizableCodeEditor({ tree, securityReview }) {
   const [openFiles, setOpenFiles] = useState([]);
   const [activeFile, setActiveFile] = useState(null);
+
+  useEffect(() => {
+  if (activeFile) {
+    console.log("Active file updated:", activeFile);
+  }
+}, [activeFile]);
 
   const openNewFile = (targetFile) => {
     console.log('Current open files', openFiles);
     console.log('About to open a file in the FileTabBar...');
     // Check if the file is already open
-    // TODO: Consider generating a unique ID for every file
     const existingFile = openFiles.find(
       (file) => file.name === targetFile.name,
     );
@@ -26,6 +31,8 @@ export default function ResizableCodeEditor({ tree }) {
     if (!existingFile) {
       setOpenFiles((prevFiles) => [...prevFiles, targetFile]); // Add the target file to the array of currently-open files
     }
+
+    console.log(targetFile); 
 
     setActiveFile(targetFile);
   };
@@ -64,6 +71,8 @@ export default function ResizableCodeEditor({ tree }) {
     if (existingFile) {
       setActiveFile(targetFile);
     }
+
+    console.log("Currently active file", activeFile); 
   };
 
   // TODO: Save file content to backend when users close the file tab
@@ -79,6 +88,10 @@ export default function ResizableCodeEditor({ tree }) {
       );
     }
   };
+
+  const deleteFile = (targetFile) => {
+    
+  }
 
   return (
     <ResizablePanelGroup
@@ -104,7 +117,7 @@ export default function ResizableCodeEditor({ tree }) {
       </ResizablePanel>
       <ResizableHandle />
        <ResizablePanel defaultSize={25}>
-        <ReviewModal />
+        <ReviewModal securityReview={securityReview}/>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

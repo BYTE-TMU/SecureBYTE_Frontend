@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5000/';
+const API_URL = 'http://127.0.0.1:5000';
 
 // Configure axios defaults
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -26,6 +26,24 @@ export const getProject = (userId, projectId) =>
 export const getSecurityReview = (userId, projectId) =>
   axios.post(
     `${API_URL}/users/${userId}/projects/${projectId}/security-review`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+export const getLogicReview = (userId, submissionId) =>
+  axios.post(
+    `${API_URL}/users/${userId}/submissions/${submissionId}/logic-review`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+export const getTestCases= (userId, submissionId) =>
+  axios.post(
+    `${API_URL}/users/${userId}/submissions/${submissionId}/testing-review`,
     {},
     {
       headers: { 'Content-Type': 'application/json' },

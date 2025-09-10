@@ -28,6 +28,7 @@ export default function IndividualProjectPage() {
   const { user } = useAuth();
   const { tree } = useGetFileStructure(projectId);
   const [projectName, setProjectName] = useState('');
+  const [securityReview, setSecurityReview] = useState(''); 
 
   console.log(tree);
   //github repo dialog
@@ -186,7 +187,7 @@ export default function IndividualProjectPage() {
             Link GitHub Repository
           </Button>
         )}
-        <GenerateSecurityReviewSheet submissions={submissions} projectId={projectId}/>
+        <GenerateSecurityReviewSheet submissions={submissions} projectId={projectId} setSecurityReview={setSecurityReview}/>
       </div>
       {submissionsError ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
@@ -245,7 +246,7 @@ export default function IndividualProjectPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ResizableCodeEditor tree={tree} />
+      <ResizableCodeEditor tree={tree} securityReview={securityReview}/>
       <IndividualProjectTable columns={columns} data={submissions} />
     </main>
   );

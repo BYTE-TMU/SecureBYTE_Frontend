@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useState } from 'react';
 import {
   Sheet,
   SheetClose,
@@ -14,37 +14,41 @@ import { useProject } from '../../hooks/project/ProjectContext';
 import { getSecurityReview } from '@/api';
 import { useAuth } from '@/hooks/auth/AuthContext';
 
-export default function GenerateSecurityReviewSheet({ submissions, projectId }) {
-  const { fetchProjectById, singleProject } = useProject(); 
-  const { user } = useAuth(); 
-  const [projectFiles, setProjectFiles] = useState([]); 
-  const [securityReview, setSecurityReview] = useState(null); 
-  const [error, setError] = useState(''); 
-  const [projectName, setProjectName] = useState(''); 
+export default function GenerateSecurityReviewSheet({
+  submissions,
+  projectId,
+  setSecurityReview,
+}) {
+  const { fetchProjectById, singleProject } = useProject();
+  const { user } = useAuth();
+  const [projectFiles, setProjectFiles] = useState([]);
+  const [error, setError] = useState('');
+  const [projectName, setProjectName] = useState('');
 
   useEffect(() => {
-    setProjectFiles(submissions.map((submission) => submission.filename)); 
-
-  }, [submissions])
+    setProjectFiles(submissions.map((submission) => submission.filename));
+  }, [submissions]);
 
   const handleGenerateReview = async () => {
-    console.log("Start generating review"); 
+    //TODO: Save project to backend first, then generate review (2 calls in a row)
+    console.log('SECURITY REVIEW: Start generating review...');
 
     // Call to the backend
     try {
-      const response = await getSecurityReview(user.uid, projectId); 
-      // setSecurityReview(response.data); 
-      setError(''); 
+      const response = await getSecurityReview(user.uid, projectId);
+      // setSecurityReview(response.data);
+      setError('');
       console.log(response.data); // Debug log
 
+      // Display review to users
+      setSecurityReview(response.data.response);
     } catch (err) {
-      setError(err.response?.data?.error || err.message); 
+      setError(err.response?.data?.error || err.message);
       console.error(
-          `Failed to generate security review: ${err.response?.data?.error || err.message}`,
+        `Failed to generate security review: ${err.response?.data?.error || err.message}`,
       );
     }
-    // Display review to users 
-  }
+  };
 
   return (
     <Sheet>
@@ -54,12 +58,16 @@ export default function GenerateSecurityReviewSheet({ submissions, projectId }) 
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Security Review for [LATER: project_name]</SheetTitle>
-          <SheetDescription>Receive AI-generated security review for this project</SheetDescription>
+          <SheetDescription>
+            Receive AI-generated security review for this project
+          </SheetDescription>
         </SheetHeader>
-        <div className='px-5 h-[70%]'>
-          <p className='font-bold'>The AI model will run a security review on the following files: </p>
-          <div className='p-2 h-[90%] overflow-y-scroll border-2'>
-            <ul className='list-disc pl-5'>
+        <div className="px-5 h-[70%]">
+          <p className="font-bold">
+            The AI model will run a security review on the following files:{' '}
+          </p>
+          <div className="p-2 h-[90%] overflow-y-scroll border-2">
+            <ul className="list-disc pl-5">
               {projectFiles.map((filename, index) => (
                 <li key={index}>{filename}</li>
               ))}
@@ -67,17 +75,21 @@ export default function GenerateSecurityReviewSheet({ submissions, projectId }) 
           </div>
         </div>
         <SheetFooter>
-           <Button className="hover:cursor-pointer" onClick={handleGenerateReview}>
+          <SheetClose asChild>
+            <Button
+              className="hover:cursor-pointer"
+              onClick={handleGenerateReview}
+            >
               Generate Review
             </Button>
-            <SheetClose asChild>
-              <Button variant="outline" className="w-full hover:cursor-pointer">
-                Cancel
-              </Button>
-            </SheetClose>
+          </SheetClose>
+          <SheetClose asChild>
+            <Button variant="outline" className="w-full hover:cursor-pointer">
+              Cancel
+            </Button>
+          </SheetClose>
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
-
+  );
 }

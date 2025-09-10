@@ -47,17 +47,15 @@ export const columns = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               //TODO: add delete submission
               onClick={() => navigator.clipboard.writeText(submission.id)}
             >
               Delete Submission
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DeleteSubmissionAlert submission={submission} />
             <DropdownMenuSeparator />
             <EditSubmissionSheet submission={submission} />
-            <DropdownMenuItem>Edit Submission</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

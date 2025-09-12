@@ -8,10 +8,17 @@ import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
+import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
-export default function ResizableCodeEditor({ tree, securityReview }) {
-  const [openFiles, setOpenFiles] = useState([]);
-  const [activeFile, setActiveFile] = useState(null);
+export default function ResizableCodeEditor({ 
+  tree, 
+  securityReview, 
+  openFiles, 
+  setOpenFiles, 
+  activeFile, 
+  setActiveFile, 
+}) {
+  const { trackFileUpdate } = useUpdateFiles(); 
 
   useEffect(() => {
   if (activeFile) {
@@ -76,17 +83,25 @@ export default function ResizableCodeEditor({ tree, securityReview }) {
   };
 
   // TODO: Save file content to backend when users close the file tab
-  const updateFileContent = (targetFile, newContent) => {
+  const updateFileContent = ({ targetFile, newContent }) => {
     // Check if the file is currently open
     const existingFile = openFiles.find((file) => file.id === targetFile.id);
 
     if (existingFile) {
+      // Update activeFile content
+      setActiveFile({...targetFile, content: newContent}); 
       setOpenFiles((prevFiles) =>
         prevFiles.map((file) =>
           file.id === targetFile.id ? { ...file, content: newContent } : file,
         ),
       );
+
+      // Save to sessionStorage 
+      trackFileUpdate({fileId: targetFile.id, fileName: targetFile.name, code: newContent}); 
     }
+
+    console.log("Active file's content is updated:", targetFile.content); 
+    console.log("CURRENTLY OPEN FILES", openFiles); 
   };
 
   const deleteFile = (targetFile) => {
@@ -113,7 +128,11 @@ export default function ResizableCodeEditor({ tree, securityReview }) {
           onCloseFile={closeFile}
           onSwitchTab={switchTab}
         />
-        <FileTabContent activeFile={activeFile} isDarkTheme={false} />
+        <FileTabContent 
+          activeFile={activeFile} 
+          isDarkTheme={false}
+          onEditorChange={updateFileContent}
+        />
       </ResizablePanel>
       <ResizableHandle />
        <ResizablePanel defaultSize={25}>

@@ -4,7 +4,8 @@ import {
   getProjects,
   createProject,
   deleteProject,
-  getProject
+  getProject, 
+  saveProject
 } from '@/api';
 
 const ProjectContext = createContext();
@@ -153,6 +154,28 @@ export function ProjectProvider({ children, autoFetch = false }) {
     return projectFiles[projectId] || [];
   };
 
+  const saveProjectToBackend = async ({ projectId, updatedFilesArr}) => {
+    console.log("Calling saveProjectToBackend..."); 
+
+    setLoading(true); 
+
+    try {
+      const response = await saveProject(user.uid, projectId, updatedFilesArr); 
+      console.log("Successfully save project to Backend: ", response.data); 
+      setFetchError('');
+
+      return response.data; 
+    } catch (err) {
+      console.error(
+        `Failed to save project: ${err.response?.data?.error || err.message}`,
+      );
+      throw new Error(`Failed to save project with id ${projectId}`);
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <ProjectContext.Provider
       value={{
@@ -168,6 +191,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         createNewProject,
         deleteOneProject,
         deleteProjectInBulk,
+        saveProjectToBackend
       }}
     >
       {children}

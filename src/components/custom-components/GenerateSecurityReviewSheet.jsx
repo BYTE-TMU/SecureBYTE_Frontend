@@ -13,41 +13,60 @@ import { Button } from '../ui/button';
 import { useProject } from '../../hooks/project/ProjectContext';
 import { getSecurityReview } from '@/api';
 import { useAuth } from '@/hooks/auth/AuthContext';
+import { updateCurrentUser } from 'firebase/auth';
+import { useUpdateFiles} from '@/hooks/useUpdateFiles';
 
 export default function GenerateSecurityReviewSheet({
   submissions,
   projectId,
   setSecurityReview,
+  projectName,
+  openFiles
 }) {
-  const { fetchProjectById, singleProject } = useProject();
   const { user } = useAuth();
   const [projectFiles, setProjectFiles] = useState([]);
-  const [error, setError] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [error, setError] = useState(''); 
+  const { saveProjectToBackend } = useProject(); 
+  const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles(); 
 
   useEffect(() => {
     setProjectFiles(submissions.map((submission) => submission.filename));
   }, [submissions]);
 
   const handleGenerateReview = async () => {
-    //TODO: Save project to backend first, then generate review (2 calls in a row)
-    console.log('SECURITY REVIEW: Start generating review...');
+    // STEP 1: Save current project to backend
+    console.log('SECURITY REVIEW: Start saving project to backend...'); 
+    const updatedFiles = getUpdatedFiles();
+    console.log("Updated files array to be sent to Backend", updatedFiles); 
 
-    // Call to the backend
     try {
-      const response = await getSecurityReview(user.uid, projectId);
-      // setSecurityReview(response.data);
-      setError('');
-      console.log(response.data); // Debug log
+      const response = await saveProjectToBackend({ projectId: projectId, updatedFilesArr: updatedFiles })
+      console.log("Save project before security review:", response.data); 
+      setError(''); 
 
-      // Display review to users
-      setSecurityReview(response.data.response);
-    } catch (err) {
+    } catch(err) {
       setError(err.response?.data?.error || err.message);
       console.error(
-        `Failed to generate security review: ${err.response?.data?.error || err.message}`,
+        `Failed to save project to database: ${err.response?.data?.error || err.message}`,
       );
     }
+
+    // Step 2: Generate security review by calling backend
+    // console.log('SECURITY REVIEW: Start generating review...');
+    // try {
+    //   const response = await getSecurityReview(user.uid, projectId);
+    //   // setSecurityReview(response.data);
+    //   setError('');
+    //   console.log(response.data); // Debug log
+
+    //   // Display review to users
+    //   setSecurityReview(response.data.response);
+    // } catch (err) {
+    //   setError(err.response?.data?.error || err.message);
+    //   console.error(
+    //     `Failed to generate security review: ${err.response?.data?.error || err.message}`,
+    //   );
+    // }
   };
 
   return (
@@ -57,7 +76,7 @@ export default function GenerateSecurityReviewSheet({
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Security Review for [LATER: project_name]</SheetTitle>
+          <SheetTitle>Security Review for {projectName} project</SheetTitle>
           <SheetDescription>
             Receive AI-generated security review for this project
           </SheetDescription>

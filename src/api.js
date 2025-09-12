@@ -22,6 +22,13 @@ export const deleteProject = (userId, projectId) =>
 export const getProject = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 
+export const saveProject = (userId, projectId, updatedFilesArr) => 
+  axios.put(`${API_URL}/users/${userId}/projects/${projectId}/save`, updatedFilesArr, {
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+// '/users/<user_id>/projects/<project_id>/save'
+
 // AI Review API
 export const getSecurityReview = (userId, projectId) =>
   axios.post(

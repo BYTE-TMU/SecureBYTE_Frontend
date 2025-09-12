@@ -1,6 +1,6 @@
 import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
-import { useParams } from 'react-router';
+import { useParams, useLocation } from 'react-router';
 import { useGetSubmissions } from '@/hooks/useGetSubmissions';
 import { toast } from 'sonner';
 import { useProject } from '../../hooks/project/ProjectContext';
@@ -27,8 +27,9 @@ export default function IndividualProjectPage() {
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
   const { tree } = useGetFileStructure(projectId);
-  const [projectName, setProjectName] = useState('');
-  const [securityReview, setSecurityReview] = useState(''); 
+  const [securityReview, setSecurityReview] = useState('');
+  const location = useLocation(); 
+  const projectName = location.state?.projectName;  
 
   console.log(tree);
   //github repo dialog
@@ -40,6 +41,9 @@ export default function IndividualProjectPage() {
   const [repoError, setRepoError] = useState('');
   const [isWorking, setIsWorking] = useState(false);
 
+  const [openFiles, setOpenFiles] = useState([]);
+  const [activeFile, setActiveFile] = useState(null);
+
   useEffect(() => {
     if (!projectId) {
       console.log('Missing projectId');
@@ -50,7 +54,7 @@ export default function IndividualProjectPage() {
       console.log(projectId);
       try {
         const projectData = await fetchProjectById({ projectId });
-        console.log(`Printing project data: ${projectData}`);
+        console.log(`Printing project data from IndividualProjectPage: ${projectData}`);
         // setProjectName(projectData['project_name']);
       } catch (err) {
         console.error(
@@ -171,15 +175,10 @@ export default function IndividualProjectPage() {
     }
   };
 
-  const openSecurityReviewPanel = () => {
-    console.log("Open Security Review Panel..."); 
-  }
-
   console.log(`inside indiv project: ${projectId}`);
   console.log(submissions.map((submission) => submission.filename));
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
-      {/* TODO: Fetch project name as title */}
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
       <div className="my-3 flex gap-2">
         {hasGithubToken && (
@@ -187,7 +186,12 @@ export default function IndividualProjectPage() {
             Link GitHub Repository
           </Button>
         )}
-        <GenerateSecurityReviewSheet submissions={submissions} projectId={projectId} setSecurityReview={setSecurityReview}/>
+        <GenerateSecurityReviewSheet 
+          submissions={submissions} 
+          projectId={projectId} 
+          setSecurityReview={setSecurityReview}
+          projectName={projectName}
+        />
       </div>
       {submissionsError ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
@@ -246,8 +250,18 @@ export default function IndividualProjectPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ResizableCodeEditor tree={tree} securityReview={securityReview}/>
-      <IndividualProjectTable columns={columns} data={submissions} />
+      <ResizableCodeEditor 
+        tree={tree} 
+        securityReview={securityReview}
+        openFiles={openFiles}
+        setOpenFiles={setOpenFiles}
+        activeFile={activeFile}
+        setActiveFile={setActiveFile}
+      />
+      <IndividualProjectTable 
+        columns={columns} 
+        data={submissions} 
+      />
     </main>
   );
 }

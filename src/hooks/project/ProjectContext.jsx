@@ -155,16 +155,13 @@ export function ProjectProvider({ children, autoFetch = false }) {
   };
 
   const saveProjectToBackend = async ({ projectId, updatedFilesArr}) => {
-    console.log("Calling saveProjectToBackend..."); 
-
     setLoading(true); 
 
     try {
       const response = await saveProject(user.uid, projectId, updatedFilesArr); 
-      console.log("Successfully save project to Backend: ", response.data); 
+      console.log("Successfully save project to Backend: ", response.data); // Debug log
       setFetchError('');
 
-      return response.data; 
     } catch (err) {
       console.error(
         `Failed to save project: ${err.response?.data?.error || err.message}`,

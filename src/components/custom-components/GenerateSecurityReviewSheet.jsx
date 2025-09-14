@@ -39,34 +39,35 @@ export default function GenerateSecurityReviewSheet({
     const updatedFiles = getUpdatedFiles();
     console.log("Updated files array to be sent to Backend", updatedFiles); 
 
-    try {
-      const response = await saveProjectToBackend({ projectId: projectId, updatedFilesArr: updatedFiles })
-      console.log("Save project before security review:", response.data); 
-      setError(''); 
-
-    } catch(err) {
-      setError(err.response?.data?.error || err.message);
-      console.error(
-        `Failed to save project to database: ${err.response?.data?.error || err.message}`,
-      );
-    }
-
-    // Step 2: Generate security review by calling backend
-    // console.log('SECURITY REVIEW: Start generating review...');
     // try {
-    //   const response = await getSecurityReview(user.uid, projectId);
-    //   // setSecurityReview(response.data);
-    //   setError('');
-    //   console.log(response.data); // Debug log
+    //   const response = await saveProjectToBackend({ projectId: projectId, updatedFilesArr: updatedFiles })
+    //   console.log("Save project before security review:", response); 
+    //   setError(''); 
 
-    //   // Display review to users
-    //   setSecurityReview(response.data.response);
-    // } catch (err) {
+    //   // Clear updates in sessionStorage
+    //   clearAllUpdates(); 
+
+    // } catch(err) {
     //   setError(err.response?.data?.error || err.message);
     //   console.error(
-    //     `Failed to generate security review: ${err.response?.data?.error || err.message}`,
+    //     `Failed to save project to database: ${err.response?.data?.error || err.message}`,
     //   );
     // }
+
+    // Step 2: Generate security review by calling backend
+    console.log('SECURITY REVIEW: Start generating review...');
+    try {
+      const response = await getSecurityReview(user.uid, projectId);
+      setError('');
+
+      // Display review to users
+      setSecurityReview(response.data.response);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+      console.error(
+        `Failed to generate security review: ${err.response?.data?.error || err.message}`,
+      );
+    }
   };
 
   return (

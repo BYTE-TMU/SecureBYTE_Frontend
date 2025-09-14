@@ -136,7 +136,7 @@ export default function ResizableCodeEditor({
       </ResizablePanel>
       <ResizableHandle />
        <ResizablePanel defaultSize={25}>
-        <ReviewModal securityReview={securityReview}/>
+        <ReviewModal activeFile={activeFile} securityReview={securityReview}/>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

@@ -34,6 +34,8 @@ export default function LogicAnalysisPanel({ activeFile }) {
     try {
       // Send test file to backend for logic review
       console.log("LOGIC REVIEW: About to call backend..."); 
+      console.log("LOGIC REVIEW: Current active file", activeFile);
+
       const response = await getLogicReview(user.uid, activeFile.id);
 
       console.log("LOGIC REVIEW: Receive data from backend"); 
@@ -213,8 +215,8 @@ export default function LogicAnalysisPanel({ activeFile }) {
         description:
           `Failed to generate logic analysis. Please try again later.`,
       });
-      setError(err.response?.data?.error || error.message);
-      console.error(`Error generating logic analysis: ${error}`);
+      setError(err.response?.data?.error || err.message);
+      console.error(`Error generating logic analysis: ${err}`);
     
     } finally {
       setLoading(false);

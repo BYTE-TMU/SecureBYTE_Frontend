@@ -22,12 +22,14 @@ export const deleteProject = (userId, projectId) =>
 export const getProject = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 
-export const saveProject = (userId, projectId, updatedFilesArr) => 
-  axios.put(`${API_URL}/users/${userId}/projects/${projectId}/save`, updatedFilesArr, {
-    headers: { 'Content-Type': 'application/json' },
-  })
-
-// '/users/<user_id>/projects/<project_id>/save'
+export const saveProject = (userId, projectId, updatedFilesArr) =>
+  axios.put(
+    `${API_URL}/users/${userId}/projects/${projectId}/save`,
+    updatedFilesArr,
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 
 // AI Review API
 export const getSecurityReview = (userId, projectId) =>
@@ -39,19 +41,19 @@ export const getSecurityReview = (userId, projectId) =>
     },
   );
 
-export const getLogicReview = (userId, submissionId) =>
+export const getLogicReview = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/logic-review`,
-    {},
+    activeFile, 
     {
       headers: { 'Content-Type': 'application/json' },
     },
   );
 
-export const getTestCases= (userId, submissionId) =>
+export const getTestCases = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/testing-review`,
-    {},
+    activeFile, 
     {
       headers: { 'Content-Type': 'application/json' },
     },

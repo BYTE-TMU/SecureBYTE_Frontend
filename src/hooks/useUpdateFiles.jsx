@@ -69,6 +69,9 @@ export const useUpdateFiles = () => {
   }, []);
 
   const getUpdatedFiles = useCallback(() => {
+    const storage = sessionStorage.getItem(STORAGE_KEY); 
+    const fileUpdates = storage ? JSON.parse(storage) : {};
+
     return Object.entries(fileUpdates).map(([fileId, file]) => {
       return {
         "fileid": fileId,
@@ -76,7 +79,7 @@ export const useUpdateFiles = () => {
         "code": file.code,
       };
     });
-  }, [fileUpdates]);
+  }, []);
 
   return {
     fileUpdates,

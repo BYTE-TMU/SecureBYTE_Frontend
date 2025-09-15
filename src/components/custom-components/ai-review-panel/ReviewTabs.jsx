@@ -7,7 +7,7 @@ import {
 import TestCasesSuggestionPanel from './TestCasesSuggestionPanel';
 import LogicSuggestionPanel from './LogicSuggestionPanel'; 
 
-export default function ReviewTabs({ activeFile, securityReview }) {
+export default function ReviewTabs({ activeFile, securityReview, projectId }) {
   return (
     <Tabs defaultValue="security" className="w-full">
       <TabsList>
@@ -19,10 +19,10 @@ export default function ReviewTabs({ activeFile, securityReview }) {
         <SecuritySuggestionPanel securityReview={securityReview}/>
       </TabsContent>
       <TabsContent value="logic" className="w-full">
-        <LogicSuggestionPanel activeFile={activeFile}/>
+        <LogicSuggestionPanel activeFile={activeFile} projectId={projectId}/>
       </TabsContent>
       <TabsContent value="test-cases" className="w-full">
-        <TestCasesSuggestionPanel activeFile={activeFile}/>
+        <TestCasesSuggestionPanel activeFile={activeFile} projectId={projectId}/>
       </TabsContent>
     </Tabs>
   );

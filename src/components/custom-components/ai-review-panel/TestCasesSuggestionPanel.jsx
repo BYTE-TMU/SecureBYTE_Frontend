@@ -13,18 +13,53 @@ import { toast } from 'sonner';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getTestCases } from '@/api';
+import { useUpdateFiles } from '@/hooks/useUpdateFiles';
+import { useProject } from '@/hooks/project/ProjectContext';
 
 // TODO: Save the currently active file to backend first, then generate the review. 
 
-export default function TestCasesSuggestionPanel({ activeFile }) {
+export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   const { user } = useAuth();
   const [error, setError] = useState('');
   const [testCases, setTestCases] = useState(new Set([]));
   const [testAvailable, setTestAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles();
+  const { saveProjectToBackend } = useProject();
+
+  const formatActiveFile = (activeFile) => {
+    return {
+      'fileid': activeFile.id, 
+      'filename': activeFile.name, 
+      'code': activeFile.content, 
+    }
+  }
 
   const handleGenerateTestCases = async () => {
-    //TODO: Save project to backend first, then generate review (2 calls in a row)
+    // STEP 1: Save project to backend 
+    const updatedFiles = getUpdatedFiles(); 
+
+    console.log("TEST CASES: Files sent to backend", updatedFiles); // Debug log
+    
+    if (updatedFiles && updatedFiles.length > 0) {
+      console.log('TEST CASES: Saving project to backend...');
+      try {
+        await saveProjectToBackend({
+          projectId: projectId,
+          updatedFilesArr: updatedFiles,
+        });
+        setError('');
+
+        clearAllUpdates(); // Clear updates in sessionStorage
+        console.log("Clear sessionStorage", sessionStorage); 
+      } catch (err) {
+        setError(err.response?.data?.error || err.message);
+        console.error(
+          `Failed to save project to database: ${err.response?.data?.error || err.message}`,
+        );
+      }
+    }
+
     
     console.log("TEST CASES: Start generating test cases..."); 
     // if (!user || !activeFile) return;
@@ -33,54 +68,20 @@ export default function TestCasesSuggestionPanel({ activeFile }) {
       setLoading(true);
       // Generate test cases with active test file 
       console.log("TEST CASES: About to call backend"); 
+      const formattedActiveFile = formatActiveFile(activeFile); 
 
-      const response = await getTestCases(user.uid, activeFile.id); 
+      const response = await getTestCases(user.uid, activeFile.id, formattedActiveFile); 
 
-      console.log("TEST CASES: Successfully retrieved from backend"); 
+      console.log("TEST CASES: Successfully calling backend"); 
 
-      // TODO: Format the code (from backend) with Prettier before displaying it
+      // TODO: Format test cases with Prettier before displaying it
 
-//       const sampleTestCases = { 
-//         'Integration test': new Set([
-//           `test('should successfully authenticate user with valid credentials and return user profile with token', async () => {
-//     // Arrange
-//     const testUser = {
-//       username: 'testuser@example.com',
-//       password: 'ComplexPassword123!',
-//       role: 'user',
-//       lastLogin: new Date('2025-08-21T10:00:00Z')
-//     };
-// });`,
-//           `test('testing now...', () => {
-//     console.log('Testing in progress');
-//     expect(true).toBe(true);
-// });`,
-//         ]),
-//         'Performance test': new Set([
-//           "test('should partial full error flow', () => {});",
-//           "test('should complete full error flow', () => {});",
-//         ]),
-//         'End-to-end test': new Set([
-//           "test('should test full error flow', () => {});",
-//           "test('should complete full error flow', () => {});",
-//         ]),
-//         'Database test': new Set([
-//           "test('should complete full error flow', () => {});",
-//           "test('should completely test full error flow', () => {});",
-//         ]),
-//         'Other tests': new Set([
-//           "test('should complete full error flow', () => {});",
-//           "test('should complete now full error flow', () => {});",
-//         ]),
-//       }; // Sample test cases (Data structure: {key: Set})
 
       console.log('TEST CASES:', response.data); 
       setTestCases(response.data);
 
       // Display test cases 
       setTestAvailable(true);
-
-      // Display 'Run All Tests' button
       setError(false); 
     } catch (err) {
       // Show error toast for failed generation of test cases.
@@ -89,7 +90,7 @@ export default function TestCasesSuggestionPanel({ activeFile }) {
           `Failed to generate test cases. Please try again later.`,
       });
       setError(err.response?.data?.error || err.message);
-      console.error(`Error generating test cases ${error}`);
+      console.error(`Error generating test cases ${err.response?.data?.error || err.message}`);
     } finally {
       // Set loading state to false
       setLoading(false); 

@@ -17,6 +17,7 @@ export default function ResizableCodeEditor({
   setOpenFiles, 
   activeFile, 
   setActiveFile, 
+  projectId
 }) {
   const { trackFileUpdate } = useUpdateFiles(); 
 
@@ -104,10 +105,6 @@ export default function ResizableCodeEditor({
     console.log("CURRENTLY OPEN FILES", openFiles); 
   };
 
-  const deleteFile = (targetFile) => {
-    
-  }
-
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -136,7 +133,11 @@ export default function ResizableCodeEditor({
       </ResizablePanel>
       <ResizableHandle />
        <ResizablePanel defaultSize={25}>
-        <ReviewModal activeFile={activeFile} securityReview={securityReview}/>
+        <ReviewModal 
+          activeFile={activeFile} 
+          securityReview={securityReview}
+          projectId={projectId}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

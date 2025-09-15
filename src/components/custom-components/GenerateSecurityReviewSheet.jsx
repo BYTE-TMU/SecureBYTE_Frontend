@@ -14,20 +14,19 @@ import { useProject } from '../../hooks/project/ProjectContext';
 import { getSecurityReview } from '@/api';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { updateCurrentUser } from 'firebase/auth';
-import { useUpdateFiles} from '@/hooks/useUpdateFiles';
+import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
 export default function GenerateSecurityReviewSheet({
   submissions,
   projectId,
   setSecurityReview,
   projectName,
-  openFiles
 }) {
   const { user } = useAuth();
   const [projectFiles, setProjectFiles] = useState([]);
-  const [error, setError] = useState(''); 
-  const { saveProjectToBackend } = useProject(); 
-  const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles(); 
+  const [error, setError] = useState('');
+  const { saveProjectToBackend } = useProject();
+  const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles();
 
   useEffect(() => {
     setProjectFiles(submissions.map((submission) => submission.filename));
@@ -35,33 +34,42 @@ export default function GenerateSecurityReviewSheet({
 
   const handleGenerateReview = async () => {
     // STEP 1: Save current project to backend
-    console.log('SECURITY REVIEW: Start saving project to backend...'); 
     const updatedFiles = getUpdatedFiles();
-    console.log("Updated files array to be sent to Backend", updatedFiles); 
+    console.log("SECURITY REVIEW: Files sent to backend", updatedFiles);
+    
+    if (updatedFiles && updatedFiles.length > 0) {
+      console.log('SECURITY REVIEW: Saving project to backend...');
+      try {
+        await saveProjectToBackend({
+          projectId: projectId,
+          updatedFilesArr: updatedFiles,
+        });
+        setError('');
 
-    // try {
-    //   const response = await saveProjectToBackend({ projectId: projectId, updatedFilesArr: updatedFiles })
-    //   console.log("Save project before security review:", response); 
-    //   setError(''); 
-
-    //   // Clear updates in sessionStorage
-    //   clearAllUpdates(); 
-
-    // } catch(err) {
-    //   setError(err.response?.data?.error || err.message);
-    //   console.error(
-    //     `Failed to save project to database: ${err.response?.data?.error || err.message}`,
-    //   );
-    // }
+        clearAllUpdates(); // Clear updates in sessionStorage
+        console.log("Clear sessionStorage", sessionStorage); 
+      } catch (err) {
+        setError(err.response?.data?.error || err.message);
+        console.error(
+          `Failed to save project to database: ${err.response?.data?.error || err.message}`,
+        );
+      }
+    }
 
     // Step 2: Generate security review by calling backend
-    console.log('SECURITY REVIEW: Start generating review...');
+    console.log('SECURITY REVIEW: Generate review...');
     try {
       const response = await getSecurityReview(user.uid, projectId);
       setError('');
 
       // Display review to users
       setSecurityReview(response.data.response);
+
+      console.log("Before clearing sessionStorage", sessionStorage); // Debug log
+      // Clear updated files in sessionStorage
+      clearAllUpdates();
+      console.log("After clearing sessionStorage", sessionStorage); // Debug log 
+
     } catch (err) {
       setError(err.response?.data?.error || err.message);
       console.error(

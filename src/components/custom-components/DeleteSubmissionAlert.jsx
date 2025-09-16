@@ -20,8 +20,10 @@ export function DeleteSubmissionAlert({ submission }) {
 
   const handleDeleteSubmission = async () => {
     if (!user || !submission.id) return;
+
     try {
       await deleteSubmission(user.uid, submission.id);
+      console.log(`Successfully delete submission: ${submission.id}`); 
       setError('');
     } catch (error) {
       console.error('Error deleting submission:', error);

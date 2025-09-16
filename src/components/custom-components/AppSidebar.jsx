@@ -11,7 +11,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '../ui/sidebar';
-import blackLogo from '../../assets/black-logo.svg';
 import {
   CirclePlus,
   CodeXml,
@@ -46,25 +45,8 @@ export default function AppSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-
               <SidebarMenuItem key={'Upload Files'}>
                 <GlobalFileSubmissionDialog />
-              </SidebarMenuItem>
-              <SidebarMenuItem key={'Upload History'}>
-                <SidebarMenuButton asChild>
-                  <Link to={'/upload-history'}>
-                    <History className="stroke-black" />
-                    <span className="text-primary">Upload History</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem key={'Code Editor'}>
-                <SidebarMenuButton asChild>
-                  <Link to={'/code-editor'}>
-                    <CodeXml className="stroke-black" />
-                    <span className="text-primary">Code Editor</span>
-                  </Link>
-                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

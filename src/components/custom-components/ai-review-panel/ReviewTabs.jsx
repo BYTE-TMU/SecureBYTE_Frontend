@@ -2,12 +2,12 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   SecuritySuggestionPanel,
-} from './SuggestionPanel';
+} from './SecuritySuggestionPanel';
 
 import TestCasesSuggestionPanel from './TestCasesSuggestionPanel';
 import LogicSuggestionPanel from './LogicSuggestionPanel'; 
 
-export default function ReviewTabs() {
+export default function ReviewTabs({ activeFile, securityReview, projectId }) {
   return (
     <Tabs defaultValue="security" className="w-full">
       <TabsList>
@@ -16,13 +16,13 @@ export default function ReviewTabs() {
         <TabsTrigger value="test-cases">Test Cases</TabsTrigger>
       </TabsList>
       <TabsContent value="security" className="w-full">
-        <SecuritySuggestionPanel />
+        <SecuritySuggestionPanel securityReview={securityReview}/>
       </TabsContent>
       <TabsContent value="logic" className="w-full">
-        <LogicSuggestionPanel />
+        <LogicSuggestionPanel activeFile={activeFile} projectId={projectId}/>
       </TabsContent>
       <TabsContent value="test-cases" className="w-full">
-        <TestCasesSuggestionPanel />
+        <TestCasesSuggestionPanel activeFile={activeFile} projectId={projectId}/>
       </TabsContent>
     </Tabs>
   );

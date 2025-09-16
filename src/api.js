@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5000/';
+const API_URL = 'http://127.0.0.1:5000';
 
 // Configure axios defaults
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -19,10 +19,47 @@ export const updateProject = (userId, projectId, project) =>
   });
 export const deleteProject = (userId, projectId) =>
   axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
-export const getProjectById = (userId, projectId) =>
+export const getProject = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 
-// Submissions API - matching your backend exactly
+export const saveProject = (userId, projectId, updatedFilesArr) =>
+  axios.put(
+    `${API_URL}/users/${userId}/projects/${projectId}/save`,
+    updatedFilesArr,
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+// AI Review API
+export const getSecurityReview = (userId, projectId) =>
+  axios.post(
+    `${API_URL}/users/${userId}/projects/${projectId}/security-review`,
+    {},
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+export const getLogicReview = (userId, submissionId, activeFile) =>
+  axios.post(
+    `${API_URL}/users/${userId}/submissions/${submissionId}/logic-review`,
+    activeFile, 
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+export const getTestCases = (userId, submissionId, activeFile) =>
+  axios.post(
+    `${API_URL}/users/${userId}/submissions/${submissionId}/testing-review`,
+    activeFile, 
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
+
+// File submissions API - matching your backend exactly
 export const getSubmissions = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}/submissions`);
 export const createSubmission = (userId, projectId, submission) =>

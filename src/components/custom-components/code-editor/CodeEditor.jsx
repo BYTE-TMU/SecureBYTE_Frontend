@@ -7,6 +7,7 @@ export default function CodeEditor({
   language = 'python', // Current default language is Python
   // TODO: Add dynamic language later
   onChange,
+  activeFile
 }) {
   const editorRef = useRef();
 
@@ -21,7 +22,7 @@ export default function CodeEditor({
       theme={isDarkTheme ? 'vs-dark' : 'vs-light'}
       language={language}
       value={value}
-      onChange={onChange}
+      onChange={(value) => onChange({ targetFile: activeFile, newContent: value})}
       onMount={onMount}
       options={{
         minimap: { enabled: false },

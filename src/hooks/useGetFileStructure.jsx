@@ -23,6 +23,7 @@ export function useGetFileStructure(projectId) {
           // This is a file because its the last part of the path
           currentLevel[part] = {
             type: 'file',
+            id: submission.id,
             name: part,
             path: submission.filename,
             content: submission.code,

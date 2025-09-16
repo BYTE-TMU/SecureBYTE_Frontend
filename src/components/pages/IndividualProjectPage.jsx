@@ -240,7 +240,7 @@ export default function IndividualProjectPage() {
         </DialogContent>
       </Dialog>
       <ResizableCodeEditor tree={tree} />
-      <IndividualProjectTable columns={columns} data={submissions} />
+      {/* <IndividualProjectTable columns={columns} data={submissions} /> */}
     </main>
   );
 }

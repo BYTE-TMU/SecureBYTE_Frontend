@@ -18,30 +18,42 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { FileUploadInput } from './FileUploadInput';
 import { useProject } from '../../hooks/project/ProjectContext';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router';
 
 export default function GlobalFileSubmissionDialog() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [files, setFiles] = useState([]);
 
-  const { createNewProject, setFilesForProject } = useProject();
+  const navigate = useNavigate();
 
+  const { createNewProject, setFilesForProject, createSubmissionForProject } =
+    useProject();
+
+  // Create a new project
   const prepareForAnalysis = async () => {
-    console.log('Files to upload', files);
+    try {
+      console.log('Files to upload', files);
 
-    // Create a new project
-    const newProject = await createNewProject({
-      newProjectName,
-      newProjectDesc,
-    });
-    const projectId = newProject.id;
+      const newProject = await createNewProject({
+        newProjectName,
+        newProjectDesc,
+      });
+      console.log(newProject.data);
+      const projectId = newProject.data.projectid;
+      console.log(projectId);
 
-    // Add uploaded files to the new project
-    setFilesForProject({ projectId, files });
+      // Add uploaded files to the new project
+      await createSubmissionForProject({ projectId, files });
+      // TODO: Show the project files in the IndividualProjectPage
 
-    // TODO: Show the project files in the IndividualProjectPage
-
-    // Redirect users to the code editor, with the new project open
+      navigate(0);
+      return toast('Project created successfully', { type: 'success' });
+      // Redirect users to the code editor, with the new project open
+    } catch (error) {
+      return toast(`Upload failed: ${error}`, { type: 'error' });
+    }
   };
 
   return (

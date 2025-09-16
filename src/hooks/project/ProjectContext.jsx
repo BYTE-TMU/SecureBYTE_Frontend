@@ -5,7 +5,9 @@ import {
   createProject,
   deleteProject,
   getProjectById,
+  createSubmission,
 } from '@/api';
+import { toast } from 'sonner';
 
 const ProjectContext = createContext();
 
@@ -138,7 +140,49 @@ export function ProjectProvider({ children, autoFetch = false }) {
       );
     }
   };
-  const createSubmissionForProject = { projectId };
+  const parseFileContent = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        console.log('File name', file.name);
+        console.log('File content', reader.result);
+        resolve(reader.result);
+      };
+
+      reader.onerror = (err) => {
+        console.error('Error reading file content', err);
+        reject(err);
+      };
+
+      try {
+        reader.readAsText(file);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
+  const createSubmissionForProject = ({ projectId, files }) => {
+    console.log('Calling createSubmissionForProject');
+    try {
+      files.map(async (file) => {
+        const fileContent = await parseFileContent(file);
+        await createSubmission(user.uid, projectId, {
+          filename: file.name,
+          code: fileContent === null ? 'Nothing for now' : fileContent,
+          securityRev: [],
+          logicRev: [],
+          testcases: [],
+          reviewpdf: '',
+        });
+      });
+
+      console.log('all files uplaoded');
+    } catch (error) {
+      console.log(`Failed to create new project ${error}`);
+    }
+  };
   const setFilesForProject = ({ projectId, files }) => {
     console.log('Calling setFilesForProject');
     console.log(files);
@@ -166,6 +210,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         createNewProject,
         deleteOneProject,
         deleteProjectInBulk,
+        createSubmissionForProject,
       }}
     >
       {children}

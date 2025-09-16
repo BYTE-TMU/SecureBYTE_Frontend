@@ -30,6 +30,7 @@ export default function LogicAnalysisPanel({ activeFile }) {
   // TODO: Save the currently active file to backend first, then generate the review. 
 
   const handleGenerateLogicAnalysis = async () => {
+    
     // STEP 1: Save updated files to backend
 
     
@@ -42,9 +43,8 @@ export default function LogicAnalysisPanel({ activeFile }) {
 
     try {
       // Send test file to backend for logic review
-      console.log("LOGIC REVIEW: About to call backend..."); 
       console.log("LOGIC REVIEW: Current active file", activeFile);
-
+      console.log("LOGIC REVIEW: About to call backend..."); 
       const response = await getLogicReview(user.uid, activeFile.id, activeFile);
 
       console.log("LOGIC REVIEW: Receive data from backend"); 
@@ -53,9 +53,9 @@ export default function LogicAnalysisPanel({ activeFile }) {
 
       setAnalysisAvailable(true);
     } catch (err) {
-      toast.error('Failed to generate logic analysis', {
+      toast.error('Logic Review Failed', {
         description:
-          `Failed to generate logic analysis. Please try again later.`,
+          `Failed to generate logic review. Please try again later.`,
       });
       setError(err.response?.data?.error || err.message);
       console.error(`Error generating logic analysis: ${err}`);

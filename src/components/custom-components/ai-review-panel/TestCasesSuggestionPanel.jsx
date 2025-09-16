@@ -15,8 +15,9 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getTestCases } from '@/api';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 import { useProject } from '@/hooks/project/ProjectContext';
+import { Separator } from '@radix-ui/react-separator';
 
-// TODO: Save the currently active file to backend first, then generate the review. 
+// TODO: Save the currently active file to backend first, then generate the review.
 
 export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   const { user } = useAuth();
@@ -29,18 +30,25 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
 
   const formatActiveFile = (activeFile) => {
     return {
-      'fileid': activeFile.id, 
-      'filename': activeFile.name, 
-      'code': activeFile.content, 
-    }
-  }
+      fileid: activeFile.id,
+      filename: activeFile.name,
+      code: activeFile.content,
+    };
+  };
 
   const handleGenerateTestCases = async () => {
-    // STEP 1: Save project to backend 
-    const updatedFiles = getUpdatedFiles(); 
+    // Check if there's any file open in the code editor
+    if (!activeFile) {
+      toast.error('File Not Open', {
+        description: `Please open a file in the Code Editor to generate test cases.`,
+      });
+      return; 
+    }
 
-    console.log("TEST CASES: Files sent to backend", updatedFiles); // Debug log
-    
+    // STEP 1: Save project to backend
+    const updatedFiles = getUpdatedFiles();
+    console.log('TEST CASES: Files sent to backend', updatedFiles); // Debug log
+
     if (updatedFiles && updatedFiles.length > 0) {
       console.log('TEST CASES: Saving project to backend...');
       try {
@@ -51,49 +59,54 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
         setError('');
 
         clearAllUpdates(); // Clear updates in sessionStorage
-        console.log("Clear sessionStorage", sessionStorage); 
+        console.log('Clear sessionStorage', sessionStorage);
       } catch (err) {
+        toast.error('Save Failed', {
+          description: `Failed to save file(s) to database.`,
+        });
         setError(err.response?.data?.error || err.message);
         console.error(
-          `Failed to save project to database: ${err.response?.data?.error || err.message}`,
+          `Failed to save file(s) to database: ${err.response?.data?.error || err.message}`,
         );
       }
     }
 
-    
-    console.log("TEST CASES: Start generating test cases..."); 
-    // if (!user || !activeFile) return;
+    console.log('TEST CASES: Start generating test cases...');
 
     try {
       setLoading(true);
-      // Generate test cases with active test file 
-      console.log("TEST CASES: About to call backend"); 
-      const formattedActiveFile = formatActiveFile(activeFile); 
+      // Generate test cases with active test file
+      console.log('TEST CASES: About to call backend');
+      const formattedActiveFile = formatActiveFile(activeFile);
 
-      const response = await getTestCases(user.uid, activeFile.id, formattedActiveFile); 
+      const response = await getTestCases(
+        user.uid,
+        activeFile.id,
+        formattedActiveFile,
+      );
 
-      console.log("TEST CASES: Successfully calling backend"); 
+      console.log('TEST CASES: Successfully calling backend');
 
       // TODO: Format test cases with Prettier before displaying it
 
+      console.log('TEST CASES:', response.data.response.files);
+      setTestCases(response.data.response.files);
 
-      console.log('TEST CASES:', response.data); 
-      setTestCases(response.data);
-
-      // Display test cases 
+      // Display test cases
       setTestAvailable(true);
-      setError(false); 
+      setError(false);
     } catch (err) {
       // Show error toast for failed generation of test cases.
       toast.error('Failed to generate test cases', {
-        description:
-          `Failed to generate test cases. Please try again later.`,
+        description: `Failed to generate test cases. Please try again later.`,
       });
       setError(err.response?.data?.error || err.message);
-      console.error(`Error generating test cases ${err.response?.data?.error || err.message}`);
+      console.error(
+        `Error generating test cases ${err.response?.data?.error || err.message}`,
+      );
     } finally {
       // Set loading state to false
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -106,9 +119,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   }
 
   return (
-    <Card
-      className="w-full h-[90%] rounded-md shadow-none overflow-hidden"
-    >
+    <Card className="w-full h-[90%] rounded-md shadow-none overflow-hidden">
       <CardHeader>
         <CardTitle>Test Cases</CardTitle>
         <CardDescription>
@@ -125,41 +136,40 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
       <CardContent className="w-full h-full overflow-hidden">
         {testAvailable && (
           <div className="space-y-4 h-100 overflow-y-auto w-full overflow-x-hidden">
-            {Object.entries(testCases).map(([testType, tests]) => (
-              <Card key={testType} className="border shadow-sm gap-0 w-full">
-                <CardHeader>
-                  <CardTitle className="text-lg">{testType}</CardTitle>
-                </CardHeader>
+            {Object.entries(testCases).map(([testKey, testObj]) => (
+              <Card key={testKey} className="border shadow-sm gap-0 w-full">
                 <CardContent className="w-full max-w-full">
-                  {Array.from(tests).map(
-                    (test, index) =>
-                      test && (
-                        <div key={index} className="w-full">
-                          <SyntaxHighlighter
-                            key={index}
-                            language="javascript"
-                            style={atomDark}
-                            wrapLines={true}
-                            wrapLongLines={true}
-                            customStyle={{
-                              maxWidth: '100%',
-                              width: '300px', // Enforce a fixed width to avoid overflowing
-                              height: 'auto',
-                              minHeight: 'fit-content',
-                              whiteSpace: 'pre-wrap',
-                              wordBreak: 'break-word',
-                              overflowWrap: 'break-word',
-                              lineHeight: '1.5rem',
-                              padding: '1rem'                              
-                            }}
-                            className="m-3"
-                            showLineNumbers={true}
-                          >
-                            {test}
-                          </SyntaxHighlighter>
-                        </div>
-                      ),
-                  )}
+                  {testObj['test_cases'].map((test, index) => (
+                    <div key={index} className="w-full">
+                      Test Description: {test['notes']}
+                      <SyntaxHighlighter
+                        key={test.id}
+                        language="javascript"
+                        style={atomDark}
+                        wrapLines={true}
+                        wrapLongLines={true}
+                        customStyle={{
+                          maxWidth: '100%',
+                          width: '300px', // Enforce a fixed width to avoid overflowing
+                          height: 'auto',
+                          minHeight: 'fit-content',
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          lineHeight: '1.5rem',
+                          padding: '1rem',
+                        }}
+                        className="m-3"
+                        showLineNumbers={true}
+                      >
+                        {test.description}
+                      </SyntaxHighlighter>
+                      <Separator
+                        orientation="horizontal"
+                        className="h-1 w-full bg-gray-200 mb-8"
+                      />
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             ))}

@@ -130,16 +130,15 @@ export function ProjectProvider({ children, autoFetch = false }) {
 
       return {
         successful,
-        failed
+        failed,
       };
-
     } catch (err) {
       throw new Error(
         `Bulk delete project fail: ${err.response?.data?.error || err.message}`,
       );
     }
   };
-
+  const createSubmissionForProject = { projectId };
   const setFilesForProject = ({ projectId, files }) => {
     console.log('Calling setFilesForProject');
     console.log(files);

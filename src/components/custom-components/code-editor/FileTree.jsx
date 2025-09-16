@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   SidebarContent,
   SidebarGroup,
@@ -24,8 +24,22 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+
+import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
+
+import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
+import { NewSubmissionDialog } from '../NewSubmissionDialog';
+import { useParams } from 'react-router';
+
 export default function FileTree({ tree, onFileSelectFromFileTree }) {
-  console.log("Printing file tree", tree);
+  const { projectId } = useParams();
+  console.log('Printing file tree', tree);
 
   return (
     <div className="flex flex-col text-sm">
@@ -33,7 +47,8 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
       <SidebarHeader className="flex flex-row items-center justify-between bg-secondary">
         <h2 className="font-medium">Project Name</h2>
         <div className="flex flex-row items-center gap-2">
-          <FilePlus className="size-4" />
+          {/* <FilePlus className="size-4" /> */}
+          <NewSubmissionDialog variant={'icon'} projectId={projectId} />
           <FolderPlus className="size-4" />
         </div>
       </SidebarHeader>
@@ -46,9 +61,17 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
               )}
               {Object.entries(tree).map(([key, value]) =>
                 value.type === 'folder' ? (
-                  <Folder folder={value} index={key} onFileSelect={onFileSelectFromFileTree}/>
+                  <Folder
+                    folder={value}
+                    index={key}
+                    onFileSelect={onFileSelectFromFileTree}
+                  />
                 ) : (
-                  <File file={value} index={key} onFileSelect={onFileSelectFromFileTree} />
+                  <File
+                    file={value}
+                    index={key}
+                    onFileSelect={onFileSelectFromFileTree}
+                  />
                 ),
               )}
             </SidebarMenu>
@@ -65,21 +88,37 @@ function Folder({ folder, index, onFileSelect }) {
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
-          <SidebarMenuButton>
-            {isOpen ? (
-              <ChevronDown className="stroke-secure-orange" />
-            ) : (
-              <ChevronRight className="stroke-secure-orange" />
-            )}
-            <FolderCode />
-            <span className="mr-auto">{folder.name}</span>
-          </SidebarMenuButton>
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <SidebarMenuButton>
+                {isOpen ? (
+                  <ChevronDown className="stroke-secure-orange" />
+                ) : (
+                  <ChevronRight className="stroke-secure-orange" />
+                )}
+                <FolderCode className="size-3" />
+
+                {folder.name}
+                {/* <FileTreeContextMenu variant={'folder'} name={folder.name} /> */}
+              </SidebarMenuButton>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem>Edit Name</ContextMenuItem>
+              <ContextMenuItem>Billing</ContextMenuItem>
+              <ContextMenuItem>Team</ContextMenuItem>
+              <ContextMenuItem>Subscription</ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </CollapsibleTrigger>
         {Object.entries(folder.children).map(([key, value]) => (
           <CollapsibleContent key={key}>
             <SidebarMenuSub>
               {value.type === 'folder' ? (
-                <Folder folder={value} index={key} onFileSelect={onFileSelect}/>
+                <Folder
+                  folder={value}
+                  index={key}
+                  onFileSelect={onFileSelect}
+                />
               ) : (
                 <File file={value} index={key} onFileSelect={onFileSelect} />
               )}
@@ -95,8 +134,25 @@ function File({ file, index, onFileSelect }) {
   return (
     <SidebarMenuItem key={index} onClick={() => onFileSelect(file)}>
       <SidebarMenuButton>
-        <FileCode />
-        {file.name}
+        <ContextMenu>
+          <ContextMenuTrigger className="w-full flex items-center gap-2">
+            <FileCode className="size-4" />
+            {file.name}
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem>New File</ContextMenuItem>
+            <ContextMenuItem>New Folder</ContextMenuItem>
+            <ContextMenuItem>
+              <RenameSubmissionDialog
+                submission={file}
+              ></RenameSubmissionDialog>
+            </ContextMenuItem>
+            <ContextMenuItem>
+              <DeleteSubmissionAlert submission={file}></DeleteSubmissionAlert>
+            </ContextMenuItem>
+            <ContextMenuItem>Subscription</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

@@ -48,7 +48,7 @@ export const getProjectsMasterTableColumns = (
       const name = project.project_name;
       const id = project.projectid;
       return (
-        <Link to={`/projects/${id}`}>
+        <Link to={`/projects/${id}`} state={{ projectName: name}}>
           <span>{name}</span>
         </Link>
       );

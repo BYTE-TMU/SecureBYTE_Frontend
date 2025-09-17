@@ -4,8 +4,9 @@ import {
   getProjects,
   createProject,
   deleteProject,
-  getProjectById,
   createSubmission,
+  getProject, 
+  saveProject
 } from '@/api';
 import { toast } from 'sonner';
 
@@ -46,7 +47,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
   const fetchProjectById = async ({ projectId }) => {
     try {
       setLoading(true);
-      const response = await getProjectById(user.uid, projectId);
+      const response = await getProject(user.uid, projectId);
       setSingleProject(response.data);
       setFetchError('');
     } catch (err) {
@@ -196,12 +197,32 @@ export function ProjectProvider({ children, autoFetch = false }) {
     return projectFiles[projectId] || [];
   };
 
+  const saveProjectToBackend = async ({ projectId, updatedFilesArr}) => {
+    setLoading(true); 
+
+    try {
+      const response = await saveProject(user.uid, projectId, updatedFilesArr); 
+      console.log("Successfully save project to Backend: ", response.data); // Debug log
+      setFetchError('');
+
+    } catch (err) {
+      console.error(
+        `Failed to save project: ${err.response?.data?.error || err.message}`,
+      );
+      throw new Error(`Failed to save project with id ${projectId}`);
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <ProjectContext.Provider
       value={{
         user,
         loading,
         projects,
+        singleProject,
         fetchProjects,
         fetchProjectById,
         fetchError,
@@ -211,6 +232,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         deleteOneProject,
         deleteProjectInBulk,
         createSubmissionForProject,
+        saveProjectToBackend
       }}
     >
       {children}

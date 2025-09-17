@@ -16,6 +16,7 @@ import {
   FilePlus,
   FolderCode,
   FolderPlus,
+  ShieldCheck,
 } from 'lucide-react';
 
 import {
@@ -36,6 +37,18 @@ import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { useParams } from 'react-router';
+
+  
+ import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 
 export default function FileTree({ tree, onFileSelectFromFileTree }) {
   const { projectId } = useParams();
@@ -131,29 +144,41 @@ function Folder({ folder, index, onFileSelect }) {
 }
 
 function File({ file, index, onFileSelect }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Handle right-click on file component
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setMenuOpen(true);
+  };
+
   return (
-    <SidebarMenuItem key={index} onClick={() => onFileSelect(file)}>
-      <SidebarMenuButton>
-        <ContextMenu>
-          <ContextMenuTrigger className="w-full flex items-center gap-2">
-            <FileCode className="size-4" />
-            {file.name}
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem>New File</ContextMenuItem>
-            <ContextMenuItem>New Folder</ContextMenuItem>
-            <ContextMenuItem>
-              <RenameSubmissionDialog
-                submission={file}
-              ></RenameSubmissionDialog>
-            </ContextMenuItem>
-            <ContextMenuItem>
-              <DeleteSubmissionAlert submission={file}></DeleteSubmissionAlert>
-            </ContextMenuItem>
-            <ContextMenuItem>Subscription</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      </SidebarMenuButton>
+
+    <SidebarMenuItem key={index} className="flex">
+      <div className="relative w-full">
+        <SidebarMenuButton 
+          onContextMenu={handleContextMenu}
+          onClick={() => onFileSelect(file)}
+          key={index}
+        >
+          <FileCode />
+          {file.name}
+        </SidebarMenuButton>
+        
+        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+          <DropdownMenuTrigger asChild>
+            <button 
+              className="absolute inset-0 opacity-0 pointer-events-none"
+              aria-hidden="true"
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DeleteSubmissionAlert submission={file} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
     </SidebarMenuItem>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -8,16 +8,30 @@ import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
+import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
-export default function ResizableCodeEditor({ tree }) {
-  const [openFiles, setOpenFiles] = useState([]);
-  const [activeFile, setActiveFile] = useState(null);
+export default function ResizableCodeEditor({ 
+  tree, 
+  securityReview, 
+  openFiles, 
+  setOpenFiles, 
+  activeFile, 
+  setActiveFile, 
+  projectId,
+  isSecReviewLoading
+}) {
+  const { trackFileUpdate } = useUpdateFiles(); 
+
+  useEffect(() => {
+  if (activeFile) {
+    console.log("Active file updated:", activeFile);
+  }
+}, [activeFile]);
 
   const openNewFile = (targetFile) => {
     console.log('Current open files', openFiles);
     console.log('About to open a file in the FileTabBar...');
     // Check if the file is already open
-    // TODO: Consider generating a unique ID for every file
     const existingFile = openFiles.find(
       (file) => file.name === targetFile.name,
     );
@@ -26,6 +40,8 @@ export default function ResizableCodeEditor({ tree }) {
     if (!existingFile) {
       setOpenFiles((prevFiles) => [...prevFiles, targetFile]); // Add the target file to the array of currently-open files
     }
+
+    console.log(targetFile); 
 
     setActiveFile(targetFile);
   };
@@ -64,20 +80,30 @@ export default function ResizableCodeEditor({ tree }) {
     if (existingFile) {
       setActiveFile(targetFile);
     }
+
+    console.log("Currently active file", activeFile); 
   };
 
   // TODO: Save file content to backend when users close the file tab
-  const updateFileContent = (targetFile, newContent) => {
+  const updateFileContent = ({ targetFile, newContent }) => {
     // Check if the file is currently open
     const existingFile = openFiles.find((file) => file.id === targetFile.id);
 
     if (existingFile) {
+      // Update activeFile content
+      setActiveFile({...targetFile, content: newContent}); 
       setOpenFiles((prevFiles) =>
         prevFiles.map((file) =>
           file.id === targetFile.id ? { ...file, content: newContent } : file,
         ),
       );
+
+      // Save to sessionStorage 
+      trackFileUpdate({fileId: targetFile.id, fileName: targetFile.name, code: newContent}); 
     }
+
+    console.log("Active file's content is updated:", targetFile.content); 
+    console.log("CURRENTLY OPEN FILES", openFiles); 
   };
 
   return (
@@ -100,11 +126,20 @@ export default function ResizableCodeEditor({ tree }) {
           onCloseFile={closeFile}
           onSwitchTab={switchTab}
         />
-        <FileTabContent activeFile={activeFile} isDarkTheme={false} />
+        <FileTabContent 
+          activeFile={activeFile} 
+          isDarkTheme={false}
+          onEditorChange={updateFileContent}
+        />
       </ResizablePanel>
       <ResizableHandle />
-       <ResizablePanel>
-        <ReviewModal />
+       <ResizablePanel defaultSize={25}>
+        <ReviewModal 
+          activeFile={activeFile} 
+          securityReview={securityReview}
+          projectId={projectId}
+          isSecReviewLoading={isSecReviewLoading}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

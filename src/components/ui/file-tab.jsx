@@ -112,6 +112,7 @@ function FileTabContent({
   activeFile,
   isDarkTheme, 
   className, 
+  onEditorChange,
   ...props }) {
 
   return (
@@ -130,6 +131,8 @@ function FileTabContent({
           isDarkTheme={isDarkTheme}
           value={activeFile.content}
           language="python"
+          onChange={onEditorChange}
+          activeFile={activeFile}
         />
       ) : (
         <div className="flex items-center justify-center h-full text-muted-foreground">

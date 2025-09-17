@@ -89,7 +89,7 @@ export default function EditProjectSheet({ project }) {
             <Button type="submit" className="hover:cursor-pointer">
               Save Changes
             </Button>
-            <SheetClose>
+            <SheetClose asChild>
               <Button variant="outline" className="w-full hover:cursor-pointer">
                 Cancel
               </Button>

@@ -1,6 +1,6 @@
 import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
-import { useParams } from 'react-router';
+import { useParams, useLocation } from 'react-router';
 import { useGetSubmissions } from '@/hooks/useGetSubmissions';
 import { toast } from 'sonner';
 import { useProject } from '../../hooks/project/ProjectContext';
@@ -20,13 +20,17 @@ import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import React, { useState, useEffect } from 'react';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
+import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
 
 export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
   const { tree } = useGetFileStructure(projectId);
-  const [projectName, setProjectName] = useState('');
+  const [securityReview, setSecurityReview] = useState('');
+  const location = useLocation();
+  const projectName = location.state?.projectName;
+  const [isSecReviewLoading, setIsSecReviewLoading] = useState(false);
 
   console.log(tree);
   //github repo dialog
@@ -38,6 +42,9 @@ export default function IndividualProjectPage() {
   const [repoError, setRepoError] = useState('');
   const [isWorking, setIsWorking] = useState(false);
 
+  const [openFiles, setOpenFiles] = useState([]);
+  const [activeFile, setActiveFile] = useState(null);
+
   useEffect(() => {
     if (!projectId) {
       console.log('Missing projectId');
@@ -48,7 +55,9 @@ export default function IndividualProjectPage() {
       console.log(projectId);
       try {
         const projectData = await fetchProjectById({ projectId });
-        console.log(`Printing project data: ${projectData}`);
+        console.log(
+          `Printing project data from IndividualProjectPage: ${projectData}`,
+        );
         // setProjectName(projectData['project_name']);
       } catch (err) {
         console.error(
@@ -173,22 +182,28 @@ export default function IndividualProjectPage() {
   console.log(submissions.map((submission) => submission.filename));
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
-      {/* TODO: Fetch project name as title */}
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
-      {hasGithubToken && (
-        <div className="mt-4">
+      <div className="my-3 flex gap-2">
+        {hasGithubToken && (
           <Button onClick={openRepoDialog} className="bg-secure-orange">
             Link GitHub Repository
           </Button>
-        </div>
-      )}
+        )}
+        <GenerateSecurityReviewSheet
+          submissions={submissions}
+          projectId={projectId}
+          setSecurityReview={setSecurityReview}
+          projectName={projectName}
+          setIsSecReviewLoading={setIsSecReviewLoading}
+        />
+      </div>
       {submissionsError ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
       ) : null}
       <Dialog open={isRepoDialogOpen} onOpenChange={setIsRepoDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Link your GitHub repository</DialogTitle>
+            <DialogTitle>Link your GitHub Repository</DialogTitle>
             <DialogDescription>
               Select a repository and optionally a branch to link or import
               files.
@@ -239,8 +254,17 @@ export default function IndividualProjectPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ResizableCodeEditor tree={tree} />
-      {/* <IndividualProjectTable columns={columns} data={submissions} /> */}
+
+      <ResizableCodeEditor
+        tree={tree}
+        securityReview={securityReview}
+        openFiles={openFiles}
+        setOpenFiles={setOpenFiles}
+        activeFile={activeFile}
+        setActiveFile={setActiveFile}
+        isSecReviewLoading={isSecReviewLoading}
+      />
+      <IndividualProjectTable columns={columns} data={submissions} />
     </main>
   );
 }

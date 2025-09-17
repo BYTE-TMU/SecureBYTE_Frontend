@@ -8,12 +8,18 @@ import {
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
-export function SecuritySuggestionPanel({ securityReview }) {
+export function SecuritySuggestionPanel({
+  securityReview,
+  isSecReviewLoading,
+}) {
+  if (isSecReviewLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Card className="h-full rounded-md shadow-none">
       <CardHeader>
         <CardTitle>Security Review</CardTitle>
-        {/* TODO: This is not good UX/UI. Consider changing it later */}
         <CardDescription>
           Click "Generate Security Review" and view your review here{' '}
         </CardDescription>
@@ -22,33 +28,23 @@ export function SecuritySuggestionPanel({ securityReview }) {
         {/* Display unformatted security review for now */}
         {securityReview && (
           <div>
-            <div>
-              <strong>Review Time:</strong> {securityReview.review_time}
-            </div>
             {securityReview.files.map((file) => (
-              <div key={file.filename} className='mt-3'>
-                <h3 className='text-1xl font-bold'>File: {file.filename}</h3>
-                {file.issues.length === 0 ? (
-                  <div>No issues found.</div>
-                ) : (
-                  <ul>
-                    {file.issues.map((issue, idx) => (
-                      <li key={idx}>
-                        <div>
-                          Line:{issue.line}
-                        </div>
-                        <div>
-                          Feedback:{issue.feedback}
-                        </div>
-                        <div>
-                          Severity:{issue.severity.level}{' '}
-                          (Score: {issue.severity.score})
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <Card key={file.filename} className='p-5 mt-3'>
+                  <CardTitle>File: {file.filename}</CardTitle>
+                  {file.issues.length === 0 ? (
+                    <CardDescription>No issues found</CardDescription>
+                  ) : (
+                    <CardContent className='p-0'>
+                      {file.issues.map((issue, index) => (
+                        <Card key={index} className='p-5 mb-5 gap-4'>
+                          <CardTitle>Line:{issue.line}</CardTitle>
+                          <CardTitle>Severity: {issue.severity.level.charAt(0).toUpperCase() + issue.severity.level.slice(1) } (Score:{' '}{issue.severity.score})</CardTitle>
+                          <CardDescription className="text-black-[1rem]">AI Feedback: {issue.feedback}</CardDescription>
+                        </Card>
+                      ))}
+                    </CardContent>
+                  )}
+              </Card>
             ))}
           </div>
         )}

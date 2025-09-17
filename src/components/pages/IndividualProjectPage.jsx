@@ -30,6 +30,7 @@ export default function IndividualProjectPage() {
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation(); 
   const projectName = location.state?.projectName;  
+  const [isSecReviewLoading, setIsSecReviewLoading] = useState(false); 
 
   console.log(tree);
   //github repo dialog
@@ -191,6 +192,7 @@ export default function IndividualProjectPage() {
           projectId={projectId} 
           setSecurityReview={setSecurityReview}
           projectName={projectName}
+          setIsSecReviewLoading={setIsSecReviewLoading}
         />
       </div>
       {submissionsError ? (
@@ -257,6 +259,7 @@ export default function IndividualProjectPage() {
         setOpenFiles={setOpenFiles}
         activeFile={activeFile}
         setActiveFile={setActiveFile}
+        isSecReviewLoading={isSecReviewLoading}
       />
       <IndividualProjectTable 
         columns={columns} 

@@ -15,7 +15,6 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getTestCases } from '@/api';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 import { useProject } from '@/hooks/project/ProjectContext';
-import { Separator } from '@radix-ui/react-separator';
 
 // TODO: Save the currently active file to backend first, then generate the review.
 
@@ -42,7 +41,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
       toast.error('File Not Open', {
         description: `Please open a file in the Code Editor to generate test cases.`,
       });
-      return; 
+      return;
     }
 
     // STEP 1: Save project to backend
@@ -124,8 +123,10 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
         <CardTitle>Test Cases</CardTitle>
         <CardDescription>
           {!testAvailable
-            ? 'Click below to generate test cases for [file_name]'
-            : 'View your test cases below'}
+            ? activeFile
+              ? `Click below to generate test cases for ${activeFile['name']}`
+              : `Open a file in the code editor to generate test cases`
+            : 'View your logic analysis below'}
         </CardDescription>
         {!testAvailable && (
           <Button variant="default" onClick={handleGenerateTestCases}>
@@ -140,35 +141,45 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
               <Card key={testKey} className="border shadow-sm gap-0 w-full">
                 <CardContent className="w-full max-w-full">
                   {testObj['test_cases'].map((test, index) => (
-                    <div key={index} className="w-full">
-                      Test Description: {test['notes']}
-                      <SyntaxHighlighter
-                        key={test.id}
-                        language="javascript"
-                        style={atomDark}
-                        wrapLines={true}
-                        wrapLongLines={true}
-                        customStyle={{
-                          maxWidth: '100%',
-                          width: '300px', // Enforce a fixed width to avoid overflowing
-                          height: 'auto',
-                          minHeight: 'fit-content',
-                          whiteSpace: 'pre-wrap',
-                          wordBreak: 'break-word',
-                          overflowWrap: 'break-word',
-                          lineHeight: '1.5rem',
-                          padding: '1rem',
-                        }}
-                        className="m-3"
-                        showLineNumbers={true}
-                      >
-                        {test.description}
-                      </SyntaxHighlighter>
-                      <Separator
-                        orientation="horizontal"
-                        className="h-1 w-full bg-gray-200 mb-8"
-                      />
-                    </div>
+                    <Card key={index} className="w-full p-5 mb-5 gap-4">
+                      {test['input'] && (
+                        <CardTitle>
+                          Input: {test['input']}
+                        </CardTitle>
+                      )}
+                      {test['expected_output'] && (
+                        <CardTitle>
+                          Expected output: {test['expected_output']}
+                        </CardTitle>
+                      )}
+                      <CardDescription className="w-full">
+                        Description: {test['notes']}
+                      </CardDescription>
+                      <CardContent className="p-0">
+                        <SyntaxHighlighter
+                          key={test.id}
+                          language="javascript"
+                          style={atomDark}
+                          wrapLines={true}
+                          wrapLongLines={true}
+                          customStyle={{
+                            maxWidth: '100%',
+                            width: '300px', // Enforce a fixed width to avoid overflowing
+                            height: 'auto',
+                            minHeight: 'fit-content',
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'break-word',
+                            lineHeight: '1.5rem',
+                            padding: '1rem',
+                          }}
+                          className="m-3"
+                          showLineNumbers={true}
+                        >
+                          {test.description}
+                        </SyntaxHighlighter>
+                      </CardContent>
+                    </Card>
                   ))}
                 </CardContent>
               </Card>

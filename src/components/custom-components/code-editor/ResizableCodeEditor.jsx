@@ -17,7 +17,8 @@ export default function ResizableCodeEditor({
   setOpenFiles, 
   activeFile, 
   setActiveFile, 
-  projectId
+  projectId,
+  isSecReviewLoading
 }) {
   const { trackFileUpdate } = useUpdateFiles(); 
 
@@ -137,6 +138,7 @@ export default function ResizableCodeEditor({
           activeFile={activeFile} 
           securityReview={securityReview}
           projectId={projectId}
+          isSecReviewLoading={isSecReviewLoading}
         />
       </ResizablePanel>
     </ResizablePanelGroup>

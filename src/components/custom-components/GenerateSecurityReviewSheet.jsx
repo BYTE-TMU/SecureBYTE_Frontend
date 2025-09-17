@@ -21,6 +21,7 @@ export default function GenerateSecurityReviewSheet({
   projectId,
   setSecurityReview,
   projectName,
+  setIsSecReviewLoading
 }) {
   const { user } = useAuth();
   const [projectFiles, setProjectFiles] = useState([]);
@@ -58,6 +59,8 @@ export default function GenerateSecurityReviewSheet({
 
     // Step 2: Generate security review by calling backend
     console.log('SECURITY REVIEW: Generate review...');
+    setIsSecReviewLoading(true); 
+
     try {
       const response = await getSecurityReview(user.uid, projectId);
       setError('');
@@ -69,7 +72,8 @@ export default function GenerateSecurityReviewSheet({
       // Clear updated files in sessionStorage
       clearAllUpdates();
       console.log("After clearing sessionStorage", sessionStorage); // Debug log 
-
+      setIsSecReviewLoading(false); 
+      
     } catch (err) {
       setError(err.response?.data?.error || err.message);
       console.error(

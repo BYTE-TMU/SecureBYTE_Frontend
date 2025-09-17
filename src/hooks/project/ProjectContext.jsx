@@ -4,7 +4,6 @@ import {
   getProjects,
   createProject,
   deleteProject,
-  getProjectById,
   createSubmission,
   getProject,
   saveProject,

@@ -50,7 +50,8 @@ import { Button } from '@/components/ui/button';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 
 export default function FileTree({ tree, onFileSelectFromFileTree }) {
-  console.log("Printing file tree", tree);
+  const { projectId } = useParams();
+  console.log('Printing file tree', tree);
 
   return (
     <div className="flex flex-col text-sm">
@@ -77,17 +78,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
                     index={key}
                     onFileSelect={onFileSelectFromFileTree}
                   />
-                  <Folder
-                    folder={value}
-                    index={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                  />
                 ) : (
-                  <File
-                    file={value}
-                    index={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                  />
                   <File
                     file={value}
                     index={key}
@@ -140,11 +131,6 @@ function Folder({ folder, index, onFileSelect }) {
                   index={key}
                   onFileSelect={onFileSelect}
                 />
-                <Folder
-                  folder={value}
-                  index={key}
-                  onFileSelect={onFileSelect}
-                />
               ) : (
                 <File file={value} index={key} onFileSelect={onFileSelect} />
               )}
@@ -168,7 +154,7 @@ function File({ file, index, onFileSelect }) {
   return (
     <SidebarMenuItem key={index} className="flex">
       <div className="relative w-full">
-        <SidebarMenuButton 
+        <SidebarMenuButton
           onContextMenu={handleContextMenu}
           onClick={() => onFileSelect(file)}
           key={index}
@@ -176,10 +162,10 @@ function File({ file, index, onFileSelect }) {
           <FileCode />
           {file.name}
         </SidebarMenuButton>
-        
+
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger asChild>
-            <button 
+            <button
               className="absolute inset-0 opacity-0 pointer-events-none"
               aria-hidden="true"
             />
@@ -190,39 +176,6 @@ function File({ file, index, onFileSelect }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {/* <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} className="flex">
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuButton
-            onContextMenu={handleContextMenu}
-            onClick={handleClick}
-            key={index}
-          >
-            <ContextMenu>
-          <ContextMenuTrigger className="w-full flex items-center gap-2">
-            <FileCode className="size-4" />
-                {file.name}
-              </ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem>New File</ContextMenuItem>
-            <ContextMenuItem>New Folder</ContextMenuItem>
-            <ContextMenuItem>
-              <RenameSubmissionDialog
-                submission={file}
-              ></RenameSubmissionDialog>
-            </ContextMenuItem>
-            <ContextMenuItem>
-              <DeleteSubmissionAlert submission={file}></DeleteSubmissionAlert>
-            </ContextMenuItem>
-            <ContextMenuItem>Subscription</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      </SidebarMenuButton>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DeleteSubmissionAlert submission={file} />
-        </DropdownMenuContent>
-      </DropdownMenu> */}
     </SidebarMenuItem>
   );
 }

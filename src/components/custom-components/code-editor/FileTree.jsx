@@ -10,15 +10,12 @@ import {
   SidebarMenuSub,
 } from '../../ui/sidebar';
 import {
-  ChevronDown,
-  ChevronRight,
-  FileCode,
-  FilePlus,
-  FolderCode,
-  FolderPlus,
-  ShieldCheck,
-} from 'lucide-react';
-
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,26 +29,22 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 
-import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
-
-import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
-import { NewSubmissionDialog } from '../NewSubmissionDialog';
-import { useParams } from 'react-router';
-
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FolderCode,
+  FolderPlus,
+} from 'lucide-react';
+
+import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
+
+import { useParams } from 'react-router';
+import { ContextMenuLabel } from '@radix-ui/react-context-menu';
 
 export default function FileTree({ tree, onFileSelectFromFileTree }) {
   const { projectId } = useParams();
-  console.log('Printing file tree', tree);
 
   return (
     <div className="flex flex-col text-sm">
@@ -69,13 +62,10 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
           <SidebarGroupContent>
             <SidebarMenu>
               {Object.entries(tree).map(([key, value]) =>
-                console.log('key: ', key, 'value: ', value),
-              )}
-              {Object.entries(tree).map(([key, value]) =>
                 value.type === 'folder' ? (
                   <Folder
                     folder={value}
-                    index={key}
+                    key={key}
                     onFileSelect={onFileSelectFromFileTree}
                   />
                 ) : (
@@ -99,44 +89,43 @@ function Folder({ folder, index, onFileSelect }) {
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
-        <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
-          <ContextMenu>
-            <ContextMenuTrigger>
-              <SidebarMenuButton>
-                {isOpen ? (
-                  <ChevronDown className="stroke-secure-orange" />
-                ) : (
-                  <ChevronRight className="stroke-secure-orange" />
-                )}
-                <FolderCode className="size-3" />
+        <ContextMenu>
+          <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
+            <div>
+              <ContextMenuTrigger>
+                <SidebarMenuButton>
+                  {isOpen ? (
+                    <ChevronDown className="stroke-secure-orange" />
+                  ) : (
+                    <ChevronRight className="stroke-secure-orange" />
+                  )}
+                  <FolderCode className="size-3" />
 
-                {folder.name}
-                {/* <FileTreeContextMenu variant={'folder'} name={folder.name} /> */}
-              </SidebarMenuButton>
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem>Edit Name</ContextMenuItem>
-              <ContextMenuItem>Billing</ContextMenuItem>
-              <ContextMenuItem>Team</ContextMenuItem>
-              <ContextMenuItem>Subscription</ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        </CollapsibleTrigger>
-        {Object.entries(folder.children).map(([key, value]) => (
-          <CollapsibleContent key={key}>
-            <SidebarMenuSub>
-              {value.type === 'folder' ? (
-                <Folder
-                  folder={value}
-                  index={key}
-                  onFileSelect={onFileSelect}
-                />
-              ) : (
-                <File file={value} index={key} onFileSelect={onFileSelect} />
-              )}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        ))}
+                  {folder.name}
+                </SidebarMenuButton>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem>Rename Folder</ContextMenuItem>
+              </ContextMenuContent>
+            </div>
+          </CollapsibleTrigger>
+        </ContextMenu>
+        {isOpen &&
+          Object.entries(folder.children).map(([key, value]) => (
+            <CollapsibleContent key={key}>
+              <SidebarMenuSub>
+                {value.type === 'folder' ? (
+                  <Folder
+                    folder={value}
+                    index={key}
+                    onFileSelect={onFileSelect}
+                  />
+                ) : (
+                  <File file={value} index={key} onFileSelect={onFileSelect} />
+                )}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          ))}
       </SidebarMenuItem>
     </Collapsible>
   );
@@ -152,30 +141,24 @@ function File({ file, index, onFileSelect }) {
   };
 
   return (
-    <SidebarMenuItem key={index} className="flex">
-      <div className="relative w-full">
-        <SidebarMenuButton
-          onContextMenu={handleContextMenu}
-          onClick={() => onFileSelect(file)}
-          key={index}
-        >
-          <FileCode />
-          {file.name}
-        </SidebarMenuButton>
-
-        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="absolute inset-0 opacity-0 pointer-events-none"
-              aria-hidden="true"
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+    <SidebarMenuItem
+      key={index}
+      onClick={() => onFileSelect(file)}
+      className="roudned-lg"
+    >
+      <ContextMenu>
+        <ContextMenuTrigger className="flex gap-2 items-center">
+          <SidebarMenuButton>
+            <FileCode className="size-4" />
+            {file.name}
+          </SidebarMenuButton>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>
             <DeleteSubmissionAlert submission={file} />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </SidebarMenuItem>
   );
 }

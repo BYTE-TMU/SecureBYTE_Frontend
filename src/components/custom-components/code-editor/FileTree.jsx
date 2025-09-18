@@ -32,8 +32,6 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 
-import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
-
 import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { useParams } from 'react-router';

@@ -2,8 +2,6 @@
 
 A comprehensive React-based frontend application 5. Copy the configuration values to your `.env` file
 
-### 4. Backend Setup (Required) a secure code review and project management platform. Built with modern web technologies including React 19, Firebase Authentication, and Vite for optimal performance.
-
 ## 🚀 Features
 
 - **User Authentication**: Firebase Authentication with email/password and Google OAuth
@@ -128,18 +126,20 @@ SecureBYTE_Frontend/
 The frontend communicates with the backend through RESTful API endpoints for:
 
 ### Projects
+
 - Get user's projects
 - Create new project
 - Update project
 - Delete project
 
 ### Submissions
+
 - Get project submissions
 - Create submission
 - Update submission
 - Delete submission
 
-*Note: Detailed API documentation is available to authorized developers.*
+_Note: Detailed API documentation is available to authorized developers._
 
 ## 🔐 Authentication Flow
 
@@ -151,12 +151,14 @@ The frontend communicates with the backend through RESTful API endpoints for:
 ## 🎯 Usage
 
 ### For Users:
+
 1. **Sign Up/Sign In**: Create account or login with existing credentials
 2. **Create Projects**: Add new coding projects with descriptions
 3. **Manage Submissions**: Upload code files and manage versions
 4. **Edit & Delete**: Modify or remove projects and submissions as needed
 
 ### For Developers:
+
 1. **Development**: Use `npm run dev` for hot reload during development
 2. **Testing**: Test authentication and API integrations
 3. **Building**: Use `npm run build` for production builds
@@ -186,6 +188,7 @@ The frontend communicates with the backend through RESTful API endpoints for:
 ### Debug Mode:
 
 The application includes extensive console logging for debugging:
+
 - Authentication state changes
 - API request/response cycles
 - Error handling with detailed messages
@@ -220,6 +223,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🆘 Support
 
 For support and questions:
+
 - Create an issue in this repository
 - Contact the team at TMU BYTE
 - Check the troubleshooting section above

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   SidebarContent,
   SidebarGroup,
@@ -26,6 +26,19 @@ import {
 } from '@/components/ui/collapsible';
 
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+
+import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
+
+import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
+import { NewSubmissionDialog } from '../NewSubmissionDialog';
+import { useParams } from 'react-router';
+
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -37,6 +50,7 @@ import { Button } from '@/components/ui/button';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 
 export default function FileTree({ tree, onFileSelectFromFileTree }) {
+  const { projectId } = useParams();
   console.log('Printing file tree', tree);
 
   return (
@@ -45,7 +59,8 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
       <SidebarHeader className="flex flex-row items-center justify-between bg-secondary">
         <h2 className="font-medium">Project Name</h2>
         <div className="flex flex-row items-center gap-2">
-          <FilePlus className="size-4" />
+          {/* <FilePlus className="size-4" /> */}
+          <NewSubmissionDialog variant={'icon'} projectId={projectId} />
           <FolderPlus className="size-4" />
         </div>
       </SidebarHeader>
@@ -85,15 +100,27 @@ function Folder({ folder, index, onFileSelect }) {
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
-          <SidebarMenuButton>
-            {isOpen ? (
-              <ChevronDown className="stroke-secure-orange" />
-            ) : (
-              <ChevronRight className="stroke-secure-orange" />
-            )}
-            <FolderCode />
-            <span className="mr-auto">{folder.name}</span>
-          </SidebarMenuButton>
+          <ContextMenu>
+            <ContextMenuTrigger>
+              <SidebarMenuButton>
+                {isOpen ? (
+                  <ChevronDown className="stroke-secure-orange" />
+                ) : (
+                  <ChevronRight className="stroke-secure-orange" />
+                )}
+                <FolderCode className="size-3" />
+
+                {folder.name}
+                {/* <FileTreeContextMenu variant={'folder'} name={folder.name} /> */}
+              </SidebarMenuButton>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem>Edit Name</ContextMenuItem>
+              <ContextMenuItem>Billing</ContextMenuItem>
+              <ContextMenuItem>Team</ContextMenuItem>
+              <ContextMenuItem>Subscription</ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </CollapsibleTrigger>
         {Object.entries(folder.children).map(([key, value]) => (
           <CollapsibleContent key={key}>
@@ -127,7 +154,7 @@ function File({ file, index, onFileSelect }) {
   return (
     <SidebarMenuItem key={index} className="flex">
       <div className="relative w-full">
-        <SidebarMenuButton 
+        <SidebarMenuButton
           onContextMenu={handleContextMenu}
           onClick={() => onFileSelect(file)}
           key={index}
@@ -135,10 +162,10 @@ function File({ file, index, onFileSelect }) {
           <FileCode />
           {file.name}
         </SidebarMenuButton>
-        
+
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger asChild>
-            <button 
+            <button
               className="absolute inset-0 opacity-0 pointer-events-none"
               aria-hidden="true"
             />
@@ -149,22 +176,6 @@ function File({ file, index, onFileSelect }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {/* <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} className="flex">
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuButton
-            onContextMenu={handleContextMenu}
-            onClick={handleClick}
-            key={index}
-          >
-            <FileCode />
-            {file.name}
-          </SidebarMenuButton>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DeleteSubmissionAlert submission={file} />
-        </DropdownMenuContent>
-      </DropdownMenu> */}
     </SidebarMenuItem>
   );
 }

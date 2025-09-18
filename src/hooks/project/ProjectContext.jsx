@@ -4,9 +4,11 @@ import {
   getProjects,
   createProject,
   deleteProject,
-  getProject, 
-  saveProject
+  createSubmission,
+  getProject,
+  saveProject,
 } from '@/api';
+import { toast } from 'sonner';
 
 const ProjectContext = createContext();
 
@@ -131,16 +133,57 @@ export function ProjectProvider({ children, autoFetch = false }) {
 
       return {
         successful,
-        failed
+        failed,
       };
-
     } catch (err) {
       throw new Error(
         `Bulk delete project fail: ${err.response?.data?.error || err.message}`,
       );
     }
   };
+  const parseFileContent = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
 
+      reader.onload = () => {
+        console.log('File name', file.name);
+        console.log('File content', reader.result);
+        resolve(reader.result);
+      };
+
+      reader.onerror = (err) => {
+        console.error('Error reading file content', err);
+        reject(err);
+      };
+
+      try {
+        reader.readAsText(file);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
+  const createSubmissionForProject = ({ projectId, files }) => {
+    console.log('Calling createSubmissionForProject');
+    try {
+      files.map(async (file) => {
+        const fileContent = await parseFileContent(file);
+        await createSubmission(user.uid, projectId, {
+          filename: file.name,
+          code: fileContent === null ? 'Nothing for now' : fileContent,
+          securityRev: [],
+          logicRev: [],
+          testcases: [],
+          reviewpdf: '',
+        });
+      });
+
+      console.log('all files uplaoded');
+    } catch (error) {
+      console.log(`Failed to create new project ${error}`);
+    }
+  };
   const setFilesForProject = ({ projectId, files }) => {
     console.log('Calling setFilesForProject');
     console.log(files);
@@ -154,24 +197,22 @@ export function ProjectProvider({ children, autoFetch = false }) {
     return projectFiles[projectId] || [];
   };
 
-  const saveProjectToBackend = async ({ projectId, updatedFilesArr}) => {
-    setLoading(true); 
+  const saveProjectToBackend = async ({ projectId, updatedFilesArr }) => {
+    setLoading(true);
 
     try {
-      const response = await saveProject(user.uid, projectId, updatedFilesArr); 
-      console.log("Successfully save project to Backend: ", response.data); // Debug log
+      const response = await saveProject(user.uid, projectId, updatedFilesArr);
+      console.log('Successfully save project to Backend: ', response.data); // Debug log
       setFetchError('');
-
     } catch (err) {
       console.error(
         `Failed to save project: ${err.response?.data?.error || err.message}`,
       );
       throw new Error(`Failed to save project with id ${projectId}`);
-
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <ProjectContext.Provider
@@ -188,7 +229,8 @@ export function ProjectProvider({ children, autoFetch = false }) {
         createNewProject,
         deleteOneProject,
         deleteProjectInBulk,
-        saveProjectToBackend
+        createSubmissionForProject,
+        saveProjectToBackend,
       }}
     >
       {children}

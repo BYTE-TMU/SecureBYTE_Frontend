@@ -28,9 +28,9 @@ export default function IndividualProjectPage() {
   const { user } = useAuth();
   const { tree } = useGetFileStructure(projectId);
   const [securityReview, setSecurityReview] = useState('');
-  const location = useLocation(); 
-  const projectName = location.state?.projectName;  
-  const [isSecReviewLoading, setIsSecReviewLoading] = useState(false); 
+  const location = useLocation();
+  const projectName = location.state?.projectName;
+  const [isSecReviewLoading, setIsSecReviewLoading] = useState(false);
 
   console.log(tree);
   //github repo dialog
@@ -55,7 +55,9 @@ export default function IndividualProjectPage() {
       console.log(projectId);
       try {
         const projectData = await fetchProjectById({ projectId });
-        console.log(`Printing project data from IndividualProjectPage: ${projectData}`);
+        console.log(
+          `Printing project data from IndividualProjectPage: ${projectData}`,
+        );
         // setProjectName(projectData['project_name']);
       } catch (err) {
         console.error(
@@ -187,9 +189,9 @@ export default function IndividualProjectPage() {
             Link GitHub Repository
           </Button>
         )}
-        <GenerateSecurityReviewSheet 
-          submissions={submissions} 
-          projectId={projectId} 
+        <GenerateSecurityReviewSheet
+          submissions={submissions}
+          projectId={projectId}
           setSecurityReview={setSecurityReview}
           projectName={projectName}
           setIsSecReviewLoading={setIsSecReviewLoading}
@@ -252,8 +254,9 @@ export default function IndividualProjectPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ResizableCodeEditor 
-        tree={tree} 
+
+      <ResizableCodeEditor
+        tree={tree}
         securityReview={securityReview}
         openFiles={openFiles}
         setOpenFiles={setOpenFiles}
@@ -261,10 +264,7 @@ export default function IndividualProjectPage() {
         setActiveFile={setActiveFile}
         isSecReviewLoading={isSecReviewLoading}
       />
-      <IndividualProjectTable 
-        columns={columns} 
-        data={submissions} 
-      />
+      <IndividualProjectTable columns={columns} data={submissions} />
     </main>
   );
 }

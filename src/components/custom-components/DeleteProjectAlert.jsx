@@ -10,25 +10,26 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useProject } from '@/hooks/project/ProjectContext'; 
+import { useProject } from '@/hooks/project/ProjectContext';
 import { useState } from 'react';
 
 export function DeleteProjectAlert({ project, closeDropdown }) {
   const [error, setError] = useState('');
-  const { deleteOneProject } = useProject(); 
+  const { deleteOneProject } = useProject();
 
   const handleDeleteProject = async () => {
     // Close the dropdown menu of the project - whether the project is deleted successfully or not
-    closeDropdown(); 
-    
-    try {
-      await deleteOneProject({ project }); 
-      setError(''); 
+    closeDropdown();
 
+    try {
+      await deleteOneProject({ project });
+      setError('');
     } catch (err) {
-      console.error('Error deleting project:', err); 
-      setError(`Failed to delete project: ${err.response?.data?.error || err.message}`); 
-    } 
+      console.error('Error deleting project:', err);
+      setError(
+        `Failed to delete project: ${err.response?.data?.error || err.message}`,
+      );
+    }
   };
   return (
     <AlertDialog>

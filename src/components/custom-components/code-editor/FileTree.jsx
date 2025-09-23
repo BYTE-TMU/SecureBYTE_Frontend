@@ -37,6 +37,8 @@ import {
   FolderPlus,
 } from 'lucide-react';
 
+
+import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 

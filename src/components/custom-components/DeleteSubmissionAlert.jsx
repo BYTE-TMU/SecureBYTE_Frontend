@@ -23,10 +23,12 @@ export function DeleteSubmissionAlert({ submission }) {
 
     try {
       await deleteSubmission(user.uid, submission.id);
-      console.log(`Successfully delete submission: ${submission.id}`); 
+      console.log(`Successfully delete submission: ${submission.id}`);
       setError('');
     } catch (error) {
       console.error('Error deleting submission:', error);
+
+      //TODO: improve error handling by creating a toast
       setError(
         `Failed to delete a submission: ${
           error.response?.data?.error || error.message
@@ -54,7 +56,10 @@ export function DeleteSubmissionAlert({ submission }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeleteSubmission}>
+          <AlertDialogAction
+            onClick={handleDeleteSubmission}
+            className="bg-red-500"
+          >
             Continue
           </AlertDialogAction>
         </AlertDialogFooter>

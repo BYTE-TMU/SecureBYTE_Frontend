@@ -119,6 +119,8 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
+
+  // PUSH
 }
 
 export function useAuth() {

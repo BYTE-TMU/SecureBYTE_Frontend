@@ -15,6 +15,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { Link, useNavigate } from 'react-router';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   // Email & Password state & handlers
@@ -29,6 +30,15 @@ export default function LoginPage() {
 
   // Hide and show password
   const [showPassword, setShowPassword] = useState(false);
+
+  // Show toast notification when error changes
+  useEffect(() => {
+    if (error) {
+      toast.error('Authentication Error', {
+        description: error,
+      });
+    }
+  }, [error]);
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center ">
@@ -105,11 +115,6 @@ export default function LoginPage() {
           <Button onClick={githubSignIn} size="lg">
             Login with GitHub
           </Button>
-          {error ? (
-            <span className="text-destructive min-h-24">{error}</span>
-          ) : (
-            ''
-          )}
         </form>
       </CardContent>
       <CardFooter className="items-center justify-center">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import googleLogo from '../../assets/google-logo.svg';
 
 import {
@@ -15,6 +15,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { Link } from 'react-router';
 import { Eye, EyeClosed, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function SignUpPage() {
   // Email & Password state & handlers
@@ -29,6 +30,15 @@ export default function SignUpPage() {
 
   // Hide and show password
   const [showPassword, setShowPassword] = useState(false);
+
+  // Show toast notification when error changes
+  useEffect(() => {
+    if (error) {
+      toast.error('Authentication Error', {
+        description: error,
+      });
+    }
+  }, [error]);
 
   return (
     <Card className="p-11 rounded-none flex flex-col text-center justify-center">
@@ -108,11 +118,6 @@ export default function SignUpPage() {
           <Button onClick={githubSignIn} size="lg">
             Login with GitHub
           </Button>
-          {error ? (
-            <span className="text-destructive min-h-24">{error}</span>
-          ) : (
-            ''
-          )}
         </form>
       </CardContent>
       <CardFooter className="items-center justify-center">

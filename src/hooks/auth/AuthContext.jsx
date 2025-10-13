@@ -13,6 +13,54 @@ import {
 import { app } from '@/firebase';
 import { useNavigate } from 'react-router';
 
+// Helper function to convert Firebase error codes to user-friendly messages
+const getAuthErrorMessage = (error) => {
+  const errorCode = error?.code;
+
+  switch (errorCode) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Invalid email or password. Please try again.';
+
+    case 'auth/email-already-in-use':
+      return 'This email is already registered. Please login or use a different email.';
+
+    case 'auth/weak-password':
+      return 'Password is too weak. Please use at least 6 characters.';
+
+    case 'auth/invalid-email':
+      return 'Invalid email address. Please check and try again.';
+
+    case 'auth/operation-not-allowed':
+      return 'This sign-in method is not enabled. Please contact support.';
+
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists with this email using a different sign-in method. Please try another method.';
+
+    case 'auth/popup-closed-by-user':
+      return 'Sign-in was cancelled. Please try again.';
+
+    case 'auth/popup-blocked':
+      return 'Pop-up was blocked by your browser. Please allow pop-ups and try again.';
+
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized for sign-in operations.';
+
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please try again later.';
+
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your connection and try again.';
+
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.';
+
+    default:
+      return error?.message || 'An unexpected error occurred. Please try again.';
+  }
+};
+
 const AuthContext = createContext();
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -52,7 +100,7 @@ export function AuthProvider({ children }) {
       // Re-direct to DashboardPage
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(getAuthErrorMessage(err));
     }
   };
 
@@ -61,7 +109,7 @@ export function AuthProvider({ children }) {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError(err.message);
+      setError(getAuthErrorMessage(err));
     }
   };
 
@@ -72,7 +120,7 @@ export function AuthProvider({ children }) {
       // Re-direct to DashboardPage
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.message);
+      setError(getAuthErrorMessage(err));
     }
   };
   const githubSignIn = async () => {
@@ -88,8 +136,7 @@ export function AuthProvider({ children }) {
       }
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      // Common error to surface clearly when account exists with different provider
-      setError(err.message || 'GitHub sign-in failed');
+      setError(getAuthErrorMessage(err));
     }
   };
 

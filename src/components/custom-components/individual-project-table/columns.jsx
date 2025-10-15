@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 
 import { MoreHorizontal } from 'lucide-react';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
@@ -16,6 +17,60 @@ export const columns = [
   {
     accessorKey: 'filename',
     header: 'File Name',
+  },
+  {
+    accessorKey: 'review_types',
+    header: 'Review Types',
+    accessorFn: (row) => {
+      const types = [];
+      if (row.securityrev && row.securityrev.length > 0) types.push('Security');
+      if (row.logicrev && row.logicrev.length > 0) types.push('Logic');
+      if (row.testcases && row.testcases.length > 0) types.push('Test Cases');
+      return types.join(', ');
+    },
+    cell: ({ row }) => {
+      const submission = row.original;
+      const reviewTypes = [];
+
+      if (submission.securityrev && submission.securityrev.length > 0) {
+        reviewTypes.push(
+          <Badge key="security" variant="default" className="mr-1">
+            Security
+          </Badge>
+        );
+      }
+      if (submission.logicrev && submission.logicrev.length > 0) {
+        reviewTypes.push(
+          <Badge key="logic" variant="secondary" className="mr-1">
+            Logic
+          </Badge>
+        );
+      }
+      if (submission.testcases && submission.testcases.length > 0) {
+        reviewTypes.push(
+          <Badge key="testcases" variant="outline" className="mr-1">
+            Test Cases
+          </Badge>
+        );
+      }
+
+      return reviewTypes.length > 0 ? <div className="flex flex-wrap gap-1">{reviewTypes}</div> : <span className="text-muted-foreground">None</span>;
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue === 'all') return true;
+
+      const submission = row.original;
+      if (filterValue === 'security') {
+        return submission.securityrev && submission.securityrev.length > 0;
+      }
+      if (filterValue === 'logic') {
+        return submission.logicrev && submission.logicrev.length > 0;
+      }
+      if (filterValue === 'testcases') {
+        return submission.testcases && submission.testcases.length > 0;
+      }
+      return true;
+    },
   },
   {
     accessorKey: 'updated_at',

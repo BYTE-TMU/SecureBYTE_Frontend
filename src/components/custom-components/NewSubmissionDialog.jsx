@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { CirclePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUploadInput } from './FileUploadInput';
 import { toast } from 'sonner';
 
@@ -24,6 +24,20 @@ export function NewSubmissionDialog({ projectId, variant }) {
   const { setFilesForProject } = useProject();
   const [error, setError] = useState('');
   const [files, setFiles] = useState([]);
+  const [selectedFolder, setSelectedFolder] = useState('');
+  const [availableFolders, setAvailableFolders] = useState([]);
+
+  // Load available folders from sessionStorage
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+      const persisted = raw ? JSON.parse(raw) : {};
+      const folderPaths = Object.keys(persisted);
+      setAvailableFolders(['', ...folderPaths]); // '' means root
+    } catch (err) {
+      console.error('Error loading folders', err);
+    }
+  }, []);
 
   const parseFileContent = async (file) => {
     return new Promise((resolve, reject) => {
@@ -63,8 +77,14 @@ export function NewSubmissionDialog({ projectId, variant }) {
         console.log('About to create a submission', file.name);
         const fileContent = await parseFileContent(file);
         console.log('fileContent', fileContent);
+        
+        // Prepend folder path to filename if a folder is selected
+        const finalFilename = selectedFolder 
+          ? `${selectedFolder}/${file.name}` 
+          : file.name;
+        
         await createSubmission(user.uid, projectId, {
-          filename: file.name,
+          filename: finalFilename,
           code: fileContent === null ? 'Nothing for now' : fileContent,
           securityrev: [],
           logicrev: [],
@@ -130,6 +150,22 @@ export function NewSubmissionDialog({ projectId, variant }) {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="folder-select">Target Folder (Optional)</Label>
+              <select
+                id="folder-select"
+                value={selectedFolder}
+                onChange={(e) => setSelectedFolder(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Root (no folder)</option>
+                {availableFolders.slice(1).map((folder) => (
+                  <option key={folder} value={folder}>
+                    {folder}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="grid gap-3">
               <Label htmlFor="project-name">File Name</Label>
               {/* <Input

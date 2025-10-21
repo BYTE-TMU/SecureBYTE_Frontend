@@ -7,6 +7,8 @@ import {
   createSubmission,
   getProject,
   saveProject,
+  createFolder,
+  renameFolder,
 } from '@/api';
 import { toast } from 'sonner';
 
@@ -193,6 +195,86 @@ export function ProjectProvider({ children, autoFetch = false }) {
     }));
   };
 
+  // Create folder persisted in sessionStorage (local only)
+  const createFolderInProject = async ({ projectId, folderPath }) => {
+    // If we have a user, try to persist on backend, otherwise fallback to sessionStorage
+    if (!user) {
+      try {
+        const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+        const persisted = raw ? JSON.parse(raw) : {};
+        persisted[folderPath] = { path: folderPath };
+        sessionStorage.setItem('secureBYTE_custom_folders', JSON.stringify(persisted));
+        return { ok: true, fallback: true };
+      } catch (err) {
+        throw new Error('Failed to persist folder locally');
+      }
+    }
+
+    try {
+      setLoading(true);
+      const response = await createFolder(user.uid, projectId, { path: folderPath });
+      setLoading(false);
+      return response.data;
+    } catch (err) {
+      setLoading(false);
+      // fallback to sessionStorage
+      try {
+        const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+        const persisted = raw ? JSON.parse(raw) : {};
+        persisted[folderPath] = { path: folderPath };
+        sessionStorage.setItem('secureBYTE_custom_folders', JSON.stringify(persisted));
+        return { ok: true, fallback: true };
+      } catch (err2) {
+        throw new Error('Failed to create folder');
+      }
+    }
+  };
+
+  const renameFolderInProject = async ({ projectId, oldPath, newPath }) => {
+    if (!user) {
+      try {
+        const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+        const persisted = raw ? JSON.parse(raw) : {};
+        if (persisted[oldPath]) {
+          const v = persisted[oldPath];
+          delete persisted[oldPath];
+          persisted[newPath] = { ...v, path: newPath };
+        } else {
+          persisted[newPath] = { path: newPath };
+        }
+        sessionStorage.setItem('secureBYTE_custom_folders', JSON.stringify(persisted));
+        return { ok: true, fallback: true };
+      } catch (err) {
+        throw new Error('Failed to rename folder locally');
+      }
+    }
+
+    try {
+      setLoading(true);
+      const response = await renameFolder(user.uid, projectId, { old_path: oldPath, new_path: newPath });
+      setLoading(false);
+      return response.data;
+    } catch (err) {
+      setLoading(false);
+      // fallback to local rename
+      try {
+        const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+        const persisted = raw ? JSON.parse(raw) : {};
+        if (persisted[oldPath]) {
+          const v = persisted[oldPath];
+          delete persisted[oldPath];
+          persisted[newPath] = { ...v, path: newPath };
+        } else {
+          persisted[newPath] = { path: newPath };
+        }
+        sessionStorage.setItem('secureBYTE_custom_folders', JSON.stringify(persisted));
+        return { ok: true, fallback: true };
+      } catch (err2) {
+        throw new Error('Failed to rename folder');
+      }
+    }
+  };
+
   const getFilesFromProject = (projectId) => {
     return projectFiles[projectId] || [];
   };
@@ -227,6 +309,8 @@ export function ProjectProvider({ children, autoFetch = false }) {
         getFilesFromProject,
         setFilesForProject,
         createNewProject,
+        createFolderInProject,
+        renameFolderInProject,
         deleteOneProject,
         deleteProjectInBulk,
         createSubmissionForProject,

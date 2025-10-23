@@ -58,7 +58,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
 
   const [persistedFolders, setPersistedFolders] = useState(() => {
     try {
-      const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+      const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
       return raw ? JSON.parse(raw) : {};
     } catch (err) {
       console.error('Error loading persisted folders', err);
@@ -69,7 +69,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
   // Helper to update persistedFolders state and sessionStorage
   const persistFolders = (next) => {
     try {
-      sessionStorage.setItem('secureBYTE_custom_folders', JSON.stringify(next));
+      sessionStorage.setItem(`secureBYTE_custom_folders_${projectId}`, JSON.stringify(next));
       setPersistedFolders(next);
       setTreeKey(prev => prev + 1); // Force re-render without page reload
     } catch (err) {
@@ -233,7 +233,7 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
         await renameFolderInProject({ projectId, oldPath: draggedPath, newPath });
         
         // Update sessionStorage - remove old path and add new path, plus update all child folders
-        const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+        const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
         const persisted = raw ? JSON.parse(raw) : {};
         
         // Find and update all folders that start with the dragged path
@@ -386,7 +386,7 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                             try {
                             await renameFolderInProject({ projectId, oldPath: folder.path || folder.name, newPath: renameValue });
                               // update session storage view
-                            const raw = sessionStorage.getItem('secureBYTE_custom_folders');
+                            const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
                             const persisted = raw ? JSON.parse(raw) : {};
                             if (persisted[folder.path]) {
                               const v = persisted[folder.path];

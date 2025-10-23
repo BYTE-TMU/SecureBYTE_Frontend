@@ -26,18 +26,21 @@ export function NewSubmissionDialog({ projectId, variant }) {
   const [files, setFiles] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState('');
   const [availableFolders, setAvailableFolders] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Load available folders from sessionStorage
+  // Load available folders from sessionStorage whenever dialog opens
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('secureBYTE_custom_folders');
-      const persisted = raw ? JSON.parse(raw) : {};
-      const folderPaths = Object.keys(persisted);
-      setAvailableFolders(['', ...folderPaths]); // '' means root
-    } catch (err) {
-      console.error('Error loading folders', err);
+    if (isOpen) {
+      try {
+        const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+        const persisted = raw ? JSON.parse(raw) : {};
+        const folderPaths = Object.keys(persisted);
+        setAvailableFolders(['', ...folderPaths]); // '' means root
+      } catch (err) {
+        console.error('Error loading folders', err);
+      }
     }
-  }, []);
+  }, [isOpen, projectId]);
 
   const parseFileContent = async (file) => {
     return new Promise((resolve, reject) => {
@@ -124,7 +127,7 @@ export function NewSubmissionDialog({ projectId, variant }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <form>
         <DialogTrigger asChild>
           {variant === 'icon' ? (

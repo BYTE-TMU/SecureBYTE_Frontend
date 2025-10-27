@@ -78,6 +78,15 @@ export const updateSubmission = (userId, submissionId, submission) =>
       headers: { 'Content-Type': 'application/json' },
     },
   );
+
+// Helper function to rename/move a file by updating its filename
+export const moveSubmission = (userId, submissionId, newFilename) =>
+  axios.put(
+    `${API_URL}/users/${userId}/submissions/${submissionId}`,
+    { filename: newFilename },
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+
 export const deleteSubmission = (userId, submissionId) =>
   axios.delete(`${API_URL}/users/${userId}/submissions/${submissionId}`);
 

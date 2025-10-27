@@ -18,7 +18,8 @@ export default function ResizableCodeEditor({
   activeFile, 
   setActiveFile, 
   projectId,
-  isSecReviewLoading
+  isSecReviewLoading,
+  refetchFileTree
 }) {
   const { trackFileUpdate } = useUpdateFiles(); 
 
@@ -115,6 +116,7 @@ export default function ResizableCodeEditor({
         <FileTree
           tree={tree}
           onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
+          refetchFileTree={refetchFileTree}
         />{' '}
       </ResizablePanel>
       <ResizableHandle />

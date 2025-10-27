@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   SidebarContent,
   SidebarGroup,
@@ -41,12 +41,16 @@ import {
 import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
+import { toast } from 'sonner';
+import { moveSubmission } from '@/api';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
 import { useParams } from 'react-router';
 import { ContextMenuLabel } from '@radix-ui/react-context-menu';
 
-export default function FileTree({ tree, onFileSelectFromFileTree }) {
+export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTree }) {
   const { projectId } = useParams();
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col text-sm">
@@ -69,12 +73,18 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
                     folder={value}
                     key={key}
                     onFileSelect={onFileSelectFromFileTree}
+                    projectId={projectId}
+                    user={user}
+                    refetchFileTree={refetchFileTree}
                   />
                 ) : (
                   <File
                     file={value}
                     index={key}
                     onFileSelect={onFileSelectFromFileTree}
+                    projectId={projectId}
+                    user={user}
+                    refetchFileTree={refetchFileTree}
                   />
                 ),
               )}
@@ -86,7 +96,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree }) {
   );
 }
 
-function Folder({ folder, index, onFileSelect }) {
+function Folder({ folder, index, onFileSelect, projectId, user, refetchFileTree }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
@@ -121,9 +131,19 @@ function Folder({ folder, index, onFileSelect }) {
                     folder={value}
                     index={key}
                     onFileSelect={onFileSelect}
+                    projectId={projectId}
+                    user={user}
+                    refetchFileTree={refetchFileTree}
                   />
                 ) : (
-                  <File file={value} index={key} onFileSelect={onFileSelect} />
+                  <File
+                    file={value}
+                    index={key}
+                    onFileSelect={onFileSelect}
+                    projectId={projectId}
+                    user={user}
+                    refetchFileTree={refetchFileTree}
+                  />
                 )}
               </SidebarMenuSub>
             </CollapsibleContent>
@@ -133,29 +153,89 @@ function Folder({ folder, index, onFileSelect }) {
   );
 }
 
-function File({ file, index, onFileSelect }) {
-  const [menuOpen, setMenuOpen] = useState(false);
+function File({ file, index, onFileSelect, projectId, user, refetchFileTree }) {
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(file.name);
+  const inputRef = useRef(null);
 
-  // Handle right-click on file component
-  const handleContextMenu = (e) => {
-    e.preventDefault();
-    setMenuOpen(true);
+  // Auto-focus input when renaming starts
+  useEffect(() => {
+    if (renaming && inputRef.current) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 0);
+    }
+  }, [renaming]);
+
+  const handleRename = async () => {
+    if (!renameValue.trim() || renameValue === file.name) {
+      setRenaming(false);
+      setRenameValue(file.name);
+      return;
+    }
+
+    try {
+      // Update filename via backend API
+      await moveSubmission(user.uid, file.id, renameValue);
+      toast.success('File renamed');
+      setRenaming(false);
+      
+      // Refetch file tree to update UI
+      if (refetchFileTree) {
+        await refetchFileTree();
+      }
+    } catch (err) {
+      console.error('Failed to rename file', err);
+      toast.error('Failed to rename file');
+      setRenameValue(file.name);
+      setRenaming(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRename();
+    } else if (e.key === 'Escape') {
+      setRenaming(false);
+      setRenameValue(file.name);
+    }
   };
 
   return (
     <SidebarMenuItem
       key={index}
-      onClick={() => onFileSelect(file)}
-      className="roudned-lg"
+      onClick={() => !renaming && onFileSelect(file)}
+      className="rounded-lg"
     >
       <ContextMenu>
         <ContextMenuTrigger className="flex gap-2 items-center">
           <SidebarMenuButton>
-            <FileCode className="size-4" />
-            {file.name}
+            <FileCode className="size-4 flex-shrink-0" />
+            {renaming ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onBlur={handleRename}
+                onKeyDown={handleKeyDown}
+                className="flex-1 bg-transparent border-b border-input focus:outline-none focus:border-ring"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span className="truncate">{file.name}</span>
+            )}
           </SidebarMenuButton>
         </ContextMenuTrigger>
         <ContextMenuContent>
+          <ContextMenuItem onClick={() => setRenaming(true)}>
+            Rename
+          </ContextMenuItem>
           <ContextMenuItem>
             <DeleteSubmissionAlert submission={file} />
           </ContextMenuItem>

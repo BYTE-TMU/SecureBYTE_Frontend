@@ -26,7 +26,7 @@ export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
-  const { tree } = useGetFileStructure(projectId);
+  const { tree, refetchFileTree } = useGetFileStructure(projectId);
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
   const projectName = location.state?.projectName;
@@ -263,6 +263,7 @@ export default function IndividualProjectPage() {
         activeFile={activeFile}
         setActiveFile={setActiveFile}
         isSecReviewLoading={isSecReviewLoading}
+        refetchFileTree={refetchFileTree}
       />
       <IndividualProjectTable columns={columns} data={submissions} />
     </main>

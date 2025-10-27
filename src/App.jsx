@@ -31,6 +31,7 @@ import { Outlet, useNavigate } from 'react-router';
 import { useAuth } from './hooks/auth/AuthContext';
 import { ProjectProvider } from './hooks/project/ProjectContext';
 import { Toaster } from './components/ui/sonner'; 
+import ReviewTypeBadge from './components/custom-components/ReviewTypeBadge';
 
 
 const auth = getAuth(app);

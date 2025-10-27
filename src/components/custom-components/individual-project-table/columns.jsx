@@ -12,11 +12,42 @@ import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal } from 'lucide-react';
 import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 import EditSubmissionSheet from '../EditSubmissionSheet';
+import { ReviewTypeBadge } from '../ReviewTypeBadge';
 
 export const columns = [
   {
     accessorKey: 'filename',
     header: 'File Name',
+  },
+  {
+    id: 'latest_review_type',
+    header: 'Latest Review Type',
+    accessorFn: (row) => {
+      // Determine the latest review type based on which arrays have content
+      // Since we don't have individual timestamps, we check in order
+      if (row.securityrev && row.securityrev.length > 0) return 'security';
+      if (row.logicrev && row.logicrev.length > 0) return 'logic';
+      if (row.testcases && row.testcases.length > 0) return 'testcases';
+      return null;
+    },
+    cell: ({ row }) => {
+      const submission = row.original;
+      let latestType = null;
+
+      // Determine which review type was most recent
+      // Check in reverse priority order so the first one found is shown
+      if (submission.securityrev && submission.securityrev.length > 0) {
+        latestType = 'security';
+      }
+      if (submission.logicrev && submission.logicrev.length > 0) {
+        latestType = 'logic';
+      }
+      if (submission.testcases && submission.testcases.length > 0) {
+        latestType = 'testcases';
+      }
+
+      return <ReviewTypeBadge type={latestType} />;
+    },
   },
   {
     accessorKey: 'review_types',

@@ -14,18 +14,34 @@ import { Label } from '@/components/ui/label';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 export function NewProjectDialog() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [error, setError] = useState('');
   const { createNewProject } = useProject(); 
+  const navigate = useNavigate();
 
   // Use ProjectProvider to create a new project and handle errors locally.
   const handleCreateProject = async () => {
     try {
-      await createNewProject({ newProjectName, newProjectDesc}); 
-      setError(''); 
+      const newProject = await createNewProject({ newProjectName, newProjectDesc}); 
+      
+      // Save project name before clearing form
+      const savedProjectName = newProjectName;
+      const projectId = newProject.data.projectid;
+      
+      // Clear form fields
+      setNewProjectName('');
+      setNewProjectDesc('');
+      
+      // Navigate to the individual project page (LoadingPage will show while data loads)
+      navigate(`/projects/${projectId}`, {
+        state: { projectName: savedProjectName }
+      });
+      
+      // Note: LoadingPage.jsx would be shown in IndividualProjectPage as it blocks rendering until submissionsLoading and treeLoading are complete
 
     } catch(err) {
       console.error('Error creating project:', err); 

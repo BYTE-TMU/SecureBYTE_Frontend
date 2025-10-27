@@ -15,6 +15,7 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getTestCases } from '@/api';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 import { useProject } from '@/hooks/project/ProjectContext';
+import LoadingView from '@/components/ui/loading-view';
 
 // TODO: Save the currently active file to backend first, then generate the review.
 
@@ -114,7 +115,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Temporary loading view
+    return <LoadingView message="Generating test cases..." variant="full" />;
   }
 
   return (

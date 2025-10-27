@@ -19,6 +19,13 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 import SubmissionDialog from '../UploadFileDialog';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import { useParams } from 'react-router';
@@ -29,6 +36,7 @@ export default function IndividualProjectTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
+  const [reviewTypeFilter, setReviewTypeFilter] = useState('all');
 
   const table = useReactTable({
     data,
@@ -48,6 +56,18 @@ export default function IndividualProjectTable({ columns, data }) {
     },
   });
 
+  const handleReviewTypeFilterChange = (value) => {
+    setReviewTypeFilter(value);
+    table.getColumn('review_types')?.setFilterValue(value);
+  };
+
+  const reviewTypeLabels = {
+    all: 'All Reviews',
+    security: 'Security',
+    logic: 'Logic',
+    testcases: 'Test Cases',
+  };
+
   return (
     <div>
       <h2 className='font-bold text-3xl mt-6 text-primary'>Review History</h2>
@@ -62,6 +82,28 @@ export default function IndividualProjectTable({ columns, data }) {
             }
             className="max-w-sm"
           />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                {reviewTypeLabels[reviewTypeFilter]}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('all')}>
+                All Reviews
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('security')}>
+                Security
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('logic')}>
+                Logic
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('testcases')}>
+                Test Cases
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="text-muted-foreground flex-1 text-sm">

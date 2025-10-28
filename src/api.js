@@ -70,21 +70,9 @@ export const createSubmission = (userId, projectId, submission) =>
       headers: { 'Content-Type': 'application/json' },
     },
   );
-// Folder management API helpers
-export const createFolder = (userId, projectId, folder) =>
-  axios.post(
-    `${API_URL}/users/${userId}/projects/${projectId}/folders`,
-    folder,
-    { headers: { 'Content-Type': 'application/json' } },
-  );
 
-export const renameFolder = (userId, projectId, body) =>
-  axios.post(
-    `${API_URL}/users/${userId}/projects/${projectId}/folders/rename`,
-    body,
-    { headers: { 'Content-Type': 'application/json' } },
-  );
-
+// File/folder movement API - updates submission filename (which includes folder path)
+// This is how folders work: they're implicit in the file path, not separate backend entities
 export const moveSubmission = (userId, submissionId, newFilename) =>
   axios.put(
     `${API_URL}/users/${userId}/submissions/${submissionId}`,

@@ -185,7 +185,7 @@ export default function IndividualProjectPage() {
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
       <div className="my-3 flex gap-2">
         {hasGithubToken && (
-          <Button onClick={openRepoDialog} className="bg-secure-orange">
+          <Button onClick={openRepoDialog} variant="default">
             Link GitHub Repository
           </Button>
         )}

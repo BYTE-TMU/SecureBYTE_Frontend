@@ -52,7 +52,7 @@ export default function SubmissionDialog() {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button type="submit" className="bg-secure-orange">
+          <Button type="submit" variant="default">
             Prepare For Analysis
           </Button>
         </DialogFooter>

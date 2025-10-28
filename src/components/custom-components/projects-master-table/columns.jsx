@@ -15,7 +15,7 @@ import { ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router';
 import EditProjectSheet from '../EditProjectSheet';
 import { DeleteProjectAlert } from '../DeleteProjectAlert';
-//test
+
 export const getProjectsMasterTableColumns = (
   openDropdowns,
   setOpenDropdowns,
@@ -42,7 +42,17 @@ export const getProjectsMasterTableColumns = (
   },
   {
     accessorKey: 'project_name',
-    header: 'Project Name',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Project Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const project = row.original;
       const name = project.project_name;

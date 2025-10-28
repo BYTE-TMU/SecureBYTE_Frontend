@@ -98,26 +98,127 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
 
 function Folder({ folder, index, onFileSelect, projectId, user, refetchFileTree }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(folder.name);
+  const inputRef = useRef(null);
+
+  // Auto-focus input when renaming starts
+  useEffect(() => {
+    if (renaming && inputRef.current) {
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 0);
+    }
+  }, [renaming]);
+
+  const handleRename = async () => {
+    if (!renameValue.trim() || renameValue === folder.name) {
+      setRenaming(false);
+      setRenameValue(folder.name);
+      return;
+    }
+
+    try {
+      const oldPath = folder.path || folder.name;
+      const pathParts = oldPath.split('/');
+      pathParts[pathParts.length - 1] = renameValue;
+      const newPath = pathParts.join('/');
+
+      // Find all files in this folder and update their paths
+      const filesToUpdate = [];
+      const findFilesInFolder = (node) => {
+        if (!node || !node.children) return;
+        Object.values(node.children).forEach((child) => {
+          if (child.type === 'file') {
+            const oldFilePath = child.path;
+            const newFilePath = oldFilePath.replace(oldPath, newPath);
+            filesToUpdate.push({ id: child.id, newPath: newFilePath });
+          } else if (child.type === 'folder') {
+            findFilesInFolder(child);
+          }
+        });
+      };
+
+      findFilesInFolder(folder);
+
+      // Update all files
+      if (user && filesToUpdate.length > 0) {
+        await Promise.all(
+          filesToUpdate.map(async (file) => {
+            try {
+              await moveSubmission(user.uid, file.id, file.newPath);
+            } catch (err) {
+              console.error(`Failed to move file ${file.id}`, err);
+            }
+          })
+        );
+      }
+
+      toast.success(`Folder renamed${filesToUpdate.length > 0 ? ` with ${filesToUpdate.length} file(s)` : ''}`);
+      setRenaming(false);
+
+      // Refetch file tree
+      if (refetchFileTree) {
+        await refetchFileTree();
+      }
+    } catch (err) {
+      console.error('Failed to rename folder', err);
+      toast.error('Failed to rename folder');
+      setRenameValue(folder.name);
+      setRenaming(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRename();
+    } else if (e.key === 'Escape') {
+      setRenaming(false);
+      setRenameValue(folder.name);
+    }
+  };
+
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
         <ContextMenu>
-          <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
+          <CollapsibleTrigger asChild onClick={() => !renaming && setIsOpen(!isOpen)}>
             <div>
               <ContextMenuTrigger>
-                <SidebarMenuButton>
-                  {isOpen ? (
-                    <ChevronDown className="stroke-secure-orange" />
+                <SidebarMenuButton className="overflow-hidden">
+                  {!renaming && (isOpen ? (
+                    <ChevronDown className="stroke-secure-orange flex-shrink-0" />
                   ) : (
-                    <ChevronRight className="stroke-secure-orange" />
-                  )}
-                  <FolderCode className="size-3" />
+                    <ChevronRight className="stroke-secure-orange flex-shrink-0" />
+                  ))}
+                  <FolderCode className="size-3 flex-shrink-0" />
 
-                  {folder.name}
+                  {renaming ? (
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="flex-1 bg-transparent border-b border-input focus:outline-none focus:border-ring"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span className="truncate">{folder.name}</span>
+                  )}
                 </SidebarMenuButton>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem>Rename Folder</ContextMenuItem>
+                <ContextMenuItem onClick={(e) => {
+                  e.preventDefault();
+                  setRenaming(true);
+                }}>
+                  Rename Folder
+                </ContextMenuItem>
               </ContextMenuContent>
             </div>
           </CollapsibleTrigger>
@@ -157,21 +258,32 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree }) {
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(file.name);
   const inputRef = useRef(null);
+  const justStartedRenaming = useRef(false);
 
   // Auto-focus input when renaming starts
   useEffect(() => {
     if (renaming && inputRef.current) {
+      justStartedRenaming.current = true;
       // Use setTimeout to ensure DOM is updated
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
         }
+        // Allow blur after a short delay
+        setTimeout(() => {
+          justStartedRenaming.current = false;
+        }, 100);
       }, 0);
     }
   }, [renaming]);
 
   const handleRename = async () => {
+    // Prevent blur from triggering immediately after opening rename
+    if (justStartedRenaming.current) {
+      return;
+    }
+
     if (!renameValue.trim() || renameValue === file.name) {
       setRenaming(false);
       setRenameValue(file.name);

@@ -49,5 +49,5 @@ export function useGetFileStructure(projectId) {
     return tree;
   }, [submissions]);
 
-  return { tree: fileTree, refetchFileTree: refetch };
+  return { tree: fileTree, refetch };
 }

@@ -11,15 +11,15 @@ import ReviewModal from '../ai-review-panel/ReviewModal';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
 export default function ResizableCodeEditor({ 
-  tree, 
+  tree,
+  refetchFileTree,
   securityReview, 
   openFiles, 
   setOpenFiles, 
   activeFile, 
   setActiveFile, 
   projectId,
-  isSecReviewLoading,
-  refetchFileTree
+  isSecReviewLoading
 }) {
   const { trackFileUpdate } = useUpdateFiles(); 
 
@@ -28,6 +28,22 @@ export default function ResizableCodeEditor({
     console.log("Active file updated:", activeFile);
   }
 }, [activeFile]);
+
+  // Handle file rename to update open tabs
+  const handleFileRenamed = (oldFile, newName, newPath) => {
+    setOpenFiles((prevFiles) =>
+      prevFiles.map((file) =>
+        file.id === oldFile.id
+          ? { ...file, name: newName, path: newPath }
+          : file
+      )
+    );
+    
+    // Update active file if it's the one being renamed
+    if (activeFile && activeFile.id === oldFile.id) {
+      setActiveFile({ ...activeFile, name: newName, path: newPath });
+    }
+  };
 
   const openNewFile = (targetFile) => {
     console.log('Current open files', openFiles);
@@ -115,8 +131,9 @@ export default function ResizableCodeEditor({
       <ResizablePanel defaultSize={20}>
         <FileTree
           tree={tree}
-          onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
           refetchFileTree={refetchFileTree}
+          onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
+          onFileRenamed={handleFileRenamed} // Callback for when a file is renamed
         />{' '}
       </ResizablePanel>
       <ResizableHandle />

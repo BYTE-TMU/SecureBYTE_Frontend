@@ -11,7 +11,8 @@ import ReviewModal from '../ai-review-panel/ReviewModal';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
 export default function ResizableCodeEditor({ 
-  tree, 
+  tree,
+  refetchFileTree,
   securityReview, 
   openFiles, 
   setOpenFiles, 
@@ -114,6 +115,7 @@ export default function ResizableCodeEditor({
       <ResizablePanel defaultSize={20}>
         <FileTree
           tree={tree}
+          refetchFileTree={refetchFileTree}
           onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
         />{' '}
       </ResizablePanel>

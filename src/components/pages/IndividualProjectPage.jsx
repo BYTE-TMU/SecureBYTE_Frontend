@@ -26,7 +26,7 @@ export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
-  const { tree } = useGetFileStructure(projectId);
+  const { tree, refetch: refetchFileTree } = useGetFileStructure(projectId);
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
   const projectName = location.state?.projectName;
@@ -72,7 +72,7 @@ export default function IndividualProjectPage() {
   const {
     submissions,
     error: submissionsError,
-    refetch,
+    refetch: refetchSubmissions,
   } = useGetSubmissions(projectId);
 
   console.log(
@@ -132,7 +132,7 @@ export default function IndividualProjectPage() {
         `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Link+import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -166,7 +166,7 @@ export default function IndividualProjectPage() {
         `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -257,6 +257,7 @@ export default function IndividualProjectPage() {
 
       <ResizableCodeEditor
         tree={tree}
+        refetchFileTree={refetchFileTree}
         securityReview={securityReview}
         openFiles={openFiles}
         setOpenFiles={setOpenFiles}

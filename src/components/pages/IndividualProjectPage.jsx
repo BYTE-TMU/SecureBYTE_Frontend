@@ -28,6 +28,7 @@ export default function IndividualProjectPage() {
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
   const { tree, loading: treeLoading } = useGetFileStructure(projectId);
+  const { submissions, error: submissionsError, loading: submissionsLoading, refetch,} = useGetSubmissions(projectId);
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
   const projectName = location.state?.projectName;
@@ -70,26 +71,19 @@ export default function IndividualProjectPage() {
     fetchData();
   }, [projectId]);
 
-  const {
-    submissions,
-    error: submissionsError,
-    loading: submissionsLoading,
-    refetch,
-  } = useGetSubmissions(projectId);
-
   console.log(
     `[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`,
     submissions,
   );
 
+  const hasGithubToken = useMemo(() => {
+    return Boolean(localStorage.getItem('github_access_token'));
+  }, []);
+
   // Show loading page while data is being fetched
   if (submissionsLoading || treeLoading) {
     return <LoadingPage />;
   }
-
-  const hasGithubToken = useMemo(() => {
-    return Boolean(localStorage.getItem('github_access_token'));
-  }, []);
 
   // Log submissions info after loading is complete
   console.log(`inside indiv project: ${projectId}`);

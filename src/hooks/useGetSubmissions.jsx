@@ -17,7 +17,9 @@ export function useGetSubmissions(projectId) {
     console.log(`[SUBMISSIONS] Fetching submissions for project ${projectId}`);
     setLoading(true);
     try {
+      console.time('[SUBMISSIONS] Fetch time');
       const response = await getSubmissions(user.uid, projectId);
+      console.timeEnd('[SUBMISSIONS] Fetch time');
       console.log(`[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`, response.data);
       setSubmissions(response.data);
       setError('');

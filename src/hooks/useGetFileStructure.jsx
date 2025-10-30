@@ -5,6 +5,7 @@ export function useGetFileStructure(projectId) {
   const { submissions, error, loading, refetch } = useGetSubmissions(projectId);
 
   const fileTree = useMemo(() => {
+    console.time('[FILETREE] Build time');
     const tree = {};
 
     submissions.forEach((submission) => {
@@ -46,6 +47,7 @@ export function useGetFileStructure(projectId) {
         }
       });
     });
+    console.timeEnd('[FILETREE] Build time');
     return tree;
   }, [submissions]);
 

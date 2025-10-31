@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useProject } from '../../hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { useMemo } from 'react';
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -27,8 +27,17 @@ export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
-  const { tree, loading: treeLoading, refetch: refetchFileTree } = useGetFileStructure(projectId);
-  const { submissions, error: submissionsError, loading: submissionsLoading, refetch,} = useGetSubmissions(projectId);
+  const {
+    tree,
+    loading: treeLoading,
+    refetch: refetchFileTree,
+  } = useGetFileStructure(projectId);
+  const {
+    submissions,
+    error: submissionsError,
+    loading: submissionsLoading,
+    refetch: refetchSubmissions,
+  } = useGetSubmissions(projectId);
 
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
@@ -71,12 +80,6 @@ export default function IndividualProjectPage() {
 
     fetchData();
   }, [projectId]);
-
-  const {
-    submissions,
-    error: submissionsError,
-    refetch: refetchSubmissions,
-  } = useGetSubmissions(projectId);
 
   console.log(
     `[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`,

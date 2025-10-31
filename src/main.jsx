@@ -5,6 +5,8 @@ import App from './App.jsx';
 import DashboardPage from './components/pages/DashboardPage';
 import CodeEditorPage from './components/pages/CodeEditorPage';
 import IndividualProjectPage from './components/pages/IndividualProjectPage';
+import AccountPage from './components/pages/AccountPage';
+import NotificationsPage from './components/pages/NotificationsPage';
 import { AuthProvider } from './hooks/auth/AuthContext';
 import AuthLayout from './components/layouts/AuthLayout';
 import LoginPage from './components/pages/LoginPage';
@@ -34,6 +36,8 @@ createRoot(document.getElementById('root')).render(
               />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/loading" element={<LoadingPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/projects">
               {console.log('inside')}{' '}
               <Route path=":projectId" element={<IndividualProjectPage />} />

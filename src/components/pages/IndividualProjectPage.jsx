@@ -27,8 +27,9 @@ export default function IndividualProjectPage() {
   let { projectId } = useParams();
   const { fetchProjectById } = useProject();
   const { user } = useAuth();
-  const { tree, loading: treeLoading } = useGetFileStructure(projectId);
+  const { tree, loading: treeLoading, refetch: refetchFileTree } = useGetFileStructure(projectId);
   const { submissions, error: submissionsError, loading: submissionsLoading, refetch,} = useGetSubmissions(projectId);
+
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
   const projectName = location.state?.projectName;
@@ -70,6 +71,12 @@ export default function IndividualProjectPage() {
 
     fetchData();
   }, [projectId]);
+
+  const {
+    submissions,
+    error: submissionsError,
+    refetch: refetchSubmissions,
+  } = useGetSubmissions(projectId);
 
   console.log(
     `[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`,
@@ -137,7 +144,7 @@ export default function IndividualProjectPage() {
         `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Link+import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -171,7 +178,7 @@ export default function IndividualProjectPage() {
         `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -260,6 +267,7 @@ export default function IndividualProjectPage() {
 
       <ResizableCodeEditor
         tree={tree}
+        refetchFileTree={refetchFileTree}
         securityReview={securityReview}
         openFiles={openFiles}
         setOpenFiles={setOpenFiles}

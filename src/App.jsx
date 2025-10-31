@@ -92,7 +92,7 @@ function App() {
   if (user) {
     return (
       <ProjectProvider autoFetch={true}>
-        <SidebarProvider defaultOpen={false} name={'primary_sidebar'}>
+        <SidebarProvider defaultOpen={true} name={'primary_sidebar'}>
           <NavigationBar isSignedIn={isSignUp} />
           <AppSidebar />
             <main className="w-screen">

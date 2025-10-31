@@ -165,24 +165,27 @@ export function ProjectProvider({ children, autoFetch = false }) {
     });
   };
 
-  const createSubmissionForProject = ({ projectId, files }) => {
+  const createSubmissionForProject = async ({ projectId, files }) => {
     console.log('Calling createSubmissionForProject');
     try {
-      files.map(async (file) => {
-        const fileContent = await parseFileContent(file);
-        await createSubmission(user.uid, projectId, {
-          filename: file.name,
-          code: fileContent === null ? 'Nothing for now' : fileContent,
-          securityRev: [],
-          logicRev: [],
-          testcases: [],
-          reviewpdf: '',
-        });
-      });
+      await Promise.all(
+        files.map(async (file) => {
+          const fileContent = await parseFileContent(file);
+          await createSubmission(user.uid, projectId, {
+            filename: file.name,
+            code: fileContent === null ? 'Nothing for now' : fileContent,
+            securityRev: [],
+            logicRev: [],
+            testcases: [],
+            reviewpdf: '',
+          });
+        })
+      );
 
-      console.log('all files uplaoded');
+      console.log('all files uploaded');
     } catch (error) {
-      console.log(`Failed to create new project ${error}`);
+      console.error(`Failed to create submissions: ${error}`);
+      throw error;
     }
   };
   const setFilesForProject = ({ projectId, files }) => {

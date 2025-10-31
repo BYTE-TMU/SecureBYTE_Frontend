@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect} from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -23,6 +23,7 @@ import { CirclePlus } from 'lucide-react';
 import { NewProjectDialog } from '../NewProjectDialog';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { toast } from 'sonner';
+import { ClimbingBoxLoader } from 'react-spinners';
 
 export default function ProjectsMasterTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
@@ -97,7 +98,11 @@ export default function ProjectsMasterTable({ columns, data }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Temporary loading view
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClimbingBoxLoader color="#003092" />
+      </div>
+    ); // Temporary loading view
   }
 
   return (

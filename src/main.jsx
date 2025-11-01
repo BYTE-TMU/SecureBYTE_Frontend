@@ -11,6 +11,7 @@ import LoginPage from './components/pages/LoginPage';
 import SignUpPage from './components/pages/SignUpPage';
 import ProtectedRoute from './utils/ProtectedRoute';
 import LoadingPage from './components/pages/LoadingPage';
+import AccountPage from './components/pages/AccountPage';
 
 createRoot(document.getElementById('root')).render(
   // LATER: Separate routes into different groups (e.g., public, authentication, protected) when landing page is added.
@@ -28,14 +29,14 @@ createRoot(document.getElementById('root')).render(
         {/* Protected routes for authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route element={<App />}>
-              <Route
-                path="/code-editor"
-                element={<CodeEditorPage className="overflow-y-hidden" />}
-              />
+            <Route
+              path="/code-editor"
+              element={<CodeEditorPage className="overflow-y-hidden" />}
+            />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/account" element={<AccountPage />} />
             <Route path="/loading" element={<LoadingPage />} />
             <Route path="/projects">
-              {console.log('inside')}{' '}
               <Route path=":projectId" element={<IndividualProjectPage />} />
             </Route>
           </Route>

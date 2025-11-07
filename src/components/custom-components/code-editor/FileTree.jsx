@@ -45,14 +45,16 @@ import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 import { useParams } from 'react-router';
 import { ContextMenuLabel } from '@radix-ui/react-context-menu';
 
-export default function FileTree({ tree, onFileSelectFromFileTree }) {
+export default function FileTree({ tree, projectName, onFileSelectFromFileTree }) {
   const { projectId } = useParams();
 
   return (
     <div className="flex flex-col text-sm">
       {' '}
       <SidebarHeader className="flex flex-row items-center justify-between bg-secondary">
-        <h2 className="font-medium">Project Name</h2>
+        <h2 className="font-medium truncate" title={projectName}>
+          {projectName || 'Project Name'}
+        </h2>
         <div className="flex flex-row items-center gap-2">
           {/* <FilePlus className="size-4" /> */}
           <NewSubmissionDialog variant={'icon'} projectId={projectId} />

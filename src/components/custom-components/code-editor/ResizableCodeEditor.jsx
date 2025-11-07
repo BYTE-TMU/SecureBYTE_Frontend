@@ -10,14 +10,15 @@ import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
-export default function ResizableCodeEditor({ 
-  tree, 
-  securityReview, 
-  openFiles, 
-  setOpenFiles, 
-  activeFile, 
-  setActiveFile, 
+export default function ResizableCodeEditor({
+  tree,
+  securityReview,
+  openFiles,
+  setOpenFiles,
+  activeFile,
+  setActiveFile,
   projectId,
+  projectName,
   isSecReviewLoading
 }) {
   const { trackFileUpdate } = useUpdateFiles(); 
@@ -109,16 +110,17 @@ export default function ResizableCodeEditor({
   return (
     <ResizablePanelGroup
       direction="horizontal"
-      className="border rounded-lg w-full"
+      className="w-full"
     >
-      <ResizablePanel defaultSize={20}>
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
         <FileTree
           tree={tree}
+          projectName={projectName}
           onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
         />{' '}
       </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel className="h-screen">
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={60} minSize={40} className="h-screen">
         <FileTabBar
           openFiles={openFiles}
           activeFile={activeFile}
@@ -126,16 +128,16 @@ export default function ResizableCodeEditor({
           onCloseFile={closeFile}
           onSwitchTab={switchTab}
         />
-        <FileTabContent 
-          activeFile={activeFile} 
+        <FileTabContent
+          activeFile={activeFile}
           isDarkTheme={false}
           onEditorChange={updateFileContent}
         />
       </ResizablePanel>
-      <ResizableHandle />
-       <ResizablePanel defaultSize={25}>
-        <ReviewModal 
-          activeFile={activeFile} 
+      <ResizableHandle withHandle />
+       <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <ReviewModal
+          activeFile={activeFile}
           securityReview={securityReview}
           projectId={projectId}
           isSecReviewLoading={isSecReviewLoading}

@@ -21,6 +21,7 @@ import React, { useState, useEffect } from 'react';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
+import { NewSubmissionDialog } from '../custom-components/NewSubmissionDialog';
 import LoadingPage from './LoadingPage';
 
 export default function IndividualProjectPage() {
@@ -202,6 +203,11 @@ export default function IndividualProjectPage() {
             Link GitHub Repository
           </Button>
         )}
+        <NewSubmissionDialog
+          projectId={projectId}
+          refetchSubmissions={refetchSubmissions}
+          refetchFileTree={refetchFileTree}
+        />
         <GenerateSecurityReviewSheet
           submissions={submissions}
           projectId={projectId}

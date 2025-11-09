@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { CirclePlus } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 
 export function NewProjectDialog() {
@@ -31,10 +32,9 @@ export function NewProjectDialog() {
       // Save project name before clearing form
       const savedProjectName = newProjectName;
       const projectId = newProject.data.projectid;
-      
-      // Clear form fields
-      setNewProjectName('');
-      setNewProjectDesc('');
+
+      // Show success message and navigate to the project page
+      toast.success('Project created successfully');
       
       // Navigate to the individual project page (LoadingPage will show while data loads)
       navigate(`/projects/${projectId}`, {

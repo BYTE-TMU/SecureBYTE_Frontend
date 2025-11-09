@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { FileUploadInput } from './FileUploadInput';
 import { toast } from 'sonner';
 
-export function NewSubmissionDialog({ projectId, variant }) {
+export function NewSubmissionDialog({ projectId, variant, refetchSubmissions, refetchFileTree, }) {
   const { user } = useAuth();
   const { setFilesForProject } = useProject();
   const [error, setError] = useState('');
@@ -76,53 +76,45 @@ export function NewSubmissionDialog({ projectId, variant }) {
       );
 
     try {
-      (files.map(async (file) => {
-        console.log('About to create a submission', file.name);
-        const fileContent = await parseFileContent(file);
-        console.log('fileContent', fileContent);
-        
-        // Prepend folder path to filename if a folder is selected
-        const finalFilename = selectedFolder 
-          ? `${selectedFolder}/${file.name}` 
-          : file.name;
-        
-        await createSubmission(user.uid, projectId, {
-          filename: finalFilename,
-          code: fileContent === null ? 'Nothing for now' : fileContent,
-          securityrev: [],
-          logicrev: [],
-          testcases: [],
-          reviewpdf: '',
-        });
-      }),
-        // })
-        // console.log('About to create a submission', files[0].name);
-        // // Parse the file content
-        // const fileContent = await parseFileContent(files[0]);
-        // console.log('fileContent', fileContent);
+      // wait for ALL uploads to finish
+      await Promise.all(
+        files.map(async (file) => {
+          console.log('About to create a submission', file.name);
+          const fileContent = await parseFileContent(file);
+          console.log('fileContent', fileContent);
+          
+          // Prepend folder path to filename if a folder is selected
+          const finalFilename = selectedFolder 
+            ? `${selectedFolder}/${file.name}` 
+            : file.name;
+          
+          await createSubmission(user.uid, projectId, {
+            filename: finalFilename,
+            code: fileContent === null ? 'Nothing for now' : fileContent,
+            securityrev: [],
+            logicrev: [],
+            testcases: [],
+            reviewpdf: '',
+          });
+        })
+      );
 
-        // await createSubmission(user.uid, projectId, {
-        //   filename: files[0]?.name,
-        //   code: fileContent === null ? 'Nothing for now' : fileContent,
-        //   securityrev: [],
-        //   logicrev: [],
-        //   testcases: [],
-        //   reviewpdf: '',
-        // });
-        setError(''));
-      return toast('Uploaded file(s) successfully', { type: 'success' });
+      setError('');
+
+      // trigger loading state so parent shows LoadingPage
+
+      // refresh submissions (set submissionsLoading to true)
+      if (refetchSubmissions) await refetchSubmissions();
+      //refresh file tree so the new file appears in the sidebar
+      if (refetchFileTree) await refetchFileTree();
+
+      toast('Uploaded file(s) successfully', { type: 'success' });
     } catch (error) {
       //TODO: figure out how to display a toast here because no point in sharing error messages directly with users as it wont help them unless there is a specific action they can take - [JOHAN]
       console.error('Error creating project:', error);
       return toast(`Upload failed. Please try again ${error}`, {
         type: 'error',
       });
-      console.error('Error details:', error.response?.data); // More detailed error
-      setError(
-        `Failed to create new submission: ${
-          error.response?.data?.error || error.message
-        }`,
-      );
     }
   };
 

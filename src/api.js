@@ -6,21 +6,42 @@ const API_URL = 'http://127.0.0.1:5000';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.headers.put['Content-Type'] = 'application/json';
 
+// Helper to unwrap standardized backend responses
+// Backend now returns: {success: true, data: ..., meta: ...} or {success: false, error: ...}
+const unwrapResponse = (response) => {
+  // If response has the new standardized structure, extract data
+  if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+    if (response.data.success) {
+      // Return the data field, or the whole response if data is undefined
+      return response.data.data !== undefined ? response.data.data : response.data;
+    } else {
+      // For errors, throw to maintain error handling behavior
+      const error = new Error(response.data.error?.message || 'Request failed');
+      error.response = response;
+      error.code = response.data.error?.code;
+      error.detail = response.data.error?.detail;
+      throw error;
+    }
+  }
+  // Fallback for legacy responses without the wrapper
+  return response.data;
+};
+
 // Projects API - matching your backend exactly
 export const getProjects = (userId) =>
-  axios.get(`${API_URL}/users/${userId}/projects`);
+  axios.get(`${API_URL}/users/${userId}/projects`).then(unwrapResponse);
 export const createProject = (userId, project) =>
   axios.post(`${API_URL}/users/${userId}/projects`, project, {
     headers: { 'Content-Type': 'application/json' },
-  });
+  }).then(unwrapResponse);
 export const updateProject = (userId, projectId, project) =>
   axios.put(`${API_URL}/users/${userId}/projects/${projectId}`, project, {
     headers: { 'Content-Type': 'application/json' },
-  });
+  }).then(unwrapResponse);
 export const deleteProject = (userId, projectId) =>
-  axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
+  axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`).then(unwrapResponse);
 export const getProject = (userId, projectId) =>
-  axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
+  axios.get(`${API_URL}/users/${userId}/projects/${projectId}`).then(unwrapResponse);
 
 export const saveProject = (userId, projectId, updatedFilesArr) =>
   axios.put(
@@ -29,7 +50,7 @@ export const saveProject = (userId, projectId, updatedFilesArr) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 
 // AI Review API
 export const getSecurityReview = (userId, projectId) =>
@@ -39,7 +60,7 @@ export const getSecurityReview = (userId, projectId) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 
 export const getLogicReview = (userId, submissionId, activeFile) =>
   axios.post(
@@ -48,7 +69,7 @@ export const getLogicReview = (userId, submissionId, activeFile) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 
 export const getTestCases = (userId, submissionId, activeFile) =>
   axios.post(
@@ -57,11 +78,11 @@ export const getTestCases = (userId, submissionId, activeFile) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 
 // File submissions API - matching your backend exactly
 export const getSubmissions = (userId, projectId) =>
-  axios.get(`${API_URL}/users/${userId}/projects/${projectId}/submissions`);
+  axios.get(`${API_URL}/users/${userId}/projects/${projectId}/submissions`).then(unwrapResponse);
 export const createSubmission = (userId, projectId, submission) =>
   axios.post(
     `${API_URL}/users/${userId}/projects/${projectId}/submissions`,
@@ -69,7 +90,7 @@ export const createSubmission = (userId, projectId, submission) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 export const updateSubmission = (userId, submissionId, submission) =>
   axios.put(
     `${API_URL}/users/${userId}/submissions/${submissionId}`,
@@ -77,9 +98,9 @@ export const updateSubmission = (userId, submissionId, submission) =>
     {
       headers: { 'Content-Type': 'application/json' },
     },
-  );
+  ).then(unwrapResponse);
 export const deleteSubmission = (userId, submissionId) =>
-  axios.delete(`${API_URL}/users/${userId}/submissions/${submissionId}`);
+  axios.delete(`${API_URL}/users/${userId}/submissions/${submissionId}`).then(unwrapResponse);
 
 // Legacy API (keeping for backward compatibility)
 export const getItems = () => axios.get(`${API_URL}/items`);
@@ -99,7 +120,7 @@ export const listGithubRepos = (userId, { perPage = 100, page = 1 } = {}) =>
           : undefined;
       return token ? { Authorization: `Bearer ${token}` } : {};
     })(),
-  });
+  }).then(unwrapResponse);
 
 export const linkGithubRepo = (
   userId,
@@ -118,7 +139,7 @@ export const linkGithubRepo = (
         return token ? { Authorization: `Bearer ${token}` } : {};
       })(),
     },
-  );
+  ).then(unwrapResponse);
 
 export const importGithubRepo = (
   userId,
@@ -137,4 +158,4 @@ export const importGithubRepo = (
         return token ? { Authorization: `Bearer ${token}` } : {};
       })(),
     },
-  );
+  ).then(unwrapResponse);

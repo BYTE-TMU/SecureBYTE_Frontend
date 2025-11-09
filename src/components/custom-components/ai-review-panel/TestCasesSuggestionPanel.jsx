@@ -63,10 +63,10 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
         toast.error('Save Failed', {
           description: `Failed to save file(s) to database.`,
         });
-        setError(err.response?.data?.error || err.message);
-        console.error(
-          `Failed to save file(s) to database: ${err.response?.data?.error || err.message}`,
-        );
+        // With standardized responses, unwrapResponse extracts the error message
+        const errorMessage = err.message || 'Unknown error occurred';
+        setError(errorMessage);
+        console.error(`Failed to save file(s) to database: ${errorMessage}`);
       }
     }
 
@@ -88,8 +88,9 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
 
       // TODO: Format test cases with Prettier before displaying it
 
-      console.log('TEST CASES:', response.data.response.files);
-      setTestCases(response.data.response.files);
+      // After standardization, unwrapResponse extracts data, so we access response.response
+      console.log('TEST CASES:', response.response.files);
+      setTestCases(response.response.files);
 
       // Display test cases
       setTestAvailable(true);
@@ -99,10 +100,10 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
       toast.error('Failed to generate test cases', {
         description: `Failed to generate test cases. Please try again later.`,
       });
-      setError(err.response?.data?.error || err.message);
-      console.error(
-        `Error generating test cases ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setError(errorMessage);
+      console.error(`Error generating test cases ${errorMessage}`);
     } finally {
       // Set loading state to false
       setLoading(false);
@@ -144,12 +145,12 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
                     <Card key={index} className="w-full p-5 mb-5 gap-4">
                       {test['input'] && (
                         <CardTitle>
-                          Input: {test['input']}
+                          Input: {typeof test['input'] === 'object' ? JSON.stringify(test['input'], null, 2) : test['input']}
                         </CardTitle>
                       )}
                       {test['expected_output'] && (
                         <CardTitle>
-                          Expected output: {test['expected_output']}
+                          Expected output: {typeof test['expected_output'] === 'object' ? JSON.stringify(test['expected_output'], null, 2) : test['expected_output']}
                         </CardTitle>
                       )}
                       <CardDescription className="w-full">

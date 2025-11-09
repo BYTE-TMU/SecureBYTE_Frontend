@@ -30,7 +30,7 @@ export default function GenerateSecurityReviewSheet({
   const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles();
 
   useEffect(() => {
-    setProjectFiles(submissions.map((submission) => submission.filename));
+    setProjectFiles((submissions || []).map((submission) => submission.filename));
   }, [submissions]);
 
   const handleGenerateReview = async () => {
@@ -50,10 +50,10 @@ export default function GenerateSecurityReviewSheet({
         clearAllUpdates(); // Clear updates in sessionStorage
         console.log("Clear sessionStorage", sessionStorage); 
       } catch (err) {
-        setError(err.response?.data?.error || err.message);
-        console.error(
-          `Failed to save project to database: ${err.response?.data?.error || err.message}`,
-        );
+        // With standardized responses, unwrapResponse extracts the error message
+        const errorMessage = err.message || 'Unknown error occurred';
+        setError(errorMessage);
+        console.error(`Failed to save project to database: ${errorMessage}`);
       }
     }
 
@@ -66,7 +66,8 @@ export default function GenerateSecurityReviewSheet({
       setError('');
 
       // Display review to users
-      setSecurityReview(response.data.response);
+      // After standardization, unwrapResponse extracts data, so we access response.response
+      setSecurityReview(response.response);
 
       console.log("Before clearing sessionStorage", sessionStorage); // Debug log
       // Clear updated files in sessionStorage
@@ -75,10 +76,10 @@ export default function GenerateSecurityReviewSheet({
       setIsSecReviewLoading(false); 
       
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
-      console.error(
-        `Failed to generate security review: ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setError(errorMessage);
+      console.error(`Failed to generate security review: ${errorMessage}`);
     }
   };
 

@@ -58,9 +58,9 @@ export default function IndividualProjectPage() {
         console.log(`Printing project data from IndividualProjectPage: ${projectData}`);
         // setProjectName(projectData['project_name']);
       } catch (err) {
-        console.error(
-          `Failed to load project: ${err.response?.data?.error || err.message}`,
-        );
+        // With standardized responses, unwrapResponse extracts the error message
+        const errorMessage = err.message || 'Unknown error occurred';
+        console.error(`Failed to load project: ${errorMessage}`);
       }
     }
 
@@ -88,11 +88,13 @@ export default function IndividualProjectPage() {
     setIsRepoDialogOpen(true);
     try {
       setLoadingRepos(true);
-      const resp = await listGithubRepos(user.uid);
-      console.log(resp.data);
-      setRepos(resp.data || []);
+  const resp = await listGithubRepos(user.uid);
+  console.log(resp);
+  setRepos(resp || []);
     } catch (err) {
-      setRepoError(err.response?.data?.error || err.message);
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setRepoError(errorMessage);
       setRepos([]);
     } finally {
       setLoadingRepos(false);
@@ -123,9 +125,9 @@ export default function IndividualProjectPage() {
         max_files: 5000,
         max_bytes: 5242880,
       });
-      console.log('[FRONTEND] Import response:', resp.data);
+      console.log('[FRONTEND] Import response:', resp);
       setIsRepoDialogOpen(false);
-      const count = resp?.data?.files_imported;
+      const count = resp?.files_imported;
       toast.success(
         `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
@@ -133,7 +135,8 @@ export default function IndividualProjectPage() {
       await refetch();
       console.log('[FRONTEND] Link+import complete');
     } catch (err) {
-      const msg = err.response?.data?.error || err.message;
+      // With standardized responses, unwrapResponse extracts the error message
+      const msg = err.message || 'Unknown error occurred';
       console.error('[FRONTEND] Link/import failed:', err);
       setRepoError(msg);
       toast.error(`Failed: ${msg}`);
@@ -157,9 +160,9 @@ export default function IndividualProjectPage() {
         max_files: 5000,
         max_bytes: 5242880,
       });
-      console.log('[FRONTEND] Import response:', resp.data);
+      console.log('[FRONTEND] Import response:', resp);
       setIsRepoDialogOpen(false);
-      const count = resp?.data?.files_imported;
+      const count = resp?.files_imported;
       toast.success(
         `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
@@ -167,7 +170,8 @@ export default function IndividualProjectPage() {
       await refetch();
       console.log('[FRONTEND] Import complete');
     } catch (err) {
-      const msg = err.response?.data?.error || err.message;
+      // With standardized responses, unwrapResponse extracts the error message
+      const msg = err.message || 'Unknown error occurred';
       console.error('[FRONTEND] Import failed:', err);
       setRepoError(msg);
       toast.error(`Failed: ${msg}`);
@@ -177,7 +181,7 @@ export default function IndividualProjectPage() {
   };
 
   console.log(`inside indiv project: ${projectId}`);
-  console.log(submissions.map((submission) => submission.filename));
+  console.log((submissions || []).map((submission) => submission.filename));
   return (
     <main className="w-full min-h-screen flex flex-col p-5">
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
@@ -219,7 +223,7 @@ export default function IndividualProjectPage() {
                   onChange={(e) => handleRepoChange(e.target.value)}
                 >
                   <option value="">Select repo</option>
-                  {repos.map((r) => (
+                  {(repos || []).map((r) => (
                     <option key={r.id} value={r.full_name}>
                       {r.full_name}
                     </option>
@@ -263,7 +267,7 @@ export default function IndividualProjectPage() {
       />
       <IndividualProjectTable 
         columns={columns} 
-        data={submissions} 
+        data={submissions || []} 
       />
     </main>
   );

@@ -12,15 +12,14 @@ export function useGetProjects() {
 
     const fetchProjects = async () => {
       try {
-        const response = await getProjects(user.uid);
-        setProjects(response.data);
+  const response = await getProjects(user.uid);
+  setProjects(response);
         setError('');
       } catch (err) {
-        setError(
-          `Failed to load projects: ${
-            err.response?.data?.error || err.message
-          }`,
-        );
+        // With standardized responses, unwrapResponse extracts the error message
+        const errorMessage = err.message || 'Unknown error occurred';
+        const errorDetail = err.detail ? ` (${JSON.stringify(err.detail)})` : '';
+        setError(`Failed to load projects: ${errorMessage}${errorDetail}`);
         setProjects([]);
       }
     };

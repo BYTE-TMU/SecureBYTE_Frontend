@@ -54,16 +54,18 @@ export default function LogicAnalysisPanel({ activeFile }) {
       );
 
       console.log('LOGIC REVIEW: Received data from backend');
-      // TODO: Retrieve relevant data for logic review (response.data.response.files)
-      setLogicFiles(response.data.response.files);
-      console.log(response.data.response.files);
+      // After standardization, unwrapResponse extracts data, so we access response.response
+      setLogicFiles(response.response.files);
+      console.log(response.response.files);
       // TODO: Display JSON data in a more readable text (with paragraphs and bullet points)
       setReviewAvailable(true);
     } catch (err) {
       toast.error('Logic Review Failed', {
         description: `Failed to generate logic review. Please try again later.`,
       });
-      setError(err.response?.data?.error || err.message);
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setError(errorMessage);
       console.error(`Error generating logic analysis: ${err}`);
     }
   };

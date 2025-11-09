@@ -83,11 +83,9 @@ export default function ProjectsMasterTable({ columns, data }) {
         });
       }
     } catch (err) {
-      console.error(
-        `Error deleting projects in bulk:" ${
-          err.response?.data?.error || err.message
-        }`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      console.error(`Error deleting projects in bulk: ${errorMessage}`);
       toast.error('Delete Failed', {
         description: 'An unexpected error occurred. Please try again.',
       });

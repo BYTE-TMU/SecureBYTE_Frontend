@@ -25,30 +25,99 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { FileUploadInput } from './FileUploadInput';
 import { useProject } from '../../hooks/project/ProjectContext';
+import { createSubmission } from '@/api';
+import { useAuth } from '@/hooks/auth/AuthContext';
+import { toast } from 'sonner';
 
 export default function CreateNewProjectDialog({ open, onOpenChange }) {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
-  const { createNewProject, setFilesForProject } = useProject();
+  const { createNewProject } = useProject();
+  const { user } = useAuth();
+
+  const parseFileContent = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      try {
+        reader.readAsText(file);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
 
   const prepareForAnalysis = async () => {
-    console.log('Files to upload', files);
+    if (!user) {
+      toast.error('Please log in to create a project');
+      return;
+    }
 
-    // Create a new project
-    const newProject = await createNewProject({
-      newProjectName,
-      newProjectDesc,
-    });
-    const projectId = newProject.id;
+    if (!newProjectName.trim()) {
+      toast.error('Project name is required');
+      return;
+    }
 
-    // Add uploaded files to the new project
-    setFilesForProject({ projectId, files });
+    try {
+      setUploading(true);
+      console.log('Files to upload', files);
 
-    // TODO: Show the project files in the IndividualProjectPage
+      // Step 1: Create a new project
+      const newProject = await createNewProject({
+        newProjectName,
+        newProjectDesc,
+      });
+      const projectId = newProject.projectid; // Backend returns 'projectid', not 'id'
+      console.log('Project created with ID:', projectId);
 
-    // Redirect users to the code editor, with the new project open
+      // Step 2: Upload all files as submissions
+      if (files.length > 0) {
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const file of files) {
+          try {
+            const fileContent = await parseFileContent(file);
+            await createSubmission(user.uid, projectId, {
+              filename: file.name,
+              code: fileContent || '',
+              logicrev: [],
+              testcases: [],
+            });
+            successCount++;
+            console.log(`Uploaded file: ${file.name}`);
+          } catch (err) {
+            console.error(`Failed to upload ${file.name}:`, err);
+            failCount++;
+          }
+        }
+
+        if (successCount > 0) {
+          toast.success(`Project created with ${successCount} file(s)`);
+        }
+        if (failCount > 0) {
+          toast.warning(`${failCount} file(s) failed to upload`);
+        }
+      } else {
+        toast.success('Project created successfully');
+      }
+
+      // Close dialog and reset form
+      if (onOpenChange) onOpenChange(false);
+      setNewProjectName('');
+      setNewProjectDesc('');
+      setFiles([]);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      const errorMessage = error.message || 'Unknown error occurred';
+      toast.error(`Failed to create project: ${errorMessage}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (

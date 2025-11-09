@@ -30,12 +30,12 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProjects(user.uid);
-      setProjects(response.data);
+      setProjects(response);
       setFetchError('');
     } catch (err) {
-      setFetchError(
-        `Failed to load projects: ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setFetchError(`Failed to load projects: ${errorMessage}`);
       setProjects([]);
     } finally {
       setLoading(false);
@@ -46,12 +46,13 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProject(user.uid, projectId);
-      setSingleProject(response.data);
+      // After standardization, unwrapResponse extracts data, so response is the project data
+      setSingleProject(response);
       setFetchError('');
     } catch (err) {
-      console.error(
-        `Failed to load project: ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      console.error(`Failed to load project: ${errorMessage}`);
       throw new Error(`Failed to load project with id ${projectId}`);
     } finally {
       setLoading(false);
@@ -79,11 +80,9 @@ export function ProjectProvider({ children, autoFetch = false }) {
       return response;
     } catch (err) {
       setLoading(false);
-      throw new Error(
-        `Failed to create a new project: ${
-          err.response?.data?.error || err.message
-        }`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      throw new Error(`Failed to create a new project: ${errorMessage}`);
     }
   };
 
@@ -99,11 +98,9 @@ export function ProjectProvider({ children, autoFetch = false }) {
       setLoading(false);
       return true; // Successfully delete a project
     } catch (err) {
-      throw new Error(
-        `Failed to delete project ${project.projectid}: ${
-          err.response?.data?.error || err.message
-        }`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      throw new Error(`Failed to delete project ${project.projectid}: ${errorMessage}`);
     }
   };
 
@@ -135,9 +132,9 @@ export function ProjectProvider({ children, autoFetch = false }) {
       };
 
     } catch (err) {
-      throw new Error(
-        `Bulk delete project fail: ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      throw new Error(`Bulk delete project fail: ${errorMessage}`);
     }
   };
 
@@ -159,13 +156,14 @@ export function ProjectProvider({ children, autoFetch = false }) {
 
     try {
       const response = await saveProject(user.uid, projectId, updatedFilesArr); 
-      console.log("Successfully save project to Backend: ", response.data); // Debug log
+      // After standardization, unwrapResponse extracts data, so response is already the data
+      console.log("Successfully save project to Backend: ", response); // Debug log
       setFetchError('');
 
     } catch (err) {
-      console.error(
-        `Failed to save project: ${err.response?.data?.error || err.message}`,
-      );
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      console.error(`Failed to save project: ${errorMessage}`);
       throw new Error(`Failed to save project with id ${projectId}`);
 
     } finally {

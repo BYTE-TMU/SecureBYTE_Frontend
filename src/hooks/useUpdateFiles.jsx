@@ -8,8 +8,10 @@ export const useUpdateFiles = () => {
       const storedItem = sessionStorage.getItem(STORAGE_KEY);
       return storedItem ? JSON.parse(storedItem) : {};
     } catch (err) {
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
       console.log(
-        `Error loading files that are updated so far from sessionStorage: ${err.response?.data?.error || err.message}`,
+        `Error loading files that are updated so far from sessionStorage: ${errorMessage}`,
       );
       return {};
     }
@@ -24,8 +26,10 @@ export const useUpdateFiles = () => {
       const storage = sessionStorage.getItem(STORAGE_KEY); 
       console.log("sessionStorage", storage); // Debug log
     } catch (err) {
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
       console.log(
-        `Error saving updated files to sessionStorage: ${err.response?.data?.error || err.message}`,
+        `Error saving updated files to sessionStorage: ${errorMessage}`,
       );
     }
   }, [fileUpdates]);

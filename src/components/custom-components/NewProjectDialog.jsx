@@ -28,8 +28,10 @@ export function NewProjectDialog() {
       setError(''); 
 
     } catch(err) {
-      console.error('Error creating project:', err); 
-      setError(`Failed to create a new project: ${err.response?.data?.error || err.message}`); 
+      console.error('Error creating project:', err);
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setError(`Failed to create a new project: ${errorMessage}`); 
     }
   };
 

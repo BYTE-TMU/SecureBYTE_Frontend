@@ -75,14 +75,11 @@ export function NewSubmissionDialog({ projectId }) {
       setError('');
       return toast('Uploaded file(s) successfully', { type: 'success' });
     } catch (error) {
-      //TODO: figure out how to display a toast here because no point in sharing error messages directly with users as it wont help them unless there is a specific action they can take - [JOHAN]
-      console.error('Error creating project:', error);
-      console.error('Error details:', error.response?.data); // More detailed error
-      setError(
-        `Failed to create new submission: ${
-          error.response?.data?.error || error.message
-        }`,
-      );
+      console.error('Error creating submission:', error);
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = error.message || 'Unknown error occurred';
+      setError(`Failed to create new submission: ${errorMessage}`);
+      toast.error(`Upload failed: ${errorMessage}`);
     }
   };
 

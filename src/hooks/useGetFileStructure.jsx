@@ -6,8 +6,7 @@ export function useGetFileStructure(projectId) {
 
   const fileTree = useMemo(() => {
     const tree = {};
-
-    submissions.forEach((submission) => {
+    (submissions || []).forEach((submission) => {
       // If theres no filename, then skip
       if (!submission.filename) return;
 

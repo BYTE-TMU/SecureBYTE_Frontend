@@ -26,8 +26,10 @@ export function DeleteProjectAlert({ project, closeDropdown }) {
       setError(''); 
 
     } catch (err) {
-      console.error('Error deleting project:', err); 
-      setError(`Failed to delete project: ${err.response?.data?.error || err.message}`); 
+      console.error('Error deleting project:', err);
+      // With standardized responses, unwrapResponse extracts the error message
+      const errorMessage = err.message || 'Unknown error occurred';
+      setError(`Failed to delete project: ${errorMessage}`); 
     } 
   };
   return (

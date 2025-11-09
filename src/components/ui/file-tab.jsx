@@ -11,10 +11,36 @@ function FileTabBar({
   activeFile,
   onCloseFile,
   onSwitchTab,
+  onReorderTabs,
+  unsavedFiles = new Set(),
   style,
   className,
   ...props
 }) {
+  const [dragOverIndex, setDragOverIndex] = React.useState(null);
+  const [isDraggingOverEmpty, setIsDraggingOverEmpty] = React.useState(false);
+
+  // Handle dropping in empty space to move to end
+  const handleEmptyAreaDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDraggingOverEmpty(true);
+    setDragOverIndex(null);
+  };
+
+  const handleEmptyAreaDragLeave = () => {
+    setIsDraggingOverEmpty(false);
+  };
+
+  const handleEmptyAreaDrop = (e) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    if (!isNaN(dragIndex) && dragIndex !== openFiles.length - 1 && onReorderTabs) {
+      onReorderTabs(dragIndex, openFiles.length - 1);
+    }
+    setIsDraggingOverEmpty(false);
+  };
+
   return (
     <div
       data-slot="file-tab-bar"
@@ -30,29 +56,51 @@ function FileTabBar({
         'rounded-t-lg p-0.5',
         className,
       )}
+      onDragOver={handleEmptyAreaDragOver}
+      onDragLeave={handleEmptyAreaDragLeave}
+      onDrop={handleEmptyAreaDrop}
       {...props}
     >
-      {openFiles.map((file) => (
+      {openFiles.map((file, index) => (
         <FileTab
           key={file.name}
           id={file.name}
+          fileId={file.id}
           fileName={file.path.split('/').pop()}
-          isActive={file.name === activeFile.name}
+          isActive={file.name === activeFile?.name}
+          isUnsaved={unsavedFiles.has(file.id)}
           onSelect={() => onSwitchTab(file)}
           handleCloseFile={() => onCloseFile(file.name)}
+          index={index}
+          onReorder={onReorderTabs}
+          dragOverIndex={dragOverIndex}
+          setDragOverIndex={setDragOverIndex}
+          setIsDraggingOverEmpty={setIsDraggingOverEmpty}
         />
       ))}
+      
+      {/* Visual indicator for dropping at the end */}
+      {isDraggingOverEmpty && openFiles.length > 0 && (
+        <div className="w-0.5 h-full bg-blue-500 animate-pulse ml-1" />
+      )}
     </div>
   );
 }
 
 function FileTab({
   id,
+  fileId,
   fileName,
   isActive,
+  isUnsaved = false,
   onSelect,
   className,
   handleCloseFile,
+  index,
+  onReorder,
+  dragOverIndex,
+  setDragOverIndex,
+  setIsDraggingOverEmpty,
   ...props
 }) {
   const handleCloseClick = (e) => {
@@ -60,50 +108,109 @@ function FileTab({
     handleCloseFile();
   };
 
-  return (
-    <button
-      data-slot="file-tab"
-      data-active={isActive}
-      onClick={onSelect}
-      className={cn(
-        'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors',
-        'min-w-[var(--tab-min-width)] max-w-[var(--tab-max-width)] h-[var(--tab-height)]',
-        'border-r border-border bg-muted/50 text-muted-foreground',
-        'hover:bg-muted hover:text-foreground',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-        'rounded-t-lg',
-        isActive && 'bg-background text-secure-blue border-b-5 border-b-primary',
-        className,
-      )}
-      {...props}
-    >
-      <span className="truncate flex-1">{fileName}</span>
+  // Drag and drop handlers
+  const handleDragStart = (e) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    
+    // Open the file being dragged (like VS Code)
+    if (!isActive && onSelect) {
+      onSelect();
+    }
+  };
 
-      <span
-        role="button"
-        tabIndex={0}
-        onClick={handleCloseClick}
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+    setIsDraggingOverEmpty(false);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    const dropIndex = index;
+    
+    setDragOverIndex(null);
+    
+    if (dragIndex !== dropIndex && onReorder) {
+      onReorder(dragIndex, dropIndex);
+    }
+  };
+
+  const showLeftIndicator = dragOverIndex === index;
+
+  return (
+    <div className="relative flex items-center">
+      {/* Visual drop indicator line */}
+      {showLeftIndicator && (
+        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10 animate-pulse" />
+      )}
+      
+      <button
+        data-slot="file-tab"
+        data-active={isActive}
+        onClick={onSelect}
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
-          'flex items-center justify-center w-4 h-4 rounded-sm',
-          'hover:bg-muted-foreground/20 transition-colors',
+          'flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors',
+          'min-w-[var(--tab-min-width)] max-w-[var(--tab-max-width)] h-[var(--tab-height)]',
+          'border-r border-border bg-muted/50 text-muted-foreground',
+          'hover:bg-muted hover:text-foreground',
           'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+          'rounded-t-lg cursor-move',
+          isActive && 'bg-background text-secure-blue border-b-5 border-b-primary',
+          className,
         )}
-        aria-label={`Close ${fileName}`}
+        {...props}
       >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        {/* Unsaved indicator dot */}
+        {isUnsaved && (
+          <span 
+            className="w-2 h-2 rounded-full border-2 border-blue-500 flex-shrink-0" 
+            aria-label="Unsaved changes" 
+          />
+        )}
+        
+        <span className="truncate flex-1">{fileName}</span>
+
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={handleCloseClick}
+          className={cn(
+            'flex items-center justify-center w-4 h-4 rounded-sm',
+            'hover:bg-muted-foreground/20 transition-colors',
+            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+          )}
+          aria-label={`Close ${fileName}`}
         >
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </span>
-    </button>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </span>
+      </button>
+    </div>
   );
 }
 

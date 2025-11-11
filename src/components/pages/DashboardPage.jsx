@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 export default function DashboardPage({}) {
   const { projects } = useProject();
+  console.log('just fetched projects');
   const [openDropdowns, setOpenDropdowns] = useState({});
   const columns = getProjectsMasterTableColumns(
     openDropdowns,

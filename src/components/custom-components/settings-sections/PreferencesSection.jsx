@@ -6,10 +6,20 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { LanguageSelector } from './LanguageSelector';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export default function PreferencesSection() {
   return (
-    <div>
+    <div className="flex flex-col gap-5">
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme Preferences</CardTitle>
+          <CardDescription>Modify your theme settings</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ModeToggle />
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Language Preferences</CardTitle>

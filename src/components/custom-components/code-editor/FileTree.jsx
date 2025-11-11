@@ -33,7 +33,7 @@ import { useNavigate, useParams } from 'react-router';
 export default function FileTree({
   tree,
   onFileSelectFromFileTree,
-  refetchFileTree,
+  refetchSubmissions,
   onFileRenamed,
 }) {
   const { projectId } = useParams();
@@ -270,8 +270,8 @@ export default function FileTree({
           `Folder moved to root${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`,
         );
 
-        if (refetchFileTree) {
-          await refetchFileTree();
+        if (refetchSubmissions) {
+          await refetchSubmissions();
         }
       } else if (draggedType === 'file') {
         // Move file to root level
@@ -286,8 +286,8 @@ export default function FileTree({
           console.log(`✅ Backend synced: File moved to root as ${fileName}`);
           toast.success('File moved to root');
 
-          if (refetchFileTree) {
-            await refetchFileTree();
+          if (refetchSubmissions) {
+            await refetchSubmissions();
           }
         } else {
           toast.error('Unable to move file - missing user or file ID');
@@ -371,7 +371,7 @@ export default function FileTree({
                     persistFolders={persistFolders}
                     persistedFolders={persistedFolders}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     fullTree={mergedTree}
                     onFileRenamed={onFileRenamed}
                   />
@@ -382,7 +382,7 @@ export default function FileTree({
                     onFileSelect={onFileSelectFromFileTree}
                     projectId={projectId}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     onFileRenamed={onFileRenamed}
                   />
                 ),
@@ -404,7 +404,7 @@ function Folder({
   persistFolders,
   persistedFolders,
   user,
-  refetchFileTree,
+  refetchSubmissions,
   fullTree,
   onFileRenamed,
 }) {
@@ -592,8 +592,8 @@ function Folder({
         );
 
         // Refetch file tree to update UI
-        if (refetchFileTree) {
-          await refetchFileTree();
+        if (refetchSubmissions) {
+          await refetchSubmissions();
         }
       } else if (draggedType === 'file') {
         // Move file into this folder - need to update submission filename
@@ -610,8 +610,8 @@ function Folder({
           toast.success('File moved');
 
           // Refetch file tree to update UI
-          if (refetchFileTree) {
-            await refetchFileTree();
+          if (refetchSubmissions) {
+            await refetchSubmissions();
           }
         } else {
           toast.error('Unable to move file - missing user or file ID');
@@ -776,7 +776,7 @@ function Folder({
                             persistFolders(updatedFolders);
 
                             // Move all files within this folder
-                            if (user && refetchFileTree) {
+                            if (user && refetchSubmissions) {
                               // Find all files in this folder from the tree
                               const filesToMove = [];
                               const findFilesInFolder = (
@@ -845,7 +845,7 @@ function Folder({
                                 );
                               }
 
-                              await refetchFileTree();
+                              await refetchSubmissions();
                             }
 
                             setRenaming(false);
@@ -901,7 +901,7 @@ function Folder({
                     persistFolders={persistFolders}
                     persistedFolders={persistedFolders}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     fullTree={fullTree}
                     onFileRenamed={onFileRenamed}
                   />
@@ -912,7 +912,7 @@ function Folder({
                     onFileSelect={onFileSelect}
                     projectId={projectId}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     onFileRenamed={onFileRenamed}
                   />
                 )}
@@ -930,7 +930,7 @@ function File({
   onFileSelect,
   projectId,
   user,
-  refetchFileTree,
+  refetchSubmissions,
   onFileRenamed,
 }) {
   const [renaming, setRenaming] = useState(false);
@@ -978,8 +978,8 @@ function File({
       setRenaming(false);
 
       // Refetch file tree to update UI
-      if (refetchFileTree) {
-        await refetchFileTree();
+      if (refetchSubmissions) {
+        await refetchSubmissions();
       }
     } catch (err) {
       console.error('Failed to rename file', err);

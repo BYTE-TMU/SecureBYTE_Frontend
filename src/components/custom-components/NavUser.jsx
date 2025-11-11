@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/auth/AuthContext';
 import ProfilePicture from './ProfilePicture';
 import LogoutButton from './LogoutButton';
 import { Link, useNavigate } from 'react-router';
+import { ModeToggle } from '../ui/mode-toggle';
 
 export default function NavUser({ profilePic }) {
   const { isMobile } = useSidebar();
@@ -64,6 +65,7 @@ export default function NavUser({ profilePic }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem></DropdownMenuItem>
               <DropdownMenuItem
                 onClick={async () => {
                   navigate('/account');

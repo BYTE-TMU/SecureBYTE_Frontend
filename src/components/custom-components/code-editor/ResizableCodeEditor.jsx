@@ -11,7 +11,7 @@ import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
 export default function ResizableCodeEditor({
   tree,
-  refetchFileTree,
+  refetchSubmissions,
   securityReview,
   openFiles,
   setOpenFiles,
@@ -34,10 +34,10 @@ export default function ResizableCodeEditor({
       prevFiles.map((file) =>
         file.id === oldFile.id
           ? { ...file, name: newName, path: newPath }
-          : file
-      )
+          : file,
+      ),
     );
-    
+
     // Update active file if it's the one being renamed
     if (activeFile && activeFile.id === oldFile.id) {
       setActiveFile({ ...activeFile, name: newName, path: newPath });
@@ -134,7 +134,7 @@ export default function ResizableCodeEditor({
       <ResizablePanel defaultSize={20}>
         <FileTree
           tree={tree}
-          refetchFileTree={refetchFileTree}
+          refetchSubmissions={refetchSubmissions}
           onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
           onFileRenamed={handleFileRenamed} // Callback for when a file is renamed
         />{' '}

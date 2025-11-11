@@ -18,6 +18,11 @@ export const columns = [
   {
     accessorKey: 'filename',
     header: 'File Name',
+    cell: ({ row }) => {
+      const filenameParts = row.getValue('filename').split('/');
+      const filename = filenameParts[filenameParts.length - 1];
+      return filename;
+    },
   },
   {
     id: 'latest_review_type',
@@ -67,25 +72,29 @@ export const columns = [
         reviewTypes.push(
           <Badge key="security" variant="default" className="mr-1">
             Security
-          </Badge>
+          </Badge>,
         );
       }
       if (submission.logicrev && submission.logicrev.length > 0) {
         reviewTypes.push(
           <Badge key="logic" variant="secondary" className="mr-1">
             Logic
-          </Badge>
+          </Badge>,
         );
       }
       if (submission.testcases && submission.testcases.length > 0) {
         reviewTypes.push(
           <Badge key="testcases" variant="outline" className="mr-1">
             Test Cases
-          </Badge>
+          </Badge>,
         );
       }
 
-      return reviewTypes.length > 0 ? <div className="flex flex-wrap gap-1">{reviewTypes}</div> : <span className="text-muted-foreground">None</span>;
+      return reviewTypes.length > 0 ? (
+        <div className="flex flex-wrap gap-1">{reviewTypes}</div>
+      ) : (
+        <span className="text-muted-foreground">None</span>
+      );
     },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue || filterValue === 'all') return true;

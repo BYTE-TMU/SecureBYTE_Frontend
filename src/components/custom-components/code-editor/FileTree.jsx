@@ -498,16 +498,20 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
   const [renameValue, setRenameValue] = useState(folderName);
   const [isDragOver, setIsDragOver] = useState(false);
   const inputRef = useRef(null);
+  const isRenamingRef = useRef(false);
 
   useEffect(() => {
     if (renaming && inputRef.current) {
+      isRenamingRef.current = true;
       // Use setTimeout to ensure DOM has updated after context menu closes
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
         }
-      }, 0);
+      }, 100); // Increased delay
+    } else {
+      isRenamingRef.current = false;
     }
   }, [renaming]);
 
@@ -709,7 +713,26 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                         ref={inputRef}
                         value={renameValue}
                         onChange={(e) => setRenameValue(e.target.value)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent folder toggle
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation(); // Prevent folder toggle
+                        }}
+                        onBlur={(e) => {
+                          // Handle blur after a delay to allow rename to complete
+                          if (isRenamingRef.current) {
+                            setTimeout(() => {
+                              if (isRenamingRef.current) {
+                                setRenaming(false);
+                                setRenameValue(folderName); // Reset to original name
+                              }
+                            }, 100);
+                          }
+                        }}
                         onKeyDown={async (e) => {
+                          e.stopPropagation(); // Prevent event bubbling
+                          
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             
@@ -721,6 +744,8 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                             // Validate: Check if new name is empty
                             if (!renameValue.trim()) {
                               toast.error('Folder name cannot be empty');
+                              setRenaming(false);
+                              setRenameValue(folderName);
                               return;
                             }
                             
@@ -759,8 +784,7 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                                 }
                               });
                               
-                              persistFolders(updatedFolders);
-                              
+                              // Note: do NOT persist updatedFolders yet — wait for backend refetch
                               // Move all files within this folder
                               if (user && refetchFileTree) {
                                 // Find all files in this folder from the tree
@@ -808,20 +832,25 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                                 }
                                 
                                 await refetchFileTree();
+                                // Persist updated folders only after backend confirms changes
+                                persistFolders(updatedFolders);
                               }
-                              
+
                               setRenaming(false);
                               toast.success('Folder renamed');
                             } catch (err) {
                               console.error('Rename failed', err);
                               toast.error('Failed to rename folder');
+                              setRenaming(false);
+                              setRenameValue(folderName);
                             }
                           } else if (e.key === 'Escape') {
+                            e.preventDefault();
                             setRenaming(false);
                             setRenameValue(folderName);
                           }
                         }}
-                        className="bg-transparent border-b border-gray-400 text-sm mx-2"
+                        className="bg-transparent border-b border-gray-400 text-sm mx-2 focus:outline-none focus:border-secure-orange"
                       />
                     ) : (
                       <span className="truncate">{folder.name}</span>
@@ -829,16 +858,14 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                 </SidebarMenuButton>
               </ContextMenuTrigger>
               <ContextMenuContent className="min-w-[200px]">
-                <ContextMenuItem>
-                  <button
-                    onClick={() => {
-                      setRenaming(true);
+                <ContextMenuItem
+                    onSelect={() => {
+                      // Allow the context menu to close, then enable inline rename
+                      setTimeout(() => setRenaming(true), 50);
                     }}
-                    className="w-full text-left"
                   >
                     Rename Folder
-                  </button>
-                </ContextMenuItem>
+                  </ContextMenuItem>
               </ContextMenuContent>
             </div>
           </CollapsibleTrigger>
@@ -884,21 +911,28 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onF
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(file.name);
   const inputRef = useRef(null);
+  const isRenamingRef = useRef(false);
 
   // Auto-focus input when renaming starts
   useEffect(() => {
     if (renaming && inputRef.current) {
-      // Use setTimeout to ensure DOM is updated
+      isRenamingRef.current = true;
+      // Use setTimeout to ensure DOM is updated and context menu is closed
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
         }
-      }, 0);
+      }, 100); // Increased delay to ensure context menu is fully closed
+    } else {
+      isRenamingRef.current = false;
     }
   }, [renaming]);
 
   const handleRename = async () => {
+    // Don't proceed if not actually renaming anymore
+    if (!isRenamingRef.current) return;
+    
     if (!renameValue.trim() || renameValue === file.name) {
       setRenaming(false);
       setRenameValue(file.name);
@@ -938,12 +972,26 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onF
   };
 
   const handleKeyDown = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
     if (e.key === 'Enter') {
       e.preventDefault();
       handleRename();
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       setRenaming(false);
       setRenameValue(file.name);
+    }
+  };
+  
+  const handleBlur = (e) => {
+    // Only process blur if we've been renaming for at least 200ms
+    // This prevents immediate blur from the context menu click
+    if (isRenamingRef.current) {
+      setTimeout(() => {
+        if (isRenamingRef.current) {
+          handleRename();
+        }
+      }, 50);
     }
   };
 
@@ -973,10 +1021,11 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onF
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                onBlur={handleRename}
+                onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent border-b border-input focus:outline-none focus:border-ring"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               />
             ) : (
               <span className="truncate">{file.name}</span>
@@ -984,7 +1033,12 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onF
           </SidebarMenuButton>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={() => setRenaming(true)}>
+          <ContextMenuItem
+            onSelect={() => {
+              // Delay enabling rename so the context menu finishes closing
+              setTimeout(() => setRenaming(true), 50);
+            }}
+          >
             Rename
           </ContextMenuItem>
           <ContextMenuItem>

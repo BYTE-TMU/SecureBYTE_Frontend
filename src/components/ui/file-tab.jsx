@@ -1,6 +1,8 @@
 import React from 'react';
 import CodeEditor from '../custom-components/code-editor/CodeEditor';
 import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { Save } from 'lucide-react';
 
 const TAB_HEIGHT = '32px';
 const TAB_MAX_WIDTH = '200px';
@@ -13,6 +15,7 @@ function FileTabBar({
   onSwitchTab,
   onReorderTabs,
   unsavedFiles = new Set(),
+  onSaveAll,
   style,
   className,
   ...props
@@ -82,6 +85,27 @@ function FileTabBar({
       {/* Visual indicator for dropping at the end */}
       {isDraggingOverEmpty && openFiles.length > 0 && (
         <div className="w-0.5 h-full bg-blue-500 animate-pulse ml-1" />
+      )}
+      
+      {/* Save Files Button */}
+      {onSaveAll && openFiles.length > 0 && (
+        <div className="ml-auto flex items-center pr-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSaveAll}
+            disabled={unsavedFiles.size === 0}
+            className="h-7 text-xs gap-1.5 border-border hover:bg-accent disabled:opacity-50"
+          >
+            <Save className="h-3.5 w-3.5" />
+            Save Files
+            {unsavedFiles.size > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 text-xs font-medium bg-blue-500 text-white rounded-full">
+                {unsavedFiles.size}
+              </span>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );

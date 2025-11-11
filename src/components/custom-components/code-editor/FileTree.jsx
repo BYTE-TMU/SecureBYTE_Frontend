@@ -811,24 +811,25 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                                 // Update all file paths in the backend
                                 if (filesToMove.length > 0) {
                                   console.log(`🔄 Moving ${filesToMove.length} file(s) after folder rename...`);
-                                  await Promise.all(
-                                    filesToMove.map(async (file) => {
-                                      let relativePath;
-                                      if (file.oldPath.startsWith(currentPath + '/')) {
-                                        relativePath = file.oldPath.substring(currentPath.length + 1);
-                                      } else {
-                                        relativePath = file.fileName;
-                                      }
-                                      const newFilePath = `${newPath}/${relativePath}`;
-                                      
-                                      try {
-                                        await moveSubmission(user.uid, file.id, newFilePath);
-                                        console.log(`✅ Backend synced: ${file.oldPath} → ${newFilePath}`);
-                                      } catch (err) {
-                                        console.error(`❌ Failed to move file ${file.oldPath} to ${newFilePath}`, err);
-                                      }
-                                    })
-                                  );
+                                  // Move files sequentially with a small delay to avoid rate limiting
+                                  for (const file of filesToMove) {
+                                    let relativePath;
+                                    if (file.oldPath.startsWith(currentPath + '/')) {
+                                      relativePath = file.oldPath.substring(currentPath.length + 1);
+                                    } else {
+                                      relativePath = file.fileName;
+                                    }
+                                    const newFilePath = `${newPath}/${relativePath}`;
+                                    
+                                    try {
+                                      await moveSubmission(user.uid, file.id, newFilePath);
+                                      console.log(`✅ Backend synced: ${file.oldPath} → ${newFilePath}`);
+                                      // Small delay to avoid rate limiting
+                                      await new Promise(resolve => setTimeout(resolve, 100));
+                                    } catch (err) {
+                                      console.error(`❌ Failed to move file ${file.oldPath} to ${newFilePath}`, err);
+                                    }
+                                  }
                                 }
                                 
                                 await refetchFileTree();

@@ -40,10 +40,9 @@ export default function GlobalFileSubmissionDialog() {
         newProjectName,
         newProjectDesc,
       });
-      console.log(newProject.data);
+      
       const projectId = newProject.data.projectid;
-      console.log(projectId);
-
+      
       // Add uploaded files to the new project
       await createSubmissionForProject({ projectId, files });
       

@@ -1,33 +1,27 @@
 import { useAuth } from '@/hooks/auth/AuthContext';
-import React, { useState } from 'react';
-import ProfilePicture from '../custom-components/ProfilePicture';
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from '../ui/input-group';
-import { Label } from '../ui/label';
-import { Item, ItemContent, ItemTitle } from '../ui/item';
+import { useState } from 'react';
+import ProfilePicture from '../../custom-components/ProfilePicture';
+
+import { Item, ItemContent, ItemTitle } from '../../ui/item';
 import {
   Field,
-  FieldContent,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldTitle,
-} from '../ui/field';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+} from '../../ui/field';
+import { Input } from '../../ui/input';
+import { Button } from '../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { Info } from 'lucide-react';
 
-export default function AccountPage() {
+export default function AccountSection() {
+  // https://dribbble.com/shots/24143775-Settings-page-UI
   const [editMode, setEditMode] = useState(false);
   const { user } = useAuth();
   return (
-    <main className="w-full min-h-screen flex flex-col p-5">
-      <h1 className="font-bold text-4xl text-secure-blue">Account</h1>
+    <main className="w-full h-full flex flex-col">
+      <h1 className="font-bold text-xl text-secure-blue">Account</h1>
       <div className="flex flex-row justify-between">
         <ProfilePicture className={'size-20'} />
         <div className="flex flex-row gap-2">
@@ -48,45 +42,6 @@ export default function AccountPage() {
           </Button>
         </div>
       </div>
-      {/* <InputGroup>
-        <InputGroupInput
-          defaultValue={user.displayName}
-          disabled={!editMode}
-          id="displayName"
-        ></InputGroupInput>
-        <InputGroupAddon align="block-start">
-          <Label className="text-foreground" htmlFor="displayName">
-            Display Name
-          </Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <InputGroupButton className="rounded-full ml-auto" size="icon-xs">
-                <Info />
-              </InputGroupButton>
-            </TooltipTrigger>
-            <TooltipContent>Your name.</TooltipContent>
-          </Tooltip>
-        </InputGroupAddon>
-      </InputGroup>
-      <InputGroup>
-        <InputGroupInput
-          defaultValue={user.email}
-          disabled={!editMode}
-        ></InputGroupInput>
-        <InputGroupAddon align="block-start">
-          <Label className="text-foreground" htmlFor="email">
-            Email
-          </Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <InputGroupButton className="rounded-full ml-auto" size="icon-xs">
-                <Info />
-              </InputGroupButton>
-            </TooltipTrigger>
-            <TooltipContent>Your email.</TooltipContent>
-          </Tooltip>
-        </InputGroupAddon>
-      </InputGroup> */}
       <FieldGroup>
         <div className="grid grid-cols-3 gap-3">
           <Field variant="outline">

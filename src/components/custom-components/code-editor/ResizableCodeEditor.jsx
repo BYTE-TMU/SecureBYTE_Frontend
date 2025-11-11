@@ -1,33 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '../../ui/resizable';
-import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
 import { useUpdateFiles } from '@/hooks/useUpdateFiles';
 
-export default function ResizableCodeEditor({ 
+export default function ResizableCodeEditor({
   tree,
   refetchFileTree,
-  securityReview, 
-  openFiles, 
-  setOpenFiles, 
-  activeFile, 
-  setActiveFile, 
+  securityReview,
+  openFiles,
+  setOpenFiles,
+  activeFile,
+  setActiveFile,
   projectId,
-  isSecReviewLoading
+  isSecReviewLoading,
 }) {
-  const { trackFileUpdate } = useUpdateFiles(); 
+  const { trackFileUpdate } = useUpdateFiles();
 
   useEffect(() => {
-  if (activeFile) {
-    console.log("Active file updated:", activeFile);
-  }
-}, [activeFile]);
+    if (activeFile) {
+      console.log('Active file updated:', activeFile);
+    }
+  }, [activeFile]);
 
   const openNewFile = (targetFile) => {
     console.log('Current open files', openFiles);
@@ -42,7 +41,7 @@ export default function ResizableCodeEditor({
       setOpenFiles((prevFiles) => [...prevFiles, targetFile]); // Add the target file to the array of currently-open files
     }
 
-    console.log(targetFile); 
+    console.log(targetFile);
 
     setActiveFile(targetFile);
   };
@@ -82,7 +81,7 @@ export default function ResizableCodeEditor({
       setActiveFile(targetFile);
     }
 
-    console.log("Currently active file", activeFile); 
+    console.log('Currently active file', activeFile);
   };
 
   // TODO: Save file content to backend when users close the file tab
@@ -92,19 +91,23 @@ export default function ResizableCodeEditor({
 
     if (existingFile) {
       // Update activeFile content
-      setActiveFile({...targetFile, content: newContent}); 
+      setActiveFile({ ...targetFile, content: newContent });
       setOpenFiles((prevFiles) =>
         prevFiles.map((file) =>
           file.id === targetFile.id ? { ...file, content: newContent } : file,
         ),
       );
 
-      // Save to sessionStorage 
-      trackFileUpdate({fileId: targetFile.id, fileName: targetFile.name, code: newContent}); 
+      // Save to sessionStorage
+      trackFileUpdate({
+        fileId: targetFile.id,
+        fileName: targetFile.name,
+        code: newContent,
+      });
     }
 
-    console.log("Active file's content is updated:", targetFile.content); 
-    console.log("CURRENTLY OPEN FILES", openFiles); 
+    console.log("Active file's content is updated:", targetFile.content);
+    console.log('CURRENTLY OPEN FILES', openFiles);
   };
 
   return (
@@ -128,16 +131,16 @@ export default function ResizableCodeEditor({
           onCloseFile={closeFile}
           onSwitchTab={switchTab}
         />
-        <FileTabContent 
-          activeFile={activeFile} 
+        <FileTabContent
+          activeFile={activeFile}
           isDarkTheme={false}
           onEditorChange={updateFileContent}
         />
       </ResizablePanel>
       <ResizableHandle />
-       <ResizablePanel defaultSize={25}>
-        <ReviewModal 
-          activeFile={activeFile} 
+      <ResizablePanel defaultSize={25}>
+        <ReviewModal
+          activeFile={activeFile}
           securityReview={securityReview}
           projectId={projectId}
           isSecReviewLoading={isSecReviewLoading}

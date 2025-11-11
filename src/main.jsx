@@ -11,10 +11,12 @@ import LoginPage from './components/pages/LoginPage';
 import SignUpPage from './components/pages/SignUpPage';
 import ProtectedRoute from './utils/ProtectedRoute';
 import LoadingPage from './components/pages/LoadingPage';
-import AccountPage from './components/pages/AccountPage';
+import SettingsLayout from './components/layouts/SettingsLayout';
+import AccountSection from './components/custom-components/settings-sections/AccountSection';
+import PreferencesSection from './components/custom-components/settings-sections/PreferencesSection';
+import NotificationsSection from './components/custom-components/settings-sections/NotificationsSection';
 
 createRoot(document.getElementById('root')).render(
-  // LATER: Separate routes into different groups (e.g., public, authentication, protected) when landing page is added.
   <BrowserRouter>
     <AuthProvider>
       {/* Authentication routes */}
@@ -34,7 +36,11 @@ createRoot(document.getElementById('root')).render(
               element={<CodeEditorPage className="overflow-y-hidden" />}
             />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/account" element={<AccountPage />} />
+            <Route path="/settings" element={<SettingsLayout />}>
+              <Route path="account" element={<AccountSection />} />
+              <Route path="preferences" element={<PreferencesSection />} />
+              <Route path="notifications" element={<NotificationsSection />} />
+            </Route>
             <Route path="/loading" element={<LoadingPage />} />
             <Route path="/projects">
               <Route path=":projectId" element={<IndividualProjectPage />} />

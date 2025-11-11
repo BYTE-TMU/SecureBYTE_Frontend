@@ -1,4 +1,4 @@
-import { deleteProject, deleteSubmission } from '@/api';
+import { deleteSubmission } from '@/api';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,12 +10,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { useState } from 'react';
+import { ContextMenuItem } from '../ui/context-menu';
 
 export function DeleteSubmissionAlert({ submission }) {
   const { user } = useAuth();
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
 
   const handleDeleteSubmission = async () => {
@@ -36,34 +37,37 @@ export function DeleteSubmissionAlert({ submission }) {
       );
     }
   };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          className=" p-2 w-full text-left font-normal justify-start text-sm hover:bg-secondary hover:rounded-sm hover:cursor-pointer text-destructive "
-        >
-          Delete Submission
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            submission and remove your data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDeleteSubmission}
-            className="bg-red-500"
-          >
-            Continue
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <ContextMenuItem
+        className="text-destructive"
+        onClick={() => setOpen(true)}
+      >
+        Delete Submission
+      </ContextMenuItem>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        {/* <AlertDialogTrigger asChild></AlertDialogTrigger> */}
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              submission and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSubmission}
+              className="bg-destructive"
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

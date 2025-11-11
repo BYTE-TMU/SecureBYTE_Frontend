@@ -22,14 +22,15 @@ export default function GithubLinkDialog({
   loadingRepos,
   repoError,
   isWorking,
+  handleRepoChange,
   handleLinkRepo,
   handleImportRepo,
 }) {
-  const handleRepoChange = (value) => {
-    setSelectedRepo(value);
-    const found = repos.find((r) => r.full_name === value);
-    setBranch(found?.default_branch || '');
-  };
+  // const handleRepoChange = (value) => {
+  //   setSelectedRepo(value);
+  //   const found = repos.find((r) => r.full_name === value);
+  //   setBranch(found?.default_branch || '');
+  // };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

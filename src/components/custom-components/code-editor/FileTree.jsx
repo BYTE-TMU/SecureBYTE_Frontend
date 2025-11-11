@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from '../../ui/sidebar';
+import { Input } from '@/components/ui/input';
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,7 +21,16 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { ChevronDown, ChevronRight, FileCode, FolderCode } from 'lucide-react';
+
+import {
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FolderCode,
+  Search,
+  X,
+} from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
@@ -28,7 +38,7 @@ import { deleteSubmission, moveSubmission } from '@/api';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import NewFolderDialog from '@/components/custom-components/NewFolderDialog';
 
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 export default function FileTree({
   tree,
@@ -45,6 +55,8 @@ export default function FileTree({
   const { user } = useAuth();
 
   const [treeKey, setTreeKey] = useState(0); // For forcing re-render
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   const [persistedFolders, setPersistedFolders] = useState(() => {
     try {
@@ -299,6 +311,56 @@ export default function FileTree({
     }
   };
 
+  // Search through file tree for matching file names and contents
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results = [];
+    const searchLower = query.toLowerCase();
+
+    // Recursive function to search through tree
+    const searchTree = (node, path = '') => {
+      Object.entries(node).forEach(([key, value]) => {
+        if (value.type === 'file') {
+          const fileName = value.name.toLowerCase();
+          const fileContent = (value.content || '').toLowerCase();
+          const filePath = value.path || value.name;
+
+          // Check if filename matches
+          const nameMatch = fileName.includes(searchLower);
+          // Check if content matches
+          const contentMatch = fileContent.includes(searchLower);
+
+          if (nameMatch || contentMatch) {
+            results.push({
+              file: value,
+              path: filePath,
+              matchType: nameMatch ? 'filename' : 'content',
+              matchedIn: nameMatch ? 'File name' : 'File content',
+            });
+          }
+        } else if (value.type === 'folder' && value.children) {
+          // Recursively search in folders
+          searchTree(value.children, value.path || value.name);
+        }
+      });
+    };
+
+    searchTree(mergedTree);
+    setSearchResults(results);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
   return (
     <div
       className="flex flex-col text-sm h-full relative"
@@ -314,80 +376,147 @@ export default function FileTree({
           </div>
         </div>
       )}{' '}
-      <SidebarHeader className="flex flex-row items-center justify-between bg-secondary">
-        <h2 className="font-medium">Project Name</h2>
-        <div className="flex flex-row items-center gap-2">
-          {/* <FilePlus className="size-4" /> */}
-          <NewSubmissionDialog variant={'icon'} projectId={projectId} />
-          <NewFolderDialog
-            variant="icon"
-            onCreate={async (folderName) => {
-              // Check if folder already exists
-              if (persistedFolders[folderName]) {
-                toast.error('A folder with this name already exists');
-                throw new Error('Folder already exists');
-              }
+      <SidebarHeader className="flex flex-col gap-2 bg-secondary">
+        <div className="flex flex-row items-center justify-between">
+          <h2 className="font-medium">Project Name</h2>
+          <div className="flex flex-row items-center gap-2">
+            {/* <FilePlus className="size-4" /> */}
+            <NewSubmissionDialog variant={'icon'} projectId={projectId} />
+            <NewFolderDialog
+              variant="icon"
+              onCreate={async (folderName) => {
+                // Check if folder already exists
+                if (persistedFolders[folderName]) {
+                  toast.error('A folder with this name already exists');
+                  throw new Error('Folder already exists');
+                }
 
-              try {
-                console.log(
-                  'Creating folder:',
-                  folderName,
-                  'in project:',
-                  projectId,
-                );
-                const result = await createFolderInProject({
-                  projectId,
-                  folderPath: folderName,
-                });
-                console.log('createFolderInProject result:', result);
-                const next = {
-                  ...persistedFolders,
-                  [folderName]: { path: folderName },
-                };
-                persistFolders(next);
-                toast.success('Folder created');
-              } catch (err) {
-                console.error('Error creating folder:', err);
-                console.error('Error details:', err.message, err.stack);
-                toast.error('Failed to create folder: ' + err.message);
-                throw err;
-              }
-            }}
+                try {
+                  console.log(
+                    'Creating folder:',
+                    folderName,
+                    'in project:',
+                    projectId,
+                  );
+                  const result = await createFolderInProject({
+                    projectId,
+                    folderPath: folderName,
+                  });
+                  console.log('createFolderInProject result:', result);
+                  const next = {
+                    ...persistedFolders,
+                    [folderName]: { path: folderName },
+                  };
+                  persistFolders(next);
+                  toast.success('Folder created');
+                } catch (err) {
+                  console.error('Error creating folder:', err);
+                  console.error('Error details:', err.message, err.stack);
+                  toast.error('Failed to create folder: ' + err.message);
+                  throw err;
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-8 pr-8 h-8 text-sm"
           />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-muted rounded-sm p-0.5"
+              aria-label="Clear search"
+            >
+              <X className="size-3 text-muted-foreground" />
+            </button>
+          )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="h-2/3">
+      <SidebarContent className="h-2/3 overflow-y-auto">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {Object.entries(mergedTree).map(([key, value]) =>
-                value.type === 'folder' ? (
-                  <Folder
-                    folder={value}
-                    key={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                    projectId={projectId}
-                    renameFolderInProject={renameFolderInProject}
-                    persistFolders={persistFolders}
-                    persistedFolders={persistedFolders}
-                    user={user}
-                    refetchSubmissions={refetchSubmissions}
-                    fullTree={mergedTree}
-                    onFileRenamed={onFileRenamed}
-                  />
+            {searchQuery ? (
+              // Display search results
+              <div className="px-2">
+                {searchResults.length > 0 ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {searchResults.length} result
+                      {searchResults.length !== 1 ? 's' : ''} found
+                    </p>
+                    <SidebarMenu>
+                      {searchResults.map((result, idx) => (
+                        <SidebarMenuItem key={idx}>
+                          <SidebarMenuButton
+                            onClick={() =>
+                              onFileSelectFromFileTree(result.file)
+                            }
+                            className="flex flex-col items-start gap-1 h-auto py-2"
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <FileCode className="size-4 flex-shrink-0" />
+                              <span className="truncate text-sm font-medium">
+                                {result.file.name}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground truncate w-full pl-6">
+                              {result.path}
+                            </span>
+                            <span className="text-xs text-muted-foreground pl-6">
+                              Match in: {result.matchedIn}
+                            </span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </>
                 ) : (
-                  <File
-                    file={value}
-                    index={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                    projectId={projectId}
-                    user={user}
-                    refetchSubmissions={refetchSubmissions}
-                    onFileRenamed={onFileRenamed}
-                  />
-                ),
-              )}
-            </SidebarMenu>
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No files found matching "{searchQuery}"
+                  </p>
+                )}
+              </div>
+            ) : (
+              // Display normal file tree
+              <SidebarMenu>
+                {Object.entries(mergedTree).map(([key, value]) =>
+                  value.type === 'folder' ? (
+                    <Folder
+                      folder={value}
+                      key={key}
+                      onFileSelect={onFileSelectFromFileTree}
+                      projectId={projectId}
+                      renameFolderInProject={renameFolderInProject}
+                      persistFolders={persistFolders}
+                      persistedFolders={persistedFolders}
+                      user={user}
+                      refetchSubmissions={refetchSubmissions}
+                      fullTree={mergedTree}
+                      onFileRenamed={onFileRenamed}
+                    />
+                  ) : (
+                    <File
+                      file={value}
+                      index={key}
+                      onFileSelect={onFileSelectFromFileTree}
+                      projectId={projectId}
+                      user={user}
+                      refetchSubmissions={refetchSubmissions}
+                      onFileRenamed={onFileRenamed}
+                    />
+                  ),
+                )}
+              </SidebarMenu>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

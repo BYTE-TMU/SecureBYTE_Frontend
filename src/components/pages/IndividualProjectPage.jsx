@@ -7,20 +7,12 @@ import { useProject } from '../../hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import React, { useState, useEffect } from 'react';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
+import GithubLinkDialog from '../custom-components/GithubLinkDialog';
 import LoadingPage from './LoadingPage';
 
 export default function IndividualProjectPage() {
@@ -213,60 +205,18 @@ export default function IndividualProjectPage() {
       {submissionsError ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
       ) : null}
-      <Dialog open={isRepoDialogOpen} onOpenChange={setIsRepoDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Link your GitHub Repository</DialogTitle>
-            <DialogDescription>
-              Select a repository and optionally a branch to link or import
-              files.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-3">
-            {loadingRepos ? (
-              <div>Loading repositories...</div>
-            ) : (
-              <>
-                <label className="text-sm">Repository</label>
-                <select
-                  className="border rounded-md p-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                  value={selectedRepo}
-                  onChange={(e) => handleRepoChange(e.target.value)}
-                >
-                  <option value="">Select repo</option>
-                  {repos.map((r) => (
-                    <option key={r.id} value={r.full_name}>
-                      {r.full_name}
-                    </option>
-                  ))}
-                </select>
-                {/* Branch optional; backend will use repo default if omitted */}
-                {repoError ? (
-                  <div className="text-destructive text-sm">{repoError}</div>
-                ) : null}
-              </>
-            )}
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              onClick={handleLinkRepo}
-              disabled={!selectedRepo || isWorking}
-            >
-              {isWorking ? 'Working...' : 'Link'}
-            </Button>
-            <Button
-              onClick={handleImportRepo}
-              disabled={isWorking}
-              variant="secondary"
-            >
-              {isWorking ? 'Working...' : 'Import Files'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <GithubLinkDialog
+        isOpen={isRepoDialogOpen}
+        onOpenChange={setIsRepoDialogOpen}
+        repos={repos}
+        selectedRepo={selectedRepo}
+        loadingRepos={loadingRepos}
+        repoError={repoError}
+        isWorking={isWorking}
+        handleRepoChange={handleRepoChange}
+        handleLinkRepo={handleLinkRepo}
+        handleImportRepo={handleImportRepo}
+      />
 
       <ResizableCodeEditor
         tree={tree}

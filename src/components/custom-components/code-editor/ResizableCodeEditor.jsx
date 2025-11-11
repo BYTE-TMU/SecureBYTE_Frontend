@@ -147,7 +147,7 @@ export default function ResizableCodeEditor({
       pendingSavesRef.current.delete(fileId);
 
       console.log('✅ File saved to backend:', fileName);
-      return true;
+      return { success: true };
     } catch (err) {
       const isRateLimited = err.response?.status === 429;
       const shouldRetry = retryCount < maxRetries;
@@ -159,59 +159,35 @@ export default function ResizableCodeEditor({
         console.log(
           `⏳ Rate limited. Retrying in ${delay / 1000}s... (attempt ${retryCount + 1}/${maxRetries})`,
         );
-        toast.warning(
-          `Save rate limited. Retrying in ${delay / 1000} seconds...`,
+
+        // Wait and retry
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return saveToBackendWithRetry(
+          fileId,
+          fileName,
+          filePath,
+          content,
+          retryCount + 1,
         );
-
-        // Schedule retry
-        const timeoutId = setTimeout(() => {
-          saveToBackendWithRetry(
-            fileId,
-            fileName,
-            filePath,
-            content,
-            retryCount + 1,
-          );
-        }, delay);
-
-        // Store timeout ID so we can cancel if needed
-        pendingSavesRef.current.set(fileId, { timeoutId, fileName });
-
-        return false;
       } else {
         // Final failure - give up
         console.error('❌ Failed to save to backend after retries:', err);
 
-        if (isRateLimited) {
-          toast.error(
-            `Unable to save "${fileName}" - server is busy. Please wait and try again later.`,
-          );
-        } else {
-          toast.error(`Failed to save "${fileName}" - ${err.message}`);
-        }
-
-        // Remove from pending saves
-        pendingSavesRef.current.delete(fileId);
-
-        // Keep the unsaved indicator visible
-        return false;
+        return {
+          success: false,
+          isRateLimited,
+          error: err.message,
+        };
       }
     }
   };
 
-  // TODO: Save file content to backend when users close the file tab
+  // Update file content in memory and sessionStorage only
   const updateFileContent = async ({ targetFile, newContent }) => {
     // Check if the file is currently open
     const existingFile = openFiles.find((file) => file.id === targetFile.id);
 
     if (existingFile) {
-      // Cancel any pending save for this file
-      const pendingSave = pendingSavesRef.current.get(targetFile.id);
-      if (pendingSave) {
-        clearTimeout(pendingSave.timeoutId);
-        pendingSavesRef.current.delete(targetFile.id);
-      }
-
       // Mark file as unsaved (has changes)
       setUnsavedFiles((prev) => new Set(prev).add(targetFile.id));
 
@@ -223,26 +199,70 @@ export default function ResizableCodeEditor({
         ),
       );
 
-      // Save to sessionStorage first (for immediate persistence)
+      // Save to sessionStorage only (not backend - wait for manual save)
       trackFileUpdate({
         fileId: targetFile.id,
         fileName: targetFile.name,
         code: newContent,
       });
-
-      // Save to backend with retry logic
-      if (user) {
-        await saveToBackendWithRetry(
-          targetFile.id,
-          targetFile.name,
-          targetFile.path || targetFile.name,
-          newContent,
-        );
-      }
     }
 
     console.log("Active file's content is updated:", targetFile.content);
     console.log('CURRENTLY OPEN FILES', openFiles);
+  };
+
+  // Manual save all files to backend
+  const handleSaveAllFiles = async () => {
+    if (!user) return;
+
+    const filesToSave = Array.from(unsavedFiles);
+    if (filesToSave.length === 0) {
+      toast.info('No unsaved changes');
+      return;
+    }
+
+    toast.info(`Saving ${filesToSave.length} file(s)...`);
+
+    let successCount = 0;
+    let failCount = 0;
+    let rateLimitedCount = 0;
+
+    for (const fileId of filesToSave) {
+      const file = openFiles.find((f) => f.id === fileId);
+      if (!file) continue;
+
+      const result = await saveToBackendWithRetry(
+        file.id,
+        file.name,
+        file.path || file.name,
+        file.content,
+        0,
+      );
+
+      if (result.success) {
+        successCount++;
+      } else {
+        failCount++;
+        if (result.isRateLimited) {
+          rateLimitedCount++;
+        }
+      }
+    }
+
+    // Show appropriate toast based on results
+    if (successCount > 0 && failCount === 0) {
+      toast.success(`Successfully saved ${successCount} file(s)`);
+    } else if (successCount > 0 && failCount > 0) {
+      toast.warning(`Saved ${successCount} file(s), but ${failCount} failed`);
+    } else if (failCount > 0) {
+      if (rateLimitedCount > 0) {
+        toast.error(
+          `Failed to save ${failCount} file(s) - server is busy. Please try again in a moment.`,
+        );
+      } else {
+        toast.error(`Failed to save ${failCount} file(s)`);
+      }
+    }
   };
 
   return (
@@ -268,6 +288,7 @@ export default function ResizableCodeEditor({
           onSwitchTab={switchTab}
           onReorderTabs={reorderTabs}
           unsavedFiles={unsavedFiles}
+          onSaveAll={handleSaveAllFiles}
         />
         <FileTabContent
           activeFile={activeFile}

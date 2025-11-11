@@ -35,7 +35,11 @@ function FileTabBar({
   const handleEmptyAreaDrop = (e) => {
     e.preventDefault();
     const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-    if (!isNaN(dragIndex) && dragIndex !== openFiles.length - 1 && onReorderTabs) {
+    if (
+      !isNaN(dragIndex) &&
+      dragIndex !== openFiles.length - 1 &&
+      onReorderTabs
+    ) {
       onReorderTabs(dragIndex, openFiles.length - 1);
     }
     setIsDraggingOverEmpty(false);
@@ -53,7 +57,7 @@ function FileTabBar({
       }}
       className={cn(
         'flex h-8 w-full bg-accent/10 border border-border overflow-x-auto overflow-y-hidden',
-        'rounded-t-lg p-0.5',
+        'p-0.5',
         className,
       )}
       onDragOver={handleEmptyAreaDragOver}
@@ -78,7 +82,7 @@ function FileTabBar({
           setIsDraggingOverEmpty={setIsDraggingOverEmpty}
         />
       ))}
-      
+
       {/* Visual indicator for dropping at the end */}
       {isDraggingOverEmpty && openFiles.length > 0 && (
         <div className="w-0.5 h-full bg-blue-500 animate-pulse ml-1" />
@@ -112,7 +116,7 @@ function FileTab({
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', index.toString());
-    
+
     // Open the file being dragged (like VS Code)
     if (!isActive && onSelect) {
       onSelect();
@@ -137,9 +141,9 @@ function FileTab({
     e.stopPropagation();
     const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
     const dropIndex = index;
-    
+
     setDragOverIndex(null);
-    
+
     if (dragIndex !== dropIndex && onReorder) {
       onReorder(dragIndex, dropIndex);
     }
@@ -149,11 +153,6 @@ function FileTab({
 
   return (
     <div className="relative flex items-center">
-      {/* Visual drop indicator line */}
-      {showLeftIndicator && (
-        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 z-10 animate-pulse" />
-      )}
-      
       <button
         data-slot="file-tab"
         data-active={isActive}
@@ -169,20 +168,22 @@ function FileTab({
           'border-r border-border bg-muted/50 text-muted-foreground',
           'hover:bg-muted hover:text-foreground',
           'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-          'rounded-t-lg cursor-move',
-          isActive && 'bg-background text-secure-blue border-b-5 border-b-primary',
+          'cursor-move',
+          isActive &&
+            'bg-background text-secure-blue border-b-5 border-b-primary',
+          showLeftIndicator && 'border-l border-l-secure-blue',
           className,
         )}
         {...props}
       >
         {/* Unsaved indicator dot */}
         {isUnsaved && (
-          <span 
-            className="w-2 h-2 rounded-full border-2 border-blue-500 flex-shrink-0" 
-            aria-label="Unsaved changes" 
+          <span
+            className="w-2 h-2 rounded-full border-2 border-blue-500 flex-shrink-0"
+            aria-label="Unsaved changes"
           />
         )}
-        
+
         <span className="truncate flex-1">{fileName}</span>
 
         <span
@@ -214,14 +215,14 @@ function FileTab({
   );
 }
 
-// TODO: Display the file content according to the current active file. 
+// TODO: Display the file content according to the current active file.
 function FileTabContent({
   activeFile,
-  isDarkTheme, 
-  className, 
+  isDarkTheme,
+  className,
   onEditorChange,
-  ...props }) {
-
+  ...props
+}) {
   return (
     <div
       data-slot="tab-content"

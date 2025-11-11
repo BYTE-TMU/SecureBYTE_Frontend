@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { getLogicReview } from '@/api';
 import { Separator } from '@radix-ui/react-separator';
+import LoadingView from '@/components/ui/loading-view';
 
 export default function LogicAnalysisPanel({ activeFile }) {
   const { user } = useAuth();
@@ -77,7 +78,7 @@ export default function LogicAnalysisPanel({ activeFile }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Display temporary view
+    return <LoadingView message="Analyzing code logic..." variant="full" />;
   }
 
   return (

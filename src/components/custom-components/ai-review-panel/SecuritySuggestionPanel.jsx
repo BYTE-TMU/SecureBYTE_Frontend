@@ -7,13 +7,14 @@ import {
 } from '@/components/ui/card';
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import LoadingView from '@/components/ui/loading-view';
 
 export function SecuritySuggestionPanel({
   securityReview,
   isSecReviewLoading,
 }) {
   if (isSecReviewLoading) {
-    return <div>Loading...</div>;
+    return <LoadingView message="Generating security review..." variant="full" />;
   }
 
   return (

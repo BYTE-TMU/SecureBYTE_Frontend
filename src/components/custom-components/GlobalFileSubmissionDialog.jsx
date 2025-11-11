@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -46,14 +46,17 @@ export default function GlobalFileSubmissionDialog() {
 
       // Add uploaded files to the new project
       await createSubmissionForProject({ projectId, files });
-      // TODO: Show the project files in the IndividualProjectPage
-
-      navigate(0);
-      return toast('Project created successfully', { type: 'success' });
-      // Redirect users to the code editor, with the new project open
+      
+      // Show success message and navigate to the project page
+      toast.success('Project created successfully');
+      
+      // Navigate to the individual project page (LoadingPage will show while data loads)
+      navigate(`/projects/${projectId}`, {
+        state: { projectName: newProjectName }
+      });
     } catch (error) {
-      return toast(`Upload failed: ${error}`, { type: 'error' });
-    }
+      toast.error(`Upload failed: ${error}`);
+    } 
   };
 
   return (

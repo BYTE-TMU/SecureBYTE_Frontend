@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { useGetSubmissions } from './useGetSubmissions';
 
 export function useGetFileStructure(projectId) {
-  const { submissions, error, refetch } = useGetSubmissions(projectId);
+  const { submissions, error, loading, refetch } = useGetSubmissions(projectId);
 
   const fileTree = useMemo(() => {
+    console.time('[FILETREE] Build time');
     const tree = {};
 
     submissions.forEach((submission) => {
@@ -46,8 +47,9 @@ export function useGetFileStructure(projectId) {
         }
       });
     });
+    console.timeEnd('[FILETREE] Build time');
     return tree;
   }, [submissions]);
 
-  return { tree: fileTree };
+  return { tree: fileTree, loading, error, refetch };
 }

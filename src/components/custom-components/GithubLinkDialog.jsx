@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -9,28 +9,98 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
+import { useAuth } from '@/hooks/auth/AuthContext';
 
-export default function GithubLinkDialog({
-  isOpen,
-  onOpenChange,
-  repos,
-  setRepos,
-  selectedRepo,
-  setSelectedRepo,
-  branch,
-  setBranch,
-  loadingRepos,
-  repoError,
-  isWorking,
-  handleRepoChange,
-  handleLinkRepo,
-  handleImportRepo,
-}) {
-  // const handleRepoChange = (value) => {
-  //   setSelectedRepo(value);
-  //   const found = repos.find((r) => r.full_name === value);
-  //   setBranch(found?.default_branch || '');
-  // };
+export default function GithubLinkDialog({ isOpen, onOpenChange, projectId, refetch }) {
+  const { user } = useAuth();
+  const [repos, setRepos] = useState([]);
+  const [selectedRepo, setSelectedRepo] = useState('');
+  const [branch, setBranch] = useState('');
+  const [loadingRepos, setLoadingRepos] = useState(false);
+  const [repoError, setRepoError] = useState('');
+  const [isWorking, setIsWorking] = useState(false);
+
+  // Fetch repos when dialog opens
+  useEffect(() => {
+    if (!isOpen || !user) return;
+
+    async function fetchRepos() {
+      setLoadingRepos(true);
+      setRepoError('');
+      try {
+        const resp = await listGithubRepos(user.uid);
+        setRepos(resp.data || []);
+      } catch (err) {
+        setRepoError(err.response?.data?.error || err.message);
+        setRepos([]);
+      } finally {
+        setLoadingRepos(false);
+      }
+    }
+
+    fetchRepos();
+  }, [isOpen, user]);
+
+  const handleRepoChange = (value) => {
+    setSelectedRepo(value);
+    const found = repos.find((r) => r.full_name === value);
+    setBranch(found?.default_branch || '');
+  };
+
+  const handleLinkRepo = async () => {
+    if (!user || !projectId || !selectedRepo) return;
+    setRepoError('');
+    setIsWorking(true);
+    try {
+      await linkGithubRepo(user.uid, projectId, { repo_full_name: selectedRepo, branch });
+      const resp = await importGithubRepo(user.uid, projectId, {
+        repo_full_name: selectedRepo,
+        branch,
+        max_files: 5000,
+        max_bytes: 5242880,
+      });
+      const count = resp?.data?.files_imported;
+      toast.success(
+        `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`
+      );
+      onOpenChange(false);
+      if (refetch) await refetch();
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setRepoError(msg);
+      toast.error(`Failed: ${msg}`);
+    } finally {
+      setIsWorking(false);
+    }
+  };
+
+  const handleImportRepo = async () => {
+    if (!user || !projectId) return;
+    setRepoError('');
+    setIsWorking(true);
+    try {
+      const resp = await importGithubRepo(user.uid, projectId, {
+        repo_full_name: selectedRepo || undefined,
+        branch: branch || undefined,
+        max_files: 5000,
+        max_bytes: 5242880,
+      });
+      const count = resp?.data?.files_imported;
+      toast.success(
+        `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`
+      );
+      onOpenChange(false);
+      if (refetch) await refetch();
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setRepoError(msg);
+      toast.error(`Failed: ${msg}`);
+    } finally {
+      setIsWorking(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -71,17 +141,10 @@ export default function GithubLinkDialog({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button
-            onClick={handleLinkRepo}
-            disabled={!selectedRepo || isWorking}
-          >
+          <Button onClick={handleLinkRepo} disabled={!selectedRepo || isWorking}>
             {isWorking ? 'Working...' : 'Link'}
           </Button>
-          <Button
-            onClick={handleImportRepo}
-            disabled={isWorking}
-            variant="secondary"
-          >
+          <Button onClick={handleImportRepo} disabled={isWorking} variant="secondary">
             {isWorking ? 'Working...' : 'Import Files'}
           </Button>
         </DialogFooter>
@@ -89,3 +152,4 @@ export default function GithubLinkDialog({
     </Dialog>
   );
 }
+

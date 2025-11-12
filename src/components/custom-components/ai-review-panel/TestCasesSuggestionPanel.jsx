@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import { toast } from 'sonner';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -137,53 +138,67 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
       </CardHeader>
       <CardContent className="w-full h-full overflow-hidden">
         {testAvailable && (
-          <div className="space-y-4 h-100 overflow-y-auto w-full overflow-x-hidden">
-            {Object.entries(testCases).map(([testKey, testObj]) => (
-              <Card key={testKey} className="border shadow-sm gap-0 w-full">
-                <CardContent className="w-full max-w-full">
-                  {testObj['test_cases'].map((test, index) => (
-                    <Card key={index} className="w-full p-5 mb-5 gap-4">
-                      {test['input'] && (
-                        <CardTitle>
-                          Input: {test['input']}
-                        </CardTitle>
-                      )}
-                      {test['expected_output'] && (
-                        <CardTitle>
-                          Expected output: {test['expected_output']}
-                        </CardTitle>
-                      )}
-                      <CardDescription className="w-full">
-                        Description: {test['notes']}
-                      </CardDescription>
-                      <CardContent className="p-0">
-                        <SyntaxHighlighter
-                          key={test.id}
-                          language="javascript"
-                          style={atomDark}
-                          wrapLines={true}
-                          wrapLongLines={true}
-                          customStyle={{
-                            maxWidth: '100%',
-                            width: '300px', // Enforce a fixed width to avoid overflowing
-                            height: 'auto',
-                            minHeight: 'fit-content',
-                            whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word',
-                            lineHeight: '1.5rem',
-                            padding: '1rem',
-                          }}
-                          className="m-3"
-                          showLineNumbers={true}
-                        >
-                          {test.description}
-                        </SyntaxHighlighter>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </CardContent>
-              </Card>
+          <div className="space-y-6 h-100 overflow-y-auto w-full overflow-x-hidden">
+            {Object.entries(testCases).map(([testKey, testObj], fileIndex) => (
+              <div key={testKey}>
+                {/* Separator between files */}
+                {fileIndex > 0 && <Separator className="my-6" />}
+                
+                <Card className="border shadow-sm p-5">
+                  <CardTitle className="mb-4">{testKey}</CardTitle>
+                  <CardContent className="p-0 space-y-4">
+                    {testObj['test_cases'].map((test, index) => (
+                      <div key={index}>
+                        {/* Separator between test cases */}
+                        {index > 0 && <Separator className="my-4" />}
+                        
+                        <Card className="p-5 space-y-4">
+                          <div className="space-y-2">
+                            {test['input'] && (
+                              <CardTitle className="text-sm font-semibold">
+                                Input: <span className="font-mono text-primary">{test['input']}</span>
+                              </CardTitle>
+                            )}
+                            {test['expected_output'] && (
+                              <CardTitle className="text-sm font-semibold">
+                                Expected Output: <span className="font-mono text-primary">{test['expected_output']}</span>
+                              </CardTitle>
+                            )}
+                            <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted">
+                              {test['notes']}
+                            </CardDescription>
+                          </div>
+                          <CardContent className="p-0">
+                            <SyntaxHighlighter
+                              key={test.id}
+                              language="javascript"
+                              style={atomDark}
+                              wrapLines={true}
+                              wrapLongLines={true}
+                              customStyle={{
+                                maxWidth: '100%',
+                                width: '300px',
+                                height: 'auto',
+                                minHeight: 'fit-content',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                                lineHeight: '1.5rem',
+                                padding: '1rem',
+                                borderRadius: '0.5rem',
+                              }}
+                              className="m-0 mt-3"
+                              showLineNumbers={true}
+                            >
+                              {test.description}
+                            </SyntaxHighlighter>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         )}

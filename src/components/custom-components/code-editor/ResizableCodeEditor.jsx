@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '../../ui/resizable';
-import CodeEditor from './CodeEditor';
 import FileTree from './FileTree';
 import { FileTabBar, FileTabContent } from '../../ui/file-tab';
 import ReviewModal from '../ai-review-panel/ReviewModal';
@@ -15,7 +14,7 @@ import { toast } from 'sonner';
 
 export default function ResizableCodeEditor({
   tree,
-  refetchFileTree,
+  refetchSubmissions,
   securityReview,
   openFiles,
   setOpenFiles,
@@ -31,7 +30,7 @@ export default function ResizableCodeEditor({
   const [unsavedFiles, setUnsavedFiles] = useState(new Set());
 
   // Track pending save operations for retry
-  const pendingSavesRef = React.useRef(new Map());
+  const pendingSavesRef = useRef(new Map());
 
   useEffect(() => {
     if (activeFile) {
@@ -279,7 +278,7 @@ export default function ResizableCodeEditor({
         <div className="w-full overflow-x-auto">
           <FileTree
             tree={tree}
-            refetchFileTree={refetchFileTree}
+            refetchSubmissions={refetchSubmissions}
             onFileSelectFromFileTree={openNewFile}
             onFileRenamed={handleFileRenamed}
           />

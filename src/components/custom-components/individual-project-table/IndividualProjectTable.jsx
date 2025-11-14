@@ -32,7 +32,6 @@ import { useParams } from 'react-router';
 import { FileUploadInput } from '../FileUploadInput';
 
 export default function IndividualProjectTable({ columns, data }) {
-  const { projectId } = useParams();
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -70,8 +69,10 @@ export default function IndividualProjectTable({ columns, data }) {
 
   return (
     <div>
-      <h2 className='font-bold text-3xl mt-6 text-primary'>Review History</h2>
-      <p className='mb-1'>All AI-generated review(s) you've generated on this project</p>
+      <h2 className="font-bold text-3xl mt-6 text-primary">Review History</h2>
+      <p className="mb-1">
+        All AI-generated review(s) you've generated on this project
+      </p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Input
@@ -90,16 +91,24 @@ export default function IndividualProjectTable({ columns, data }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('all')}>
+              <DropdownMenuItem
+                onClick={() => handleReviewTypeFilterChange('all')}
+              >
                 All Reviews
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('security')}>
+              <DropdownMenuItem
+                onClick={() => handleReviewTypeFilterChange('security')}
+              >
                 Security
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('logic')}>
+              <DropdownMenuItem
+                onClick={() => handleReviewTypeFilterChange('logic')}
+              >
                 Logic
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleReviewTypeFilterChange('testcases')}>
+              <DropdownMenuItem
+                onClick={() => handleReviewTypeFilterChange('testcases')}
+              >
                 Test Cases
               </DropdownMenuItem>
             </DropdownMenuContent>

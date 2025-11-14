@@ -120,7 +120,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   }
 
   return (
-    <Card className="w-full h-[90%] rounded-md shadow-none overflow-hidden">
+    <Card className="h-full rounded-none border-none shadow-none overflow-hidden">
       <CardHeader>
         <CardTitle>Test Cases</CardTitle>
         <CardDescription>
@@ -140,64 +140,64 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
         {testAvailable && (
           <div className="space-y-6 h-100 overflow-y-auto w-full overflow-x-hidden">
             {Object.entries(testCases).map(([testKey, testObj], fileIndex) => (
-              <div key={testKey}>
+              <div key={testKey} c>
                 {/* Separator between files */}
                 {fileIndex > 0 && <Separator className="my-6" />}
-                
-                <Card className="border shadow-sm p-5">
-                  <CardTitle className="mb-4">{testKey}</CardTitle>
-                  <CardContent className="p-0 space-y-4">
-                    {testObj['test_cases'].map((test, index) => (
-                      <div key={index}>
-                        {/* Separator between test cases */}
-                        {index > 0 && <Separator className="my-4" />}
-                        
-                        <Card className="p-5 space-y-4">
-                          <div className="space-y-2">
-                            {test['input'] && (
-                              <CardTitle className="text-sm font-semibold">
-                                Input: <span className="font-mono text-primary">{test['input']}</span>
-                              </CardTitle>
-                            )}
-                            {test['expected_output'] && (
-                              <CardTitle className="text-sm font-semibold">
-                                Expected Output: <span className="font-mono text-primary">{test['expected_output']}</span>
-                              </CardTitle>
-                            )}
-                            <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted">
-                              {test['notes']}
-                            </CardDescription>
-                          </div>
-                          <CardContent className="p-0">
-                            <SyntaxHighlighter
-                              key={test.id}
-                              language="javascript"
-                              style={atomDark}
-                              wrapLines={true}
-                              wrapLongLines={true}
-                              customStyle={{
-                                maxWidth: '100%',
-                                width: '300px',
-                                height: 'auto',
-                                minHeight: 'fit-content',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                                lineHeight: '1.5rem',
-                                padding: '1rem',
-                                borderRadius: '0.5rem',
-                              }}
-                              className="m-0 mt-3"
-                              showLineNumbers={true}
-                            >
-                              {test.description}
-                            </SyntaxHighlighter>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+
+                <CardTitle className="mb-4">{testKey}</CardTitle>
+                {testObj['test_cases'].map((test, index) => (
+                  <div key={index} className="h-full">
+                    {/* Separator between test cases */}
+                    {index > 0 && <Separator className="my-4" />}
+
+                    <div className="space-y-2">
+                      {test['input'] && (
+                        <CardTitle className="text-sm font-semibold">
+                          Input:{' '}
+                          <span className="font-mono text-primary">
+                            {test['input']}
+                          </span>
+                        </CardTitle>
+                      )}
+                      {test['expected_output'] && (
+                        <CardTitle className="text-sm font-semibold">
+                          Expected Output:{' '}
+                          <span className="font-mono text-primary">
+                            {test['expected_output']}
+                          </span>
+                        </CardTitle>
+                      )}
+                      <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted">
+                        {test['notes']}
+                      </CardDescription>
+                    </div>
+                    <CardContent className="p-0">
+                      <SyntaxHighlighter
+                        key={test.id}
+                        language="javascript"
+                        style={atomDark}
+                        wrapLines={true}
+                        wrapLongLines={true}
+                        customStyle={{
+                          maxWidth: '100%',
+                          width: '300px',
+                          height: 'auto',
+                          minHeight: 'fit-content',
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          lineHeight: '1.5rem',
+                          padding: '1rem',
+                          borderRadius: '0.5rem',
+                        }}
+                        className="m-0 mt-3"
+                        showLineNumbers={true}
+                      >
+                        {test.description}
+                      </SyntaxHighlighter>
+                    </CardContent>
+                  </div>
+                ))}
               </div>
             ))}
           </div>

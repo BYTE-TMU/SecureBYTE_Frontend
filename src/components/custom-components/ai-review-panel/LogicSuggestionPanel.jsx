@@ -82,7 +82,7 @@ export default function LogicAnalysisPanel({ activeFile }) {
   }
 
   return (
-    <Card className="h-full rounded-md shadow-none">
+    <Card className="h-full rounded-none border-none shadow-none overflow-x-hidden">
       <CardHeader>
         <CardTitle>Logic Analysis</CardTitle>
         <CardDescription>
@@ -98,37 +98,39 @@ export default function LogicAnalysisPanel({ activeFile }) {
           </Button>
         )}
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 h-full">
         {/* Display the logic analysis when it is available */}
         {reviewAvailable && logicFiles && (
-          <div className="overflow-y-auto h-100 space-y-6">
-            {Object.entries(logicFiles).map(([reviewKey, reviewObj], fileIndex) => (
-              <div key={reviewKey}>
-                {/* Separator between files */}
-                {fileIndex > 0 && <Separator className="my-6" />}
-                
-                <Card className="border shadow-sm p-5">
-                  <CardTitle className="mb-4">{reviewKey}</CardTitle>
-                  <CardContent className="p-0 space-y-4">
-                    {reviewObj['logic Errors'].map((review, index) => (
-                      <div key={index}>
-                        {/* Separator between logic errors */}
-                        {index > 0 && <Separator className="my-4" />}
-                        
-                        <Card className="p-5 space-y-3">
-                          <CardTitle className="text-base font-semibold">
-                            Function: {review.function}
-                          </CardTitle>
-                          <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted">
-                            {review.feedback}
-                          </CardDescription>
-                        </Card>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
+          <div className="overflow-y-auto h-full space-y-6">
+            {Object.entries(logicFiles).map(
+              ([reviewKey, reviewObj], fileIndex) => (
+                <div key={reviewKey} className="h-full">
+                  {/* Separator between files */}
+                  {fileIndex > 0 && <Separator className="my-6" />}
+
+                  <CardTitle className="mb-4">
+                    Suggestion {reviewKey + 1}
+                  </CardTitle>
+                  {reviewObj['logic Errors'].map((review, index) => (
+                    <div key={index}>
+                      {/* Separator between logic errors */}
+                      {index > 0 && <Separator className="my-4" />}
+
+                      {review.function ? (
+                        <CardTitle className="text-base font-semibold">
+                          Function: {review.function}
+                        </CardTitle>
+                      ) : (
+                        ''
+                      )}
+                      <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted h-full">
+                        {review.feedback}
+                      </CardDescription>
+                    </div>
+                  ))}
+                </div>
+              ),
+            )}
           </div>
         )}
       </CardContent>

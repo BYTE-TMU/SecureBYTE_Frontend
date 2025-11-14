@@ -40,7 +40,6 @@ import {
   X,
 } from 'lucide-react';
 
-
 import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/project/ProjectContext';
@@ -53,9 +52,18 @@ import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 import { useParams } from 'react-router';
 import { ContextMenuLabel } from '@radix-ui/react-context-menu';
 
-export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTree, onFileRenamed }) {
+export default function FileTree({
+  tree,
+  onFileSelectFromFileTree,
+  refetchFileTree,
+  onFileRenamed,
+}) {
   const { projectId } = useParams();
-  const { createFolderInProject, renameFolderInProject, loadFoldersFromBackend } = useProject();
+  const {
+    createFolderInProject,
+    renameFolderInProject,
+    loadFoldersFromBackend,
+  } = useProject();
   const { user } = useAuth();
   const [treeKey, setTreeKey] = useState(0); // For forcing re-render
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,7 +71,9 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
 
   const [persistedFolders, setPersistedFolders] = useState(() => {
     try {
-      const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
       return raw ? JSON.parse(raw) : {};
     } catch (err) {
       console.error('Error loading persisted folders', err);
@@ -77,7 +87,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
       loadFoldersFromBackend(projectId).then((folders) => {
         if (Object.keys(folders).length > 0) {
           setPersistedFolders(folders);
-          setTreeKey(prev => prev + 1);
+          setTreeKey((prev) => prev + 1);
         }
       });
     }
@@ -86,9 +96,12 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
   // Helper to update persistedFolders state and sessionStorage
   const persistFolders = (next) => {
     try {
-      sessionStorage.setItem(`secureBYTE_custom_folders_${projectId}`, JSON.stringify(next));
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(next),
+      );
       setPersistedFolders(next);
-      setTreeKey(prev => prev + 1); // Force re-render without page reload
+      setTreeKey((prev) => prev + 1); // Force re-render without page reload
     } catch (err) {
       console.error('Error persisting folders', err);
     }
@@ -100,18 +113,18 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
     const parts = path.split('/');
     let current = mergedTree;
     let currentPath = '';
-    
+
     parts.forEach((part, idx) => {
       currentPath = currentPath ? `${currentPath}/${part}` : part;
-      
+
       if (idx === parts.length - 1) {
         // Last part - the actual folder we're creating
         if (!current[part]) {
-          current[part] = { 
-            type: 'folder', 
-            name: part, 
+          current[part] = {
+            type: 'folder',
+            name: part,
             path: currentPath,
-            children: {} 
+            children: {},
           };
         } else {
           // Update path if folder already exists
@@ -120,11 +133,11 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
       } else {
         // Intermediate folder in the path
         if (!current[part]) {
-          current[part] = { 
-            type: 'folder', 
-            name: part, 
+          current[part] = {
+            type: 'folder',
+            name: part,
             path: currentPath,
-            children: {} 
+            children: {},
           };
         } else if (!current[part].children) {
           // Ensure children object exists
@@ -167,31 +180,43 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
       if (draggedType === 'folder') {
         // Move folder to root level
         const folderName = draggedPath.split('/').pop();
-        
-        await renameFolderInProject({ projectId, oldPath: draggedPath, newPath: folderName });
-        
+
+        await renameFolderInProject({
+          projectId,
+          oldPath: draggedPath,
+          newPath: folderName,
+        });
+
         // Update sessionStorage - move folder and all children to root
-        const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+        const raw = sessionStorage.getItem(
+          `secureBYTE_custom_folders_${projectId}`,
+        );
         const persisted = raw ? JSON.parse(raw) : {};
-        
+
         const updatedFolders = {};
         Object.keys(persisted).forEach((path) => {
           if (path === draggedPath) {
             // This is the folder being moved to root
-            updatedFolders[folderName] = { ...persisted[path], path: folderName };
+            updatedFolders[folderName] = {
+              ...persisted[path],
+              path: folderName,
+            };
           } else if (path.startsWith(draggedPath + '/')) {
             // This is a child folder - update its path relative to root
             const childSuffix = path.substring(draggedPath.length + 1);
             const newChildPath = `${folderName}/${childSuffix}`;
-            updatedFolders[newChildPath] = { ...persisted[path], path: newChildPath };
+            updatedFolders[newChildPath] = {
+              ...persisted[path],
+              path: newChildPath,
+            };
           } else {
             // Keep other folders as-is
             updatedFolders[path] = persisted[path];
           }
         });
-        
+
         persistFolders(updatedFolders);
-        
+
         // Find and move all files within this folder to root level
         const filesToMove = [];
         const findFilesInFolder = (node, currentPath) => {
@@ -202,7 +227,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
               filesToMove.push({
                 id: value.id,
                 oldPath: filePath,
-                fileName: value.name
+                fileName: value.name,
               });
             } else if (value.type === 'folder') {
               const folderPath = value.path || `${currentPath}/${value.name}`;
@@ -210,7 +235,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
             }
           });
         };
-        
+
         // Find the dragged folder in the tree
         const findFolderNode = (tree, targetPath) => {
           const parts = targetPath.split('/');
@@ -227,15 +252,17 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
           }
           return null;
         };
-        
+
         const draggedFolderNode = findFolderNode(mergedTree || {}, draggedPath);
         if (draggedFolderNode) {
           findFilesInFolder(draggedFolderNode, draggedPath);
         }
-        
+
         // Update all file paths in the backend
         if (user && filesToMove.length > 0) {
-          console.log(`🔄 Moving ${filesToMove.length} file(s) to root - syncing to backend...`);
+          console.log(
+            `🔄 Moving ${filesToMove.length} file(s) to root - syncing to backend...`,
+          );
           await Promise.all(
             filesToMove.map(async (file) => {
               // Calculate the new path relative to root
@@ -246,19 +273,26 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
                 relativePath = file.fileName;
               }
               const newFilePath = `${folderName}/${relativePath}`;
-              
+
               try {
                 await moveSubmission(user.uid, file.id, newFilePath);
-                console.log(`✅ Backend synced: ${file.oldPath} → ${newFilePath}`);
+                console.log(
+                  `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
+                );
               } catch (err) {
-                console.error(`❌ Failed to move file ${file.oldPath} to ${newFilePath}`, err);
+                console.error(
+                  `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
+                  err,
+                );
               }
-            })
+            }),
           );
         }
-        
-        toast.success(`Folder moved to root${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`);
-        
+
+        toast.success(
+          `Folder moved to root${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`,
+        );
+
         if (refetchFileTree) {
           await refetchFileTree();
         }
@@ -266,13 +300,15 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
         // Move file to root level
         const fileId = e.dataTransfer.getData('fileId');
         const fileName = draggedPath.split('/').pop();
-        
+
         if (user && fileId) {
-          console.log(`🔄 Moving file to root - syncing to backend: ${draggedPath} → ${fileName}`);
+          console.log(
+            `🔄 Moving file to root - syncing to backend: ${draggedPath} → ${fileName}`,
+          );
           await moveSubmission(user.uid, fileId, fileName);
           console.log(`✅ Backend synced: File moved to root as ${fileName}`);
           toast.success('File moved to root');
-          
+
           if (refetchFileTree) {
             await refetchFileTree();
           }
@@ -289,7 +325,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
   // Search through file tree for matching file names and contents
   const handleSearch = (query) => {
     setSearchQuery(query);
-    
+
     if (!query.trim()) {
       setSearchResults([]);
       return;
@@ -305,18 +341,18 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
           const fileName = value.name.toLowerCase();
           const fileContent = (value.content || '').toLowerCase();
           const filePath = value.path || value.name;
-          
+
           // Check if filename matches
           const nameMatch = fileName.includes(searchLower);
           // Check if content matches
           const contentMatch = fileContent.includes(searchLower);
-          
+
           if (nameMatch || contentMatch) {
             results.push({
               file: value,
               path: filePath,
               matchType: nameMatch ? 'filename' : 'content',
-              matchedIn: nameMatch ? 'File name' : 'File content'
+              matchedIn: nameMatch ? 'File name' : 'File content',
             });
           }
         } else if (value.type === 'folder' && value.children) {
@@ -337,8 +373,8 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
   };
 
   return (
-    <div 
-      className="flex flex-col text-sm h-full relative"
+    <div
+      className="flex flex-col text-sm h-[90vh] relative"
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
@@ -350,8 +386,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
             <p className="text-sm font-medium">Drop here to move to root</p>
           </div>
         </div>
-      )}
-      {' '}
+      )}{' '}
       <SidebarHeader className="flex flex-col gap-2 bg-secondary">
         <div className="flex flex-row items-center justify-between">
           <h2 className="font-medium">Project Name</h2>
@@ -361,30 +396,41 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
             <NewFolderDialog
               variant="icon"
               onCreate={async (folderName) => {
-              // Check if folder already exists
-              if (persistedFolders[folderName]) {
-                toast.error('A folder with this name already exists');
-                throw new Error('Folder already exists');
-              }
-              
-              try {
-                console.log('Creating folder:', folderName, 'in project:', projectId);
-                const result = await createFolderInProject({ projectId, folderPath: folderName });
-                console.log('createFolderInProject result:', result);
-                const next = { ...persistedFolders, [folderName]: { path: folderName } };
-                persistFolders(next);
-                toast.success('Folder created');
-              } catch (err) {
-                console.error('Error creating folder:', err);
-                console.error('Error details:', err.message, err.stack);
-                toast.error('Failed to create folder: ' + err.message);
-                throw err;
-              }
-            }}
-          />
+                // Check if folder already exists
+                if (persistedFolders[folderName]) {
+                  toast.error('A folder with this name already exists');
+                  throw new Error('Folder already exists');
+                }
+
+                try {
+                  console.log(
+                    'Creating folder:',
+                    folderName,
+                    'in project:',
+                    projectId,
+                  );
+                  const result = await createFolderInProject({
+                    projectId,
+                    folderPath: folderName,
+                  });
+                  console.log('createFolderInProject result:', result);
+                  const next = {
+                    ...persistedFolders,
+                    [folderName]: { path: folderName },
+                  };
+                  persistFolders(next);
+                  toast.success('Folder created');
+                } catch (err) {
+                  console.error('Error creating folder:', err);
+                  console.error('Error details:', err.message, err.stack);
+                  toast.error('Failed to create folder: ' + err.message);
+                  throw err;
+                }
+              }}
+            />
           </div>
         </div>
-        
+
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
@@ -406,10 +452,7 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
           )}
         </div>
       </SidebarHeader>
-      
-      <SidebarContent 
-        className="h-2/3 overflow-y-auto"
-      >
+      <SidebarContent className="h-2/3 overflow-y-auto">
         <SidebarGroup>
           <SidebarGroupContent>
             {searchQuery ? (
@@ -418,13 +461,16 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
                 {searchResults.length > 0 ? (
                   <>
                     <p className="text-xs text-muted-foreground mb-2">
-                      {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
+                      {searchResults.length} result
+                      {searchResults.length !== 1 ? 's' : ''} found
                     </p>
                     <SidebarMenu>
                       {searchResults.map((result, idx) => (
                         <SidebarMenuItem key={idx}>
                           <SidebarMenuButton
-                            onClick={() => onFileSelectFromFileTree(result.file)}
+                            onClick={() =>
+                              onFileSelectFromFileTree(result.file)
+                            }
                             className="flex flex-col items-start gap-1 h-auto py-2"
                           >
                             <div className="flex items-center gap-2 w-full">
@@ -456,30 +502,30 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
                 {Object.entries(mergedTree).map(([key, value]) =>
                   value.type === 'folder' ? (
                     <Folder
-                    folder={value}
-                    key={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                    projectId={projectId}
-                    renameFolderInProject={renameFolderInProject}
-                    persistFolders={persistFolders}
-                    persistedFolders={persistedFolders}
-                    user={user}
-                    refetchFileTree={refetchFileTree}
-                    fullTree={mergedTree}
-                    onFileRenamed={onFileRenamed}
-                  />
-                ) : (
-                  <File
-                    file={value}
-                    index={key}
-                    onFileSelect={onFileSelectFromFileTree}
-                    projectId={projectId}
-                    user={user}
-                    refetchFileTree={refetchFileTree}
-                    onFileRenamed={onFileRenamed}
-                  />
-                ),
-              )}
+                      folder={value}
+                      key={key}
+                      onFileSelect={onFileSelectFromFileTree}
+                      projectId={projectId}
+                      renameFolderInProject={renameFolderInProject}
+                      persistFolders={persistFolders}
+                      persistedFolders={persistedFolders}
+                      user={user}
+                      refetchFileTree={refetchFileTree}
+                      fullTree={mergedTree}
+                      onFileRenamed={onFileRenamed}
+                    />
+                  ) : (
+                    <File
+                      file={value}
+                      index={key}
+                      onFileSelect={onFileSelectFromFileTree}
+                      projectId={projectId}
+                      user={user}
+                      refetchFileTree={refetchFileTree}
+                      onFileRenamed={onFileRenamed}
+                    />
+                  ),
+                )}
               </SidebarMenu>
             )}
           </SidebarGroupContent>
@@ -489,7 +535,19 @@ export default function FileTree({ tree, onFileSelectFromFileTree, refetchFileTr
   );
 }
 
-function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject, persistFolders, persistedFolders, user, refetchFileTree, fullTree, onFileRenamed }) {
+function Folder({
+  folder,
+  index,
+  onFileSelect,
+  projectId,
+  renameFolderInProject,
+  persistFolders,
+  persistedFolders,
+  user,
+  refetchFileTree,
+  fullTree,
+  onFileRenamed,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   // Only show the folder name, not the full path, for renaming
@@ -550,36 +608,50 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
         const pathParts = draggedPath.split('/');
         const folderName = pathParts[pathParts.length - 1];
         const newPath = `${targetFolderPath}/${folderName}`;
-        
+
         // Check if folder with same name already exists in target
-        const rawStorage = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+        const rawStorage = sessionStorage.getItem(
+          `secureBYTE_custom_folders_${projectId}`,
+        );
         const existingFolders = rawStorage ? JSON.parse(rawStorage) : {};
         if (existingFolders[newPath]) {
-          toast.error('A folder with this name already exists in the target folder');
+          toast.error(
+            'A folder with this name already exists in the target folder',
+          );
           return;
         }
-        
-        await renameFolderInProject({ projectId, oldPath: draggedPath, newPath });
-        
+
+        await renameFolderInProject({
+          projectId,
+          oldPath: draggedPath,
+          newPath,
+        });
+
         // Update sessionStorage - remove old path and add new path, plus update all child folders
         const updatedFolders = {};
         Object.keys(existingFolders).forEach((path) => {
           if (path === draggedPath) {
             // This is the folder being moved
-            updatedFolders[newPath] = { ...existingFolders[path], path: newPath };
+            updatedFolders[newPath] = {
+              ...existingFolders[path],
+              path: newPath,
+            };
           } else if (path.startsWith(draggedPath + '/')) {
             // This is a child folder - update its path too
             const childSuffix = path.substring(draggedPath.length);
             const newChildPath = newPath + childSuffix;
-            updatedFolders[newChildPath] = { ...existingFolders[path], path: newChildPath };
+            updatedFolders[newChildPath] = {
+              ...existingFolders[path],
+              path: newChildPath,
+            };
           } else {
             // Keep other folders as-is
             updatedFolders[path] = existingFolders[path];
           }
         });
-        
+
         persistFolders(updatedFolders);
-        
+
         // Find and move all files within this folder and its subfolders
         const filesToMove = [];
         const findFilesInFolder = (node, currentPath) => {
@@ -590,7 +662,7 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
               filesToMove.push({
                 id: value.id,
                 oldPath: filePath,
-                fileName: value.name
+                fileName: value.name,
               });
             } else if (value.type === 'folder') {
               const folderPath = value.path || `${currentPath}/${value.name}`;
@@ -598,7 +670,7 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
             }
           });
         };
-        
+
         // Find the dragged folder in the tree
         const findFolderNode = (tree, targetPath) => {
           const parts = targetPath.split('/');
@@ -615,12 +687,12 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
           }
           return null;
         };
-        
+
         const draggedFolderNode = findFolderNode(fullTree || {}, draggedPath);
         if (draggedFolderNode) {
           findFilesInFolder(draggedFolderNode, draggedPath);
         }
-        
+
         // Update all file paths in the backend
         if (user && filesToMove.length > 0) {
           console.log(`🔄 Syncing ${filesToMove.length} file(s) to backend...`);
@@ -639,19 +711,26 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
                 relativePath = file.fileName;
               }
               const newFilePath = `${newPath}/${relativePath}`;
-              
+
               try {
                 await moveSubmission(user.uid, file.id, newFilePath);
-                console.log(`✅ Backend synced: ${file.oldPath} → ${newFilePath}`);
+                console.log(
+                  `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
+                );
               } catch (err) {
-                console.error(`❌ Failed to move file ${file.oldPath} to ${newFilePath}`, err);
+                console.error(
+                  `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
+                  err,
+                );
               }
-            })
+            }),
           );
         }
-        
-        toast.success(`Folder moved${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`);
-        
+
+        toast.success(
+          `Folder moved${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`,
+        );
+
         // Refetch file tree to update UI
         if (refetchFileTree) {
           await refetchFileTree();
@@ -661,13 +740,15 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
         const fileId = e.dataTransfer.getData('fileId');
         const fileName = draggedPath.split('/').pop();
         const newPath = `${targetFolderPath}/${fileName}`;
-        
+
         if (user && fileId) {
-          console.log(`🔄 Syncing file to backend: ${draggedPath} → ${newPath}`);
+          console.log(
+            `🔄 Syncing file to backend: ${draggedPath} → ${newPath}`,
+          );
           await moveSubmission(user.uid, fileId, newPath);
           console.log(`✅ Backend synced: File moved to ${newPath}`);
           toast.success('File moved');
-          
+
           // Refetch file tree to update UI
           if (refetchFileTree) {
             await refetchFileTree();
@@ -698,134 +779,180 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
               <ContextMenuTrigger>
                 <SidebarMenuButton className="overflow-hidden">
                   {isOpen ? (
-                      <ChevronDown className="stroke-secure-orange flex-shrink-0" />
-                    ) : (
-                      <ChevronRight className="stroke-secure-orange flex-shrink-0" />
-                    )}
-                    <FolderCode className="size-3 flex-shrink-0" />
+                    <ChevronDown className="stroke-secure-orange flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="stroke-secure-orange flex-shrink-0" />
+                  )}
+                  <FolderCode className="size-3 flex-shrink-0" />
 
-                    {renaming ? (
-                      <input
-                        ref={inputRef}
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={async (e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            
-                            const currentPath = folder.path || folder.name;
-                            const pathParts = currentPath.split('/');
-                            const parentPath = pathParts.slice(0, -1).join('/');
-                            const newPath = parentPath ? `${parentPath}/${renameValue}` : renameValue;
-                            
-                            // Validate: Check if new name is empty
-                            if (!renameValue.trim()) {
-                              toast.error('Folder name cannot be empty');
-                              return;
-                            }
-                            
-                            // Validate: Cannot rename to any ancestor folder's name
-                            const ancestorNames = currentPath.split('/').slice(0, -1); // All parts except current folder
-                            if (ancestorNames.includes(renameValue)) {
-                              toast.error('Cannot rename to an ancestor folder name');
-                              return;
-                            }
-                            
-                            // Validate: Check if folder with new name already exists in the same parent
-                            const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
-                            const persisted = raw ? JSON.parse(raw) : {};
-                            if (persisted[newPath] && newPath !== currentPath) {
-                              toast.error('A folder with this name already exists');
-                              return;
-                            }
-                            
-                            try {
-                              await renameFolderInProject({ projectId, oldPath: currentPath, newPath: newPath });
-                              
-                              // Update session storage for this folder and all child folders
-                              const updatedFolders = {};
-                              Object.keys(persisted).forEach((path) => {
-                                if (path === currentPath) {
-                                  // This is the folder being renamed
-                                  updatedFolders[newPath] = { ...persisted[path], path: newPath };
-                                } else if (path.startsWith(currentPath + '/')) {
-                                  // This is a child folder - update its path too
-                                  const childSuffix = path.substring(currentPath.length);
-                                  const newChildPath = newPath + childSuffix;
-                                  updatedFolders[newChildPath] = { ...persisted[path], path: newChildPath };
-                                } else {
-                                  // Keep other folders as-is
-                                  updatedFolders[path] = persisted[path];
-                                }
-                              });
-                              
-                              persistFolders(updatedFolders);
-                              
-                              // Move all files within this folder
-                              if (user && refetchFileTree) {
-                                // Find all files in this folder from the tree
-                                const filesToMove = [];
-                                const findFilesInFolder = (node, currentFolderPath) => {
-                                  if (!node || !node.children) return;
-                                  Object.entries(node.children).forEach(([key, value]) => {
+                  {renaming ? (
+                    <input
+                      ref={inputRef}
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+
+                          const currentPath = folder.path || folder.name;
+                          const pathParts = currentPath.split('/');
+                          const parentPath = pathParts.slice(0, -1).join('/');
+                          const newPath = parentPath
+                            ? `${parentPath}/${renameValue}`
+                            : renameValue;
+
+                          // Validate: Check if new name is empty
+                          if (!renameValue.trim()) {
+                            toast.error('Folder name cannot be empty');
+                            return;
+                          }
+
+                          // Validate: Cannot rename to any ancestor folder's name
+                          const ancestorNames = currentPath
+                            .split('/')
+                            .slice(0, -1); // All parts except current folder
+                          if (ancestorNames.includes(renameValue)) {
+                            toast.error(
+                              'Cannot rename to an ancestor folder name',
+                            );
+                            return;
+                          }
+
+                          // Validate: Check if folder with new name already exists in the same parent
+                          const raw = sessionStorage.getItem(
+                            `secureBYTE_custom_folders_${projectId}`,
+                          );
+                          const persisted = raw ? JSON.parse(raw) : {};
+                          if (persisted[newPath] && newPath !== currentPath) {
+                            toast.error(
+                              'A folder with this name already exists',
+                            );
+                            return;
+                          }
+
+                          try {
+                            await renameFolderInProject({
+                              projectId,
+                              oldPath: currentPath,
+                              newPath: newPath,
+                            });
+
+                            // Update session storage for this folder and all child folders
+                            const updatedFolders = {};
+                            Object.keys(persisted).forEach((path) => {
+                              if (path === currentPath) {
+                                // This is the folder being renamed
+                                updatedFolders[newPath] = {
+                                  ...persisted[path],
+                                  path: newPath,
+                                };
+                              } else if (path.startsWith(currentPath + '/')) {
+                                // This is a child folder - update its path too
+                                const childSuffix = path.substring(
+                                  currentPath.length,
+                                );
+                                const newChildPath = newPath + childSuffix;
+                                updatedFolders[newChildPath] = {
+                                  ...persisted[path],
+                                  path: newChildPath,
+                                };
+                              } else {
+                                // Keep other folders as-is
+                                updatedFolders[path] = persisted[path];
+                              }
+                            });
+
+                            persistFolders(updatedFolders);
+
+                            // Move all files within this folder
+                            if (user && refetchFileTree) {
+                              // Find all files in this folder from the tree
+                              const filesToMove = [];
+                              const findFilesInFolder = (
+                                node,
+                                currentFolderPath,
+                              ) => {
+                                if (!node || !node.children) return;
+                                Object.entries(node.children).forEach(
+                                  ([key, value]) => {
                                     if (value.type === 'file') {
-                                      const filePath = value.path || `${currentFolderPath}/${value.name}`;
+                                      const filePath =
+                                        value.path ||
+                                        `${currentFolderPath}/${value.name}`;
                                       filesToMove.push({
                                         id: value.id,
                                         oldPath: filePath,
-                                        fileName: value.name
+                                        fileName: value.name,
                                       });
                                     } else if (value.type === 'folder') {
-                                      const folderSubPath = value.path || `${currentFolderPath}/${value.name}`;
+                                      const folderSubPath =
+                                        value.path ||
+                                        `${currentFolderPath}/${value.name}`;
                                       findFilesInFolder(value, folderSubPath);
                                     }
-                                  });
-                                };
-                                
-                                findFilesInFolder(folder, currentPath);
-                                
-                                // Update all file paths in the backend
-                                if (filesToMove.length > 0) {
-                                  console.log(`🔄 Moving ${filesToMove.length} file(s) after folder rename...`);
-                                  await Promise.all(
-                                    filesToMove.map(async (file) => {
-                                      let relativePath;
-                                      if (file.oldPath.startsWith(currentPath + '/')) {
-                                        relativePath = file.oldPath.substring(currentPath.length + 1);
-                                      } else {
-                                        relativePath = file.fileName;
-                                      }
-                                      const newFilePath = `${newPath}/${relativePath}`;
-                                      
-                                      try {
-                                        await moveSubmission(user.uid, file.id, newFilePath);
-                                        console.log(`✅ Backend synced: ${file.oldPath} → ${newFilePath}`);
-                                      } catch (err) {
-                                        console.error(`❌ Failed to move file ${file.oldPath} to ${newFilePath}`, err);
-                                      }
-                                    })
-                                  );
-                                }
-                                
-                                await refetchFileTree();
+                                  },
+                                );
+                              };
+
+                              findFilesInFolder(folder, currentPath);
+
+                              // Update all file paths in the backend
+                              if (filesToMove.length > 0) {
+                                console.log(
+                                  `🔄 Moving ${filesToMove.length} file(s) after folder rename...`,
+                                );
+                                await Promise.all(
+                                  filesToMove.map(async (file) => {
+                                    let relativePath;
+                                    if (
+                                      file.oldPath.startsWith(currentPath + '/')
+                                    ) {
+                                      relativePath = file.oldPath.substring(
+                                        currentPath.length + 1,
+                                      );
+                                    } else {
+                                      relativePath = file.fileName;
+                                    }
+                                    const newFilePath = `${newPath}/${relativePath}`;
+
+                                    try {
+                                      await moveSubmission(
+                                        user.uid,
+                                        file.id,
+                                        newFilePath,
+                                      );
+                                      console.log(
+                                        `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
+                                      );
+                                    } catch (err) {
+                                      console.error(
+                                        `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
+                                        err,
+                                      );
+                                    }
+                                  }),
+                                );
                               }
-                              
-                              setRenaming(false);
-                              toast.success('Folder renamed');
-                            } catch (err) {
-                              console.error('Rename failed', err);
-                              toast.error('Failed to rename folder');
+
+                              await refetchFileTree();
                             }
-                          } else if (e.key === 'Escape') {
+
                             setRenaming(false);
-                            setRenameValue(folderName);
+                            toast.success('Folder renamed');
+                          } catch (err) {
+                            console.error('Rename failed', err);
+                            toast.error('Failed to rename folder');
                           }
-                        }}
-                        className="bg-transparent border-b border-gray-400 text-sm mx-2"
-                      />
-                    ) : (
-                      <span className="truncate">{folder.name}</span>
-                    )}
+                        } else if (e.key === 'Escape') {
+                          setRenaming(false);
+                          setRenameValue(folderName);
+                        }
+                      }}
+                      className="bg-transparent border-b border-gray-400 text-sm mx-2"
+                    />
+                  ) : (
+                    <span className="truncate">{folder.name}</span>
+                  )}
                 </SidebarMenuButton>
               </ContextMenuTrigger>
               <ContextMenuContent className="min-w-[200px]">
@@ -880,7 +1007,15 @@ function Folder({ folder, index, onFileSelect, projectId, renameFolderInProject,
   );
 }
 
-function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onFileRenamed }) {
+function File({
+  file,
+  index,
+  onFileSelect,
+  projectId,
+  user,
+  refetchFileTree,
+  onFileRenamed,
+}) {
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(file.name);
   const inputRef = useRef(null);
@@ -909,22 +1044,22 @@ function File({ file, index, onFileSelect, projectId, user, refetchFileTree, onF
       // Preserve folder path when renaming
       const filePath = file.path || file.name;
       const pathParts = filePath.split('/');
-      
+
       // Replace just the filename (last part) with the new name
       pathParts[pathParts.length - 1] = renameValue;
       const newPath = pathParts.join('/');
-      
+
       // Update filename via backend API
       await moveSubmission(user.uid, file.id, newPath);
-      
+
       // Notify parent component to update open tabs
       if (onFileRenamed) {
         onFileRenamed(file, renameValue, newPath);
       }
-      
+
       toast.success('File renamed');
       setRenaming(false);
-      
+
       // Refetch file tree to update UI
       if (refetchFileTree) {
         await refetchFileTree();

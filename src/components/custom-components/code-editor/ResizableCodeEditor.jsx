@@ -268,18 +268,29 @@ export default function ResizableCodeEditor({
   return (
     <ResizablePanelGroup
       direction="horizontal"
-      className="border rounded-lg w-full"
+      className="border rounded-lg min-w-0 w-full"
     >
-      <ResizablePanel defaultSize={20}>
-        <FileTree
-          tree={tree}
-          refetchFileTree={refetchFileTree}
-          onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
-          onFileRenamed={handleFileRenamed} // Callback for when a file is renamed
-        />{' '}
+      <ResizablePanel
+        defaultSize={20}
+        minSize={15}
+        maxSize={20}
+        className="min-w-0 overflow-x-hidden overflow-y-auto"
+      >
+        <div className="w-full overflow-x-auto">
+          <FileTree
+            tree={tree}
+            refetchFileTree={refetchFileTree}
+            onFileSelectFromFileTree={openNewFile}
+            onFileRenamed={handleFileRenamed}
+          />
+        </div>
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel className="h-screen">
+      <ResizablePanel
+        defaultSize={50}
+        maxSize={60}
+        className="min-h-0 max-w-140"
+      >
         <FileTabBar
           openFiles={openFiles}
           activeFile={activeFile}
@@ -297,7 +308,10 @@ export default function ResizableCodeEditor({
         />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel defaultSize={25}>
+      <ResizablePanel
+        defaultSize={25}
+        className="min-w-0 overflow-x-hidden overflow-y-auto"
+      >
         <ReviewModal
           activeFile={activeFile}
           securityReview={securityReview}

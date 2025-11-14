@@ -31,6 +31,7 @@ import {
   X,
 } from 'lucide-react';
 
+import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';

@@ -41,6 +41,40 @@ import NewFolderDialog from '@/components/custom-components/NewFolderDialog';
 
 import { useParams } from 'react-router';
 
+// Helper function to collect all folder names from tree and persisted folders (excluding current folder)
+const collectAllFolderNames = (node, persistedFolders, currentFolderPath) => {
+  const names = [];
+  
+  // Get folder names from tree
+  const traverse = (n) => {
+    if (!n || !n.children) return;
+    
+    Object.values(n.children).forEach((child) => {
+      if (child.type === 'folder') {
+        const folderPath = child.path || child.name;
+        if (folderPath !== currentFolderPath) {
+          names.push(child.name);
+        }
+        traverse(child);
+      }
+    });
+  };
+  
+  traverse(node);
+  
+  // Also get folder names from persisted folders
+  Object.keys(persistedFolders).forEach((path) => {
+    if (path !== currentFolderPath) {
+      const folderName = path.split('/').pop();
+      if (!names.includes(folderName)) {
+        names.push(folderName);
+      }
+    }
+  });
+  
+  return names;
+};
+
 export default function FileTree({
   tree,
   onFileSelectFromFileTree,
@@ -513,6 +547,7 @@ export default function FileTree({
                       user={user}
                       refetchSubmissions={refetchSubmissions}
                       onFileRenamed={onFileRenamed}
+                      parentFolder={mergedTree}
                     />
                   ),
                 )}
@@ -546,16 +581,20 @@ function Folder({
   const [renameValue, setRenameValue] = useState(folderName);
   const [isDragOver, setIsDragOver] = useState(false);
   const inputRef = useRef(null);
+  const isRenamingRef = useRef(false);
 
   useEffect(() => {
     if (renaming && inputRef.current) {
+      isRenamingRef.current = true;
       // Use setTimeout to ensure DOM has updated after context menu closes
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
         }
-      }, 0);
+      }, 100); // Increased delay
+    } else {
+      isRenamingRef.current = false;
     }
   }, [renaming]);
 
@@ -831,7 +870,26 @@ function Folder({
                       ref={inputRef}
                       value={renameValue}
                       onChange={(e) => setRenameValue(e.target.value)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent folder toggle
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation(); // Prevent folder toggle
+                      }}
+                      onBlur={(e) => {
+                        // Handle blur after a delay to allow rename to complete
+                        if (isRenamingRef.current) {
+                          setTimeout(() => {
+                            if (isRenamingRef.current) {
+                              setRenaming(false);
+                              setRenameValue(folderName); // Reset to original name
+                            }
+                          }, 100);
+                        }
+                      }}
                       onKeyDown={async (e) => {
+                        e.stopPropagation(); // Prevent event bubbling
+
                         if (e.key === 'Enter') {
                           e.preventDefault();
 
@@ -845,6 +903,8 @@ function Folder({
                           // Validate: Check if new name is empty
                           if (!renameValue.trim()) {
                             toast.error('Folder name cannot be empty');
+                            setRenaming(false);
+                            setRenameValue(folderName);
                             return;
                           }
 
@@ -859,14 +919,19 @@ function Folder({
                             return;
                           }
 
-                          // Validate: Check if folder with new name already exists in the same parent
+                          // Validate: Check if another folder with this name already exists anywhere in the project
                           const raw = sessionStorage.getItem(
                             `secureBYTE_custom_folders_${projectId}`,
                           );
                           const persisted = raw ? JSON.parse(raw) : {};
-                          if (persisted[newPath] && newPath !== currentPath) {
+                          const allFolderNames = collectAllFolderNames(
+                            fullTree,
+                            persisted,
+                            currentPath,
+                          );
+                          if (allFolderNames.includes(renameValue)) {
                             toast.error(
-                              'A folder with this name already exists',
+                              'A folder with this name already exists in this project',
                             );
                             return;
                           }
@@ -903,8 +968,7 @@ function Folder({
                               }
                             });
 
-                            persistFolders(updatedFolders);
-
+                            // Note: do NOT persist updatedFolders yet — wait for backend refetch
                             // Move all files within this folder
                             if (user && refetchSubmissions) {
                               // Find all files in this folder from the tree
@@ -942,54 +1006,62 @@ function Folder({
                                 console.log(
                                   `🔄 Moving ${filesToMove.length} file(s) after folder rename...`,
                                 );
-                                await Promise.all(
-                                  filesToMove.map(async (file) => {
-                                    let relativePath;
-                                    if (
-                                      file.oldPath.startsWith(currentPath + '/')
-                                    ) {
-                                      relativePath = file.oldPath.substring(
-                                        currentPath.length + 1,
-                                      );
-                                    } else {
-                                      relativePath = file.fileName;
-                                    }
-                                    const newFilePath = `${newPath}/${relativePath}`;
+                                // Move files sequentially with a small delay to avoid rate limiting
+                                for (const file of filesToMove) {
+                                  let relativePath;
+                                  if (
+                                    file.oldPath.startsWith(currentPath + '/')
+                                  ) {
+                                    relativePath = file.oldPath.substring(
+                                      currentPath.length + 1,
+                                    );
+                                  } else {
+                                    relativePath = file.fileName;
+                                  }
+                                  const newFilePath = `${newPath}/${relativePath}`;
 
-                                    try {
-                                      await moveSubmission(
-                                        user.uid,
-                                        file.id,
-                                        newFilePath,
-                                      );
-                                      console.log(
-                                        `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
-                                      );
-                                    } catch (err) {
-                                      console.error(
-                                        `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
-                                        err,
-                                      );
-                                    }
-                                  }),
-                                );
+                                  try {
+                                    await moveSubmission(
+                                      user.uid,
+                                      file.id,
+                                      newFilePath,
+                                    );
+                                    console.log(
+                                      `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
+                                    );
+                                    // Small delay to avoid rate limiting
+                                    await new Promise((resolve) =>
+                                      setTimeout(resolve, 100),
+                                    );
+                                  } catch (err) {
+                                    console.error(
+                                      `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
+                                      err,
+                                    );
+                                  }
+                                }
                               }
 
                               await refetchSubmissions();
+                              // Persist updated folders only after backend confirms changes
+                              persistFolders(updatedFolders);
                             }
 
                             setRenaming(false);
                             toast.success('Folder renamed');
                           } catch (err) {
                             console.error('Rename failed', err);
-                            toast.error('Failed to rename folder');
+                            toast.error('Failed to rename folder: A folder with this name already exists');
+                            setRenaming(false);
+                            setRenameValue(folderName);
                           }
                         } else if (e.key === 'Escape') {
+                          e.preventDefault();
                           setRenaming(false);
                           setRenameValue(folderName);
                         }
                       }}
-                      className="bg-transparent border-b border-gray-400 text-sm mx-2"
+                      className="bg-transparent border-b border-gray-400 text-sm mx-2 focus:outline-none focus:border-secure-orange"
                     />
                   ) : (
                     <span className="truncate">{folder.name}</span>
@@ -997,15 +1069,13 @@ function Folder({
                 </SidebarMenuButton>
               </ContextMenuTrigger>
               <ContextMenuContent className="min-w-[200px]">
-                <ContextMenuItem>
-                  <button
+                <ContextMenuItem
                     onClick={() => {
-                      setRenaming(true);
-                    }}
-                    className="w-full text-left"
+                    setRenaming(true);
+                  }}
+                  className="w-full text-left"
                   >
                     Rename Folder
-                  </button>
                 </ContextMenuItem>
                 <ContextMenuItem
                   className="text-destructive"
@@ -1044,6 +1114,7 @@ function Folder({
                     user={user}
                     refetchSubmissions={refetchSubmissions}
                     onFileRenamed={onFileRenamed}
+                    parentFolder={folder}
                   />
                 )}
               </SidebarMenuSub>
@@ -1062,29 +1133,51 @@ function File({
   user,
   refetchSubmissions,
   onFileRenamed,
+  parentFolder,
 }) {
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(file.name);
   const inputRef = useRef(null);
+  const isRenamingRef = useRef(false);
 
   // Auto-focus input when renaming starts
   useEffect(() => {
     if (renaming && inputRef.current) {
-      // Use setTimeout to ensure DOM is updated
+      isRenamingRef.current = true;
+      // Use setTimeout to ensure DOM is updated and context menu is closed
       setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
         }
-      }, 0);
+      }, 100); // Increased delay to ensure context menu is fully closed
+    } else {
+      isRenamingRef.current = false;
     }
   }, [renaming]);
 
   const handleRename = async () => {
+    // Don't proceed if not actually renaming anymore
+    if (!isRenamingRef.current) return;
+    
     if (!renameValue.trim() || renameValue === file.name) {
       setRenaming(false);
       setRenameValue(file.name);
       return;
+    }
+
+    // Validate: Check if another file with this name exists in the same folder
+    if (parentFolder && parentFolder.children) {
+      const filesInSameFolder = Object.values(parentFolder.children).filter(
+        (child) => child.type === 'file' && child.id !== file.id
+      );
+      const duplicateFile = filesInSameFolder.find(
+        (f) => f.name === renameValue
+      );
+      if (duplicateFile) {
+        toast.error('A file with this name already exists in this folder');
+        return;
+      }
     }
 
     try {
@@ -1120,12 +1213,26 @@ function File({
   };
 
   const handleKeyDown = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
     if (e.key === 'Enter') {
       e.preventDefault();
       handleRename();
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       setRenaming(false);
       setRenameValue(file.name);
+    }
+  };
+  
+  const handleBlur = (e) => {
+    // Only process blur if we've been renaming for at least 200ms
+    // This prevents immediate blur from the context menu click
+    if (isRenamingRef.current) {
+      setTimeout(() => {
+        if (isRenamingRef.current) {
+          handleRename();
+        }
+      }, 50);
     }
   };
 
@@ -1155,7 +1262,12 @@ function File({
   return (
     <SidebarMenuItem
       key={index}
-      onClick={() => !renaming && onFileSelect(file)}
+      onClick={(e) => {
+        // Don't select file if we're renaming or about to rename
+        if (!renaming && !isRenamingRef.current) {
+          onFileSelect(file);
+        }
+      }}
       className="rounded-lg"
       draggable
       onDragStart={handleDragStart}
@@ -1170,10 +1282,11 @@ function File({
                 type="text"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
-                onBlur={handleRename}
+                onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent border-b border-input focus:outline-none focus:border-ring"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               />
             ) : (
               <span className="truncate">{file.name}</span>
@@ -1181,7 +1294,12 @@ function File({
           </SidebarMenuButton>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={() => setRenaming(true)}>
+          <ContextMenuItem
+            onSelect={() => {
+              // Delay enabling rename so the context menu finishes closing
+              setTimeout(() => setRenaming(true), 50);
+            }}
+          >
             Rename
           </ContextMenuItem>
           <ContextMenuItem

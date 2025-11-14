@@ -1144,7 +1144,8 @@ function File({
       console.log(`about to delete with: ${user.uid}, ${file.id}`);
       await deleteSubmission(user.uid, file.id);
       console.log(`Successfully delete submission: ${file.id}`);
-      Navigate();
+      toast.success('Sucessfully deleted file');
+      // Navigate();
     } catch (error) {
       console.error('Error deleting submission:', error);
       toast.error('Failed to delete the submission. Try again later.');

@@ -70,9 +70,14 @@ The Firebase configuration keys will be provided by the executive team. The appl
 - **Firebase Authentication**: For user login/signup with email/password and Google OAuth
 - **Firebase Realtime Database**: For storing user-specific projects and submissions
 
-### 4. Backend Setup (Required)
+### 4. Backend Repository Setup (Required)
 
 This frontend requires the SecureBYTE Backend to be running. Please ensure the backend is set up and running on your local machine or server. The backend API URL should be set in the `.env` file as `VITE_API_URL`. Please refer to the backend documentation for setup instructions on their repository.
+
+### 5. AI Repository Setup (Optional but recommended)
+
+This frontend does not require the SecureBYTE AI to be running at all times for development but to ensure the most optimal developer context, please setup the AI repository. Please refer to the AI documentation for setup instructions on their repository.
+
 
 ## 🚀 Running the Project
 
@@ -143,7 +148,7 @@ _Note: Detailed API documentation is available to authorized developers._
 
 ## 🔐 Authentication Flow
 
-1. User signs in with email/password or Google OAuth
+1. User signs in with email/password, Google OAuth or Github
 2. Firebase Auth provides user token and UID
 3. Frontend uses UID for all API calls to ensure data isolation
 4. Backend validates requests and maintains user-specific data

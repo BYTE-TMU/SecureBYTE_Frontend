@@ -1,6 +1,7 @@
 import { Separator } from '@radix-ui/react-separator';
 import React from 'react';
 import { SidebarTrigger } from '../ui/sidebar';
+import Breadcrumbs from './Breadcrumbs';
 
 export default function AppHeader() {
   return (
@@ -11,7 +12,7 @@ export default function AppHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4 "
         />
-        <p>Future Breadcrumbs can maybe go here</p>
+        <Breadcrumbs />
       </div>
     </header>
   );

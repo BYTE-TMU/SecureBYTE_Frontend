@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Plus, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router';
 import { useAuth } from '@/hooks/auth/AuthContext';
+import NavUser from './NavUser';
 
 export default function NavigationBar() {
   const { user } = useAuth();

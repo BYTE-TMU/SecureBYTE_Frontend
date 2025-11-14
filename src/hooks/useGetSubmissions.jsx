@@ -6,16 +6,26 @@ export function useGetSubmissions(projectId) {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const refetch = useCallback(async () => {
+    console.log('fetching submissions once');
+
     if (!user || !projectId) {
       console.log('[SUBMISSIONS] No user or projectId for refetch');
+      setLoading(false);
       return;
     }
     console.log(`[SUBMISSIONS] Fetching submissions for project ${projectId}`);
+    setLoading(true);
     try {
+      console.time('[SUBMISSIONS] Fetch time');
       const response = await getSubmissions(user.uid, projectId);
-      console.log(`[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`, response.data);
+      console.timeEnd('[SUBMISSIONS] Fetch time');
+      console.log(
+        `[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`,
+        response.data,
+      );
       setSubmissions(response.data);
       setError('');
     } catch (err) {
@@ -26,6 +36,8 @@ export function useGetSubmissions(projectId) {
         }`,
       );
       setSubmissions([]);
+    } finally {
+      setLoading(false);
     }
   }, [user, projectId]);
 
@@ -33,5 +45,5 @@ export function useGetSubmissions(projectId) {
     refetch();
   }, [refetch]);
 
-  return { submissions, error, refetch };
+  return { submissions, error, loading, refetch };
 }

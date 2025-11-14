@@ -1,11 +1,10 @@
+import { useState, useEffect, useMemo } from 'react';
 import { columns } from '../custom-components/individual-project-table/columns';
 import IndividualProjectTable from '../custom-components/individual-project-table/IndividualProjectTable';
 import { useParams, useLocation } from 'react-router';
 import { useGetSubmissions } from '@/hooks/useGetSubmissions';
 import { toast } from 'sonner';
-import { useProject } from '../../hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,22 +16,30 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
-import React, { useState, useEffect } from 'react';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
+import { NewSubmissionDialog } from '../custom-components/NewSubmissionDialog';
+import LoadingPage from './LoadingPage';
 
 export default function IndividualProjectPage() {
   let { projectId } = useParams();
-  const { fetchProjectById } = useProject();
   const { user } = useAuth();
-  const { tree } = useGetFileStructure(projectId);
+
+  const {
+    submissions,
+    error: submissionsError,
+    loading: submissionsLoading,
+    refetch: refetchSubmissions,
+  } = useGetSubmissions(projectId);
+
+  const { tree, loading: treeLoading } = useGetFileStructure(submissions);
+  console.log(tree);
   const [securityReview, setSecurityReview] = useState('');
   const location = useLocation();
   const projectName = location.state?.projectName;
   const [isSecReviewLoading, setIsSecReviewLoading] = useState(false);
 
-  console.log(tree);
   //github repo dialog
   const [isRepoDialogOpen, setIsRepoDialogOpen] = useState(false);
   const [repos, setRepos] = useState([]);
@@ -45,44 +52,16 @@ export default function IndividualProjectPage() {
   const [openFiles, setOpenFiles] = useState([]);
   const [activeFile, setActiveFile] = useState(null);
 
-  useEffect(() => {
-    if (!projectId) {
-      console.log('Missing projectId');
-      return;
-    }
-
-    async function fetchData() {
-      console.log(projectId);
-      try {
-        const projectData = await fetchProjectById({ projectId });
-        console.log(
-          `Printing project data from IndividualProjectPage: ${projectData}`,
-        );
-        // setProjectName(projectData['project_name']);
-      } catch (err) {
-        console.error(
-          `Failed to load project: ${err.response?.data?.error || err.message}`,
-        );
-      }
-    }
-
-    fetchData();
-  }, [projectId]);
-
-  const {
-    submissions,
-    error: submissionsError,
-    refetch,
-  } = useGetSubmissions(projectId);
-
-  console.log(
-    `[PROJECT PAGE] Current submissions count: ${submissions?.length || 0}`,
-    submissions,
-  );
+  console.log(submissions);
 
   const hasGithubToken = useMemo(() => {
     return Boolean(localStorage.getItem('github_access_token'));
   }, []);
+
+  // Show loading page while data is being fetched
+  if (submissionsLoading || treeLoading) {
+    return <LoadingPage />;
+  }
 
   const openRepoDialog = async () => {
     if (!user) return;
@@ -132,7 +111,7 @@ export default function IndividualProjectPage() {
         `Repository linked and files imported${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Link+import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -166,7 +145,7 @@ export default function IndividualProjectPage() {
         `Files imported from GitHub${typeof count === 'number' ? ` (${count} files)` : ''}`,
       );
       console.log('[FRONTEND] Refetching submissions');
-      await refetch();
+      await refetchSubmissions();
       console.log('[FRONTEND] Import complete');
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
@@ -178,10 +157,8 @@ export default function IndividualProjectPage() {
     }
   };
 
-  console.log(`inside indiv project: ${projectId}`);
-  console.log(submissions.map((submission) => submission.filename));
   return (
-    <main className="w-full min-h-screen flex flex-col p-5">
+    <main className="w-full min-h-screen flex flex-col p-5 overflow-hidden">
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
       <div className="my-3 flex gap-2">
         {hasGithubToken && (
@@ -189,6 +166,7 @@ export default function IndividualProjectPage() {
             Link GitHub Repository
           </Button>
         )}
+
         <GenerateSecurityReviewSheet
           submissions={submissions}
           projectId={projectId}
@@ -197,7 +175,8 @@ export default function IndividualProjectPage() {
           setIsSecReviewLoading={setIsSecReviewLoading}
         />
       </div>
-      {submissionsError ? (
+      {/* {submissionsError ? ( */}
+      {false ? (
         <div className="text-destructive text-sm mt-2">{submissionsError}</div>
       ) : null}
       <Dialog open={isRepoDialogOpen} onOpenChange={setIsRepoDialogOpen}>
@@ -257,6 +236,7 @@ export default function IndividualProjectPage() {
 
       <ResizableCodeEditor
         tree={tree}
+        refetchSubmissions={refetchSubmissions}
         securityReview={securityReview}
         openFiles={openFiles}
         setOpenFiles={setOpenFiles}

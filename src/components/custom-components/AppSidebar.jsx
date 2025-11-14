@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -6,26 +5,16 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '../ui/sidebar';
-import {
-  CirclePlus,
-  CodeXml,
-  History,
-  LayoutDashboard,
-  LogOut,
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { LayoutDashboard } from 'lucide-react';
 import GlobalFileSubmissionDialog from './GlobalFileSubmissionDialog';
-import { useAuth } from '@/hooks/auth/AuthContext';
+import NavUser from './NavUser';
+import { ModeToggle } from '../ui/mode-toggle';
 
 export default function AppSidebar() {
-  const { logout } = useAuth();
-  const navigate = useNavigate(); 
-
   return (
     <Sidebar
       className="border-secure-blue pt-18 "
@@ -53,30 +42,8 @@ export default function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <LogOut onClick={
-                async () => {
-                console.log("About to log out"); 
-                await logout();
-
-                console.log("Finish log out"); 
-                console.log("Navigate to login page");
-                navigate("/auth/login"); 
-              }
-              }/>
-              <span onClick={async () => {
-                console.log("About to log out"); 
-                await logout();
-
-                console.log("Finish log out"); 
-                console.log("Navigate to login page");
-                navigate("/auth/login"); 
-              }}>Log out</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <ModeToggle />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

@@ -44,7 +44,7 @@ export const getSecurityReview = (userId, projectId) =>
 export const getLogicReview = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/logic-review`,
-    activeFile, 
+    activeFile,
     {
       headers: { 'Content-Type': 'application/json' },
     },
@@ -53,7 +53,7 @@ export const getLogicReview = (userId, submissionId, activeFile) =>
 export const getTestCases = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/testing-review`,
-    activeFile, 
+    activeFile,
     {
       headers: { 'Content-Type': 'application/json' },
     },
@@ -70,6 +70,15 @@ export const createSubmission = (userId, projectId, submission) =>
       headers: { 'Content-Type': 'application/json' },
     },
   );
+
+// File/folder movement API - updates submission filename (which includes folder path)
+export const moveSubmission = (userId, submissionId, newFilename) =>
+  axios.put(
+    `${API_URL}/users/${userId}/submissions/${submissionId}`,
+    { filename: newFilename },
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+
 export const updateSubmission = (userId, submissionId, submission) =>
   axios.put(
     `${API_URL}/users/${userId}/submissions/${submissionId}`,
@@ -78,6 +87,7 @@ export const updateSubmission = (userId, submissionId, submission) =>
       headers: { 'Content-Type': 'application/json' },
     },
   );
+
 export const deleteSubmission = (userId, submissionId) =>
   axios.delete(`${API_URL}/users/${userId}/submissions/${submissionId}`);
 

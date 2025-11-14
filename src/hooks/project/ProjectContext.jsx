@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import {
   getProjects,
@@ -7,8 +7,9 @@ import {
   createSubmission,
   getProject,
   saveProject,
+  updateProject,
+  getSubmissions,
 } from '@/api';
-import { toast } from 'sonner';
 
 const ProjectContext = createContext();
 
@@ -18,7 +19,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
   const [projects, setProjects] = useState([]);
   const [fetchError, setFetchError] = useState('');
   const [singleProject, setSingleProject] = useState('');
-  const [projectFiles, setProjectFiles] = useState({});
+  const [projectFiles, setProjectFiles] = useState([]);
 
   useEffect(() => {
     if (user && autoFetch) {
@@ -27,8 +28,6 @@ export function ProjectProvider({ children, autoFetch = false }) {
   }, [user, autoFetch]);
 
   const fetchProjects = async () => {
-    console.log('Fetching projects...');
-
     try {
       setLoading(true);
       const response = await getProjects(user.uid);
@@ -48,6 +47,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProject(user.uid, projectId);
+      console.log(response);
       setSingleProject(response.data);
       setFetchError('');
     } catch (err) {
@@ -164,24 +164,27 @@ export function ProjectProvider({ children, autoFetch = false }) {
     });
   };
 
-  const createSubmissionForProject = ({ projectId, files }) => {
+  const createSubmissionForProject = async ({ projectId, files }) => {
     console.log('Calling createSubmissionForProject');
     try {
-      files.map(async (file) => {
-        const fileContent = await parseFileContent(file);
-        await createSubmission(user.uid, projectId, {
-          filename: file.name,
-          code: fileContent === null ? 'Nothing for now' : fileContent,
-          securityRev: [],
-          logicRev: [],
-          testcases: [],
-          reviewpdf: '',
-        });
-      });
+      await Promise.all(
+        files.map(async (file) => {
+          const fileContent = await parseFileContent(file);
+          await createSubmission(user.uid, projectId, {
+            filename: file.name,
+            code: fileContent === null ? 'Nothing for now' : fileContent,
+            securityRev: [],
+            logicRev: [],
+            testcases: [],
+            reviewpdf: '',
+          });
+        }),
+      );
 
-      console.log('all files uplaoded');
+      console.log('all files uploaded');
     } catch (error) {
-      console.log(`Failed to create new project ${error}`);
+      console.error(`Failed to create submissions: ${error}`);
+      throw error;
     }
   };
   const setFilesForProject = ({ projectId, files }) => {
@@ -193,8 +196,158 @@ export function ProjectProvider({ children, autoFetch = false }) {
     }));
   };
 
+  // Create folder persisted in sessionStorage (local only)
+  const createFolderInProject = async ({ projectId, folderPath }) => {
+    // Store folders in the project's metadata in the backend
+    // SessionStorage is only used as a cache for immediate UI updates
+    try {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Get current project to read existing folders
+      const projectResponse = await getProject(user.uid, projectId);
+      const project = projectResponse.data;
+
+      // Get existing folders from project metadata or empty array
+      const existingFolders = project.folders || [];
+
+      // Add new folder if it doesn't exist
+      if (!existingFolders.includes(folderPath)) {
+        const updatedFolders = [...existingFolders, folderPath];
+
+        // Update project with new folders array
+        await updateProject(user.uid, projectId, {
+          ...project,
+          folders: updatedFolders,
+        });
+
+        console.log(
+          `✅ Folder "${folderPath}" saved to backend in project metadata`,
+        );
+      }
+
+      // Also update sessionStorage for immediate UI updates (cache)
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
+      const persisted = raw ? JSON.parse(raw) : {};
+      persisted[folderPath] = { path: folderPath };
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(persisted),
+      );
+
+      return { ok: true };
+    } catch (err) {
+      console.error('Failed to create folder:', err);
+
+      // Check if it's a rate limit error
+      if (err.response?.status === 429) {
+        throw new Error(
+          'Server is busy (rate limited). Please wait 5-10 minutes before creating folders. Your folder was NOT saved.',
+        );
+      }
+
+      throw new Error(
+        'Failed to create folder: ' + (err.message || 'Unknown error'),
+      );
+    }
+  };
+
+  const renameFolderInProject = async ({ projectId, oldPath, newPath }) => {
+    // Update folder in project metadata on the backend
+    // Also update sessionStorage for immediate UI
+    try {
+      // Get current project
+      const projectResponse = await getProject(user.uid, projectId);
+      const project = projectResponse.data;
+
+      // Get existing folders
+      const existingFolders = project.folders || [];
+
+      // Replace old path with new path, and update any child folder paths
+      const updatedFolders = existingFolders.map((folder) => {
+        if (folder === oldPath) {
+          return newPath;
+        } else if (folder.startsWith(oldPath + '/')) {
+          // Update child folders
+          return folder.replace(oldPath, newPath);
+        }
+        return folder;
+      });
+
+      // Update project
+      await updateProject(user.uid, projectId, {
+        ...project,
+        folders: updatedFolders,
+      });
+
+      console.log(`✅ Folder renamed in backend: ${oldPath} → ${newPath}`);
+
+      // Also update sessionStorage
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
+      const persisted = raw ? JSON.parse(raw) : {};
+      if (persisted[oldPath]) {
+        const v = persisted[oldPath];
+        delete persisted[oldPath];
+        persisted[newPath] = { ...v, path: newPath };
+      } else {
+        persisted[newPath] = { path: newPath };
+      }
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(persisted),
+      );
+
+      return { ok: true };
+    } catch (err) {
+      console.error('Failed to rename folder:', err);
+      throw new Error('Failed to rename folder');
+    }
+  };
+
   const getFilesFromProject = (projectId) => {
     return projectFiles[projectId] || [];
+  };
+
+  const loadFoldersFromBackend = async (projectId) => {
+    // Load folders from project metadata on the backend
+    // Sync them to sessionStorage for immediate use
+    try {
+      const projectResponse = await getProject(user.uid, projectId);
+      const project = projectResponse.data;
+
+      const folders = project.folders || [];
+
+      if (folders.length > 0) {
+        console.log(
+          `📂 Loading ${folders.length} folder(s) from backend:`,
+          folders,
+        );
+
+        // Convert array to object format for sessionStorage
+        const foldersObj = {};
+        folders.forEach((folderPath) => {
+          foldersObj[folderPath] = { path: folderPath };
+        });
+
+        // Save to sessionStorage
+        sessionStorage.setItem(
+          `secureBYTE_custom_folders_${projectId}`,
+          JSON.stringify(foldersObj),
+        );
+
+        return foldersObj;
+      }
+
+      return {};
+    } catch (err) {
+      console.error('Failed to load folders from backend:', err);
+      return {};
+    }
   };
 
   const saveProjectToBackend = async ({ projectId, updatedFilesArr }) => {
@@ -227,6 +380,9 @@ export function ProjectProvider({ children, autoFetch = false }) {
         getFilesFromProject,
         setFilesForProject,
         createNewProject,
+        createFolderInProject,
+        renameFolderInProject,
+        loadFoldersFromBackend,
         deleteOneProject,
         deleteProjectInBulk,
         createSubmissionForProject,

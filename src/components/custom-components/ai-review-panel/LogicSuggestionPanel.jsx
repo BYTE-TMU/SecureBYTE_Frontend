@@ -11,7 +11,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { getLogicReview } from '@/api';
-import { Separator } from '@radix-ui/react-separator';
+import { Separator } from '@/components/ui/separator';
+import LoadingView from '@/components/ui/loading-view';
 
 export default function LogicAnalysisPanel({ activeFile }) {
   const { user } = useAuth();
@@ -77,11 +78,11 @@ export default function LogicAnalysisPanel({ activeFile }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Display temporary view
+    return <LoadingView message="Analyzing code logic..." variant="full" />;
   }
 
   return (
-    <Card className="h-full rounded-md shadow-none">
+    <Card className="h-full rounded-none border-none shadow-none overflow-x-hidden">
       <CardHeader>
         <CardTitle>Logic Analysis</CardTitle>
         <CardDescription>
@@ -97,22 +98,39 @@ export default function LogicAnalysisPanel({ activeFile }) {
           </Button>
         )}
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 h-full">
         {/* Display the logic analysis when it is available */}
         {reviewAvailable && logicFiles && (
-          <div className="overflow-y-auto h-100">
-            {Object.entries(logicFiles).map(([reviewKey, reviewObj]) => (
-              <Card key={reviewKey} className="border shadow-sm gap-0 w-full">
-                <CardContent className="w-full max-w-full">
+          <div className="overflow-y-auto h-full space-y-6">
+            {Object.entries(logicFiles).map(
+              ([reviewKey, reviewObj], fileIndex) => (
+                <div key={reviewKey} className="h-full">
+                  {/* Separator between files */}
+                  {fileIndex > 0 && <Separator className="my-6" />}
+
+                  <CardTitle className="mb-4">
+                    Suggestion {reviewKey + 1}
+                  </CardTitle>
                   {reviewObj['logic Errors'].map((review, index) => (
-                    <Card key={index} className="w-full p-5 mb-5">
-                      <CardTitle>Function: {review.function}</CardTitle>
-                      <CardDescription>Feedback: {review.feedback}</CardDescription>
-                    </Card>
+                    <div key={index}>
+                      {/* Separator between logic errors */}
+                      {index > 0 && <Separator className="my-4" />}
+
+                      {review.function ? (
+                        <CardTitle className="text-base font-semibold">
+                          Function: {review.function}
+                        </CardTitle>
+                      ) : (
+                        ''
+                      )}
+                      <CardDescription className="leading-relaxed pl-4 border-l-2 border-muted h-full">
+                        {review.feedback}
+                      </CardDescription>
+                    </div>
                   ))}
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              ),
+            )}
           </div>
         )}
       </CardContent>

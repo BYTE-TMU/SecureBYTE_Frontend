@@ -59,8 +59,7 @@ function FileTabBar({
         ...style,
       }}
       className={cn(
-        'flex h-8 w-full bg-accent/10 border border-border overflow-x-auto overflow-y-hidden',
-        'p-0.5',
+        'flex h-8 w-full bg-accent/10 border border-border',
         className,
       )}
       onDragOver={handleEmptyAreaDragOver}
@@ -68,29 +67,30 @@ function FileTabBar({
       onDrop={handleEmptyAreaDrop}
       {...props}
     >
-      {openFiles.map((file, index) => (
-        <FileTab
-          key={file.name}
-          id={file.name}
-          fileId={file.id}
-          fileName={file.path.split('/').pop()}
-          isActive={file.name === activeFile?.name}
-          isUnsaved={unsavedFiles.has(file.id)}
-          onSelect={() => onSwitchTab(file)}
-          handleCloseFile={() => onCloseFile(file.name)}
-          index={index}
-          onReorder={onReorderTabs}
-          dragOverIndex={dragOverIndex}
-          setDragOverIndex={setDragOverIndex}
-          setIsDraggingOverEmpty={setIsDraggingOverEmpty}
-        />
-      ))}
+      <div className="flex items-center  overflow-x-auto overflow-y-hidden no-scrollbar ">
+        {openFiles.map((file, index) => (
+          <FileTab
+            key={file.name}
+            id={file.name}
+            fileId={file.id}
+            fileName={file.path.split('/').pop()}
+            isActive={file.name === activeFile?.name}
+            isUnsaved={unsavedFiles.has(file.id)}
+            onSelect={() => onSwitchTab(file)}
+            handleCloseFile={() => onCloseFile(file.name)}
+            index={index}
+            onReorder={onReorderTabs}
+            dragOverIndex={dragOverIndex}
+            setDragOverIndex={setDragOverIndex}
+            setIsDraggingOverEmpty={setIsDraggingOverEmpty}
+          />
+        ))}
 
-      {/* Visual indicator for dropping at the end */}
-      {isDraggingOverEmpty && openFiles.length > 0 && (
-        <div className="w-0.5 h-full bg-blue-500 animate-pulse ml-1" />
-      )}
-      
+        {/* Visual indicator for dropping at the end */}
+        {isDraggingOverEmpty && openFiles.length > 0 && (
+          <div className="w-0.5 h-full bg-blue-500 animate-pulse ml-1" />
+        )}
+      </div>
       {/* Save Files Button */}
       {onSaveAll && openFiles.length > 0 && (
         <div className="ml-auto flex items-center pr-2">

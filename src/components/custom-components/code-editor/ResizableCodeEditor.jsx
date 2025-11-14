@@ -269,7 +269,7 @@ export default function ResizableCodeEditor({
     <div className="max-w-screen">
       <ResizablePanelGroup
         direction="horizontal"
-        className="border rounded-lg min-w-0 w-full"
+        className="border rounded-lg min-w-0"
       >
         <ResizablePanel
           defaultSize={20}
@@ -280,6 +280,7 @@ export default function ResizableCodeEditor({
           <div className="w-full overflow-x-auto">
             <FileTree
               tree={tree}
+              projectName={projectName}
               refetchSubmissions={refetchSubmissions}
               onFileSelectFromFileTree={openNewFile}
               onFileRenamed={handleFileRenamed}

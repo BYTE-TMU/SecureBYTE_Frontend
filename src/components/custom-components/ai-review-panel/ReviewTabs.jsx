@@ -13,7 +13,7 @@ export default function ReviewTabs({
 }) {
   return (
     <Tabs defaultValue="security" className="w-full h-full gap-0">
-      <TabsList className="rounded-none w-full h-[32px]">
+      <TabsList className="rounded-none w-fill h-[32px]">
         <TabsTrigger value="security">Security</TabsTrigger>
         <TabsTrigger value="logic">Logic</TabsTrigger>
         <TabsTrigger value="test-cases">Test Cases</TabsTrigger>

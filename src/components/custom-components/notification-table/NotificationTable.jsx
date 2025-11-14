@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -50,7 +50,9 @@ export default function NotificationTable({ columns, data }) {
 
   const handlePriorityFilterChange = (value) => {
     setPriorityFilter(value);
-    table.getColumn('priority')?.setFilterValue(value === 'all' ? undefined : value);
+    table
+      .getColumn('priority')
+      ?.setFilterValue(value === 'all' ? undefined : value);
   };
 
   const priorityLabels = {
@@ -80,16 +82,24 @@ export default function NotificationTable({ columns, data }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => handlePriorityFilterChange('all')}>
+              <DropdownMenuItem
+                onClick={() => handlePriorityFilterChange('all')}
+              >
                 All Priorities
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePriorityFilterChange('high')}>
+              <DropdownMenuItem
+                onClick={() => handlePriorityFilterChange('high')}
+              >
                 High Priority
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePriorityFilterChange('medium')}>
+              <DropdownMenuItem
+                onClick={() => handlePriorityFilterChange('medium')}
+              >
                 Medium Priority
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePriorityFilterChange('low')}>
+              <DropdownMenuItem
+                onClick={() => handlePriorityFilterChange('low')}
+              >
                 Low Priority
               </DropdownMenuItem>
             </DropdownMenuContent>

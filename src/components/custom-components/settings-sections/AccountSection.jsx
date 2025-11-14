@@ -1,113 +1,203 @@
-import { useAuth } from '@/hooks/auth/AuthContext';
 import { useState } from 'react';
-import ProfilePicture from '../../custom-components/ProfilePicture';
-
-import { Item, ItemContent, ItemTitle } from '../../ui/item';
+import { useAuth } from '@/hooks/auth/AuthContext';
 import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldTitle,
-} from '../../ui/field';
-import { Input } from '../../ui/input';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
 import { Button } from '../../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
-import { Info } from 'lucide-react';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { Mail, User, Calendar, Lock, Eye, EyeOff, Edit } from 'lucide-react';
+import { Separator } from '../../ui/separator';
 
 export default function AccountSection() {
-  // https://dribbble.com/shots/24143775-Settings-page-UI
-  const [editMode, setEditMode] = useState(false);
   const { user } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(user?.displayName || '');
+
+  // Since Firebase doesn't expose passwords, we show a placeholder
+  const passwordPlaceholder = '••••••••••••';
+
+  const handleSaveName = () => {
+    // TODO: Implement name update logic
+    setIsEditingName(false);
+  };
+
   return (
-    <main className="w-full h-full flex flex-col">
-      <h1 className="font-bold text-xl text-secure-blue">Account</h1>
-      <div className="flex flex-row justify-between">
-        <ProfilePicture className={'size-20'} />
-        <div className="flex flex-row gap-2">
-          <Button variant="outline" onClick={() => setEditMode(true)}>
-            Edit
-          </Button>
-          <Button
-            variant="outline"
-            disabled={!editMode}
-            onClick={() => setEditMode(false)}
-            className={
-              editMode
-                ? 'bg-secure-orange text-white hover:bg-secure-blue hover:text-white'
-                : ''
-            }
-          >
-            Save Changes
-          </Button>
-        </div>
-      </div>
-      <FieldGroup>
-        <div className="grid grid-cols-3 gap-3">
-          <Field variant="outline">
-            <FieldTitle>
-              <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="rounded-full ml-auto"
-                    variant="outline"
-                    size="icon-xs"
-                  >
-                    <Info />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Your name.</TooltipContent>
-              </Tooltip>
-            </FieldTitle>
-            <Input
-              id="displayName"
-              value={user.displayName}
-              disabled={!editMode}
-            />
-          </Field>
-          <Field variant="outline">
-            <FieldTitle>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="rounded-full ml-auto"
-                    variant="outline"
-                    size="icon-xs"
-                  >
-                    <Info />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Your email.</TooltipContent>
-              </Tooltip>
-            </FieldTitle>
-            <Input id="email" value={user.email} disabled={!editMode} />
-          </Field>
-          <Field variant="outline">
-            <FieldTitle>
-              <FieldLabel htmlFor="displayName">Joined On</FieldLabel>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="rounded-full ml-auto"
-                    variant="outline"
-                    size="icon-xs"
-                  >
-                    <Info />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>The day you joined SecureBYTE</TooltipContent>
-              </Tooltip>
-            </FieldTitle>
-            <FieldDescription>{user.metadata.creationTime}</FieldDescription>
-            <ItemContent></ItemContent>
-          </Field>
-        </div>
-      </FieldGroup>
-      <Item variant="outline" size="sm">
-        <ItemTitle>Joined On</ItemTitle>
-      </Item>
-    </main>
+    <div className="max-w-3xl space-y-6">
+      {/* Profile Overview Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={user?.photoURL} />
+              <AvatarFallback className="text-2xl">
+                {user?.displayName?.[0] || user?.email?.[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle>{user?.displayName || 'User'}</CardTitle>
+              <CardDescription>{user?.email}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Account Details Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Details</CardTitle>
+          <CardDescription>Manage your account information</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Name Section */}
+          <div className="space-y-2">
+            <Label htmlFor="name" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Name
+            </Label>
+            {isEditingName ? (
+              <div className="flex gap-2">
+                <Input
+                  id="name"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  placeholder="Enter your name"
+                />
+                <Button onClick={handleSaveName} size="sm">
+                  Save
+                </Button>
+                <Button
+                  onClick={() => setIsEditingName(false)}
+                  size="sm"
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">
+                    {user?.displayName || 'Not set'}
+                  </span>
+                </div>
+                <Button
+                  onClick={() => setIsEditingName(true)}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Email Section */}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email
+            </Label>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">{user?.email}</span>
+              <Button size="sm" variant="ghost" disabled>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Email cannot be changed at this time
+            </p>
+          </div>
+
+          <Separator />
+
+          {/* Password Section */}
+          <div className="space-y-2">
+            <Label htmlFor="password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" />
+              Password
+            </Label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center justify-between bg-muted px-3 py-2 rounded-md">
+                <span className="text-sm">
+                  {showPassword
+                    ? 'Your password is hidden for security'
+                    : passwordPlaceholder}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <Button size="sm" variant="outline">
+                Change
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Account Created Section */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Account Created
+            </Label>
+            <span className="text-sm">
+              {user?.metadata?.creationTime
+                ? new Date(user.metadata.creationTime).toLocaleDateString(
+                    'en-US',
+                    {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    },
+                  )
+                : 'N/A'}
+            </span>
+          </div>
+
+          {/* Last Sign In Section */}
+          {user?.metadata?.lastSignInTime && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Last Sign In
+                </Label>
+                <span className="text-sm">
+                  {new Date(user.metadata.lastSignInTime).toLocaleDateString(
+                    'en-US',
+                    {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    },
+                  )}
+                </span>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

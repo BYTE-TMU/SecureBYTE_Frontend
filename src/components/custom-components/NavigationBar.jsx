@@ -42,7 +42,7 @@ export default function NavigationBar() {
             <Bell className="h-9 w-9" />
           </Button>
         </div>
-        <ProfileDropdown profilePic={user?.photoURL} />
+        {/* <ProfileDropdown profilePic={user?.photoURL} /> */}
       </div>
     </nav>
   ) : (

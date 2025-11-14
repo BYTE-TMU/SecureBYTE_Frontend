@@ -9,7 +9,10 @@ import {
 import { Link } from 'react-router';
 import { User, Bell, Github } from 'lucide-react';
 
-export default function ProfileDropdown({ profilePic, hasGitHubIntegration = false }) {
+export default function ProfileDropdown({
+  profilePic,
+  hasGitHubIntegration = false,
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -25,13 +28,19 @@ export default function ProfileDropdown({ profilePic, hasGitHubIntegration = fal
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
-            <Link to="/account" className="flex items-center gap-2 cursor-pointer">
+            <Link
+              to="/account"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <User className="h-4 w-4" />
               <span>Account</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/notifications" className="flex items-center gap-2 cursor-pointer">
+            <Link
+              to="/notifications"
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Bell className="h-4 w-4" />
               <span>Notifications</span>
             </Link>

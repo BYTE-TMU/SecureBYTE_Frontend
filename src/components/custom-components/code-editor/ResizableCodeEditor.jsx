@@ -22,7 +22,7 @@ export default function ResizableCodeEditor({
   setActiveFile,
   projectId,
   projectName,
-  isSecReviewLoading
+  isSecReviewLoading,
 }) {
   const { trackFileUpdate } = useUpdateFiles();
   const { user } = useAuth();
@@ -266,42 +266,6 @@ export default function ResizableCodeEditor({
   };
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="w-full"
-    >
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-        <FileTree
-          tree={tree}
-          projectName={projectName}
-          onFileSelectFromFileTree={openNewFile} // Callback function for selecting a file from FileTree
-        />{' '}
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={60} minSize={40} className="h-screen">
-        <FileTabBar
-          openFiles={openFiles}
-          activeFile={activeFile}
-          onOpenFile={openNewFile}
-          onCloseFile={closeFile}
-          onSwitchTab={switchTab}
-        />
-        <FileTabContent
-          activeFile={activeFile}
-          isDarkTheme={false}
-          onEditorChange={updateFileContent}
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-       <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-        <ReviewModal
-          activeFile={activeFile}
-          securityReview={securityReview}
-          projectId={projectId}
-          isSecReviewLoading={isSecReviewLoading}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
     <div className="max-w-screen">
       <ResizablePanelGroup
         direction="horizontal"
@@ -322,7 +286,7 @@ export default function ResizableCodeEditor({
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel
           defaultSize={50}
           maxSize={60}
@@ -346,7 +310,7 @@ export default function ResizableCodeEditor({
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel
           defaultSize={20}
           className="min-w-0 overflow-x-hidden overflow-y-auto"

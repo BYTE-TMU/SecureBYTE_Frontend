@@ -41,6 +41,7 @@ import NewFolderDialog from '@/components/custom-components/NewFolderDialog';
 
 import { useParams } from 'react-router';
 
+
 // Helper function to collect all folder names from tree and persisted folders (excluding current folder)
 const collectAllFolderNames = (node, persistedFolders, currentFolderPath) => {
   const names = [];
@@ -77,6 +78,7 @@ const collectAllFolderNames = (node, persistedFolders, currentFolderPath) => {
 
 export default function FileTree({
   tree,
+  projectName,
   onFileSelectFromFileTree,
   refetchSubmissions,
   onFileRenamed,
@@ -397,6 +399,7 @@ export default function FileTree({
   };
 
   return (
+
     <div
       className="flex flex-col text-sm h-full relative"
       onDragOver={handleRootDragOver}
@@ -413,7 +416,9 @@ export default function FileTree({
       )}{' '}
       <SidebarHeader className="flex flex-col gap-2 bg-secondary">
         <div className="flex flex-row items-center justify-between">
-          <h2 className="font-medium">Project Name</h2>
+          <h2 className="font-medium truncate" title={projectName}>
+            {projectName || 'Project Name'}
+          </h2>          
           <div className="flex flex-row items-center gap-2">
             {/* <FilePlus className="size-4" /> */}
             <NewSubmissionDialog variant={'icon'} projectId={projectId} />

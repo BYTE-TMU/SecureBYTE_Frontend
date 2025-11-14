@@ -82,7 +82,7 @@ export default function LogicAnalysisPanel({ activeFile }) {
   }
 
   return (
-    <Card className="h-full rounded-none border-none shadow-none overflow-x-hidden">
+    <Card className="h-full w-[90%] rounded-none border-none shadow-none overflow-x-hidden">
       <CardHeader>
         <CardTitle>Logic Analysis</CardTitle>
         <CardDescription>

@@ -21,6 +21,7 @@ export default function ResizableCodeEditor({
   activeFile,
   setActiveFile,
   projectId,
+  projectName,
   isSecReviewLoading,
 }) {
   const { trackFileUpdate } = useUpdateFiles();
@@ -285,7 +286,7 @@ export default function ResizableCodeEditor({
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel
           defaultSize={50}
           maxSize={60}
@@ -309,7 +310,7 @@ export default function ResizableCodeEditor({
             />
           </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel
           defaultSize={20}
           className="min-w-0 overflow-x-hidden overflow-y-auto"

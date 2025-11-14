@@ -13,11 +13,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { BellDot, CircleUser, EllipsisVertical, Settings } from 'lucide-react';
+import {
+  BellDot,
+  CircleUser,
+  EllipsisVertical,
+  Github,
+  Settings,
+} from 'lucide-react';
 import { useAuth } from '@/hooks/auth/AuthContext';
 import ProfilePicture from './ProfilePicture';
 import LogoutButton from './LogoutButton';
-import { Link, useNavigate } from 'react-router';
+import { Link, NavLink, useNavigate } from 'react-router';
 import { ModeToggle } from '../ui/mode-toggle';
 
 export default function NavUser({ profilePic }) {
@@ -65,29 +71,21 @@ export default function NavUser({ profilePic }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem></DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={async () => {
-                  navigate('/account');
-                }}
-              >
-                <CircleUser />
-                Account
+              <DropdownMenuItem>
+                <>
+                  <Github className="h-4 w-4" />
+                  <span>Integrate GitHub</span>
+                </>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={async () => {
-                  navigate('/notifications');
-                }}
-              >
-                <BellDot /> Notifications
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={async () => {
-                  navigate('/settings');
-                }}
-              >
-                <Settings />
-                Settings
+
+              <DropdownMenuItem>
+                <NavLink
+                  to={'/settings/account'}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <Settings />
+                  Settings
+                </NavLink>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

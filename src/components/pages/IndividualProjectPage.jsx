@@ -242,6 +242,8 @@ export default function IndividualProjectPage() {
         setOpenFiles={setOpenFiles}
         activeFile={activeFile}
         setActiveFile={setActiveFile}
+        projectId={projectId}
+        projectName={projectName}
         isSecReviewLoading={isSecReviewLoading}
       />
       <IndividualProjectTable columns={columns} data={submissions} />

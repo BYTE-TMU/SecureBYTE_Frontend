@@ -1,6 +1,6 @@
 import React from 'react';
 import whiteLogo from '../../assets/white-logo.svg';
-import ProfilePicture from './ProfilePicture';
+import ProfileDropdown from './ProfileDropdown';
 import { Button } from '../ui/button';
 import { Plus, Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router';
@@ -42,7 +42,7 @@ export default function NavigationBar() {
             <Bell className="h-9 w-9" />
           </Button>
         </div>
-        <ProfilePicture />
+        {/* <ProfileDropdown profilePic={user?.photoURL} /> */}
       </div>
     </nav>
   ) : (

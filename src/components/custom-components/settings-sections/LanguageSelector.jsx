@@ -1,6 +1,4 @@
-import { ChevronDownIcon } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Item, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { useState } from 'react';
 import {

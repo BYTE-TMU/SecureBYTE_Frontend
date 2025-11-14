@@ -93,10 +93,13 @@ export default function SignUpPage() {
               )}
             </div>
           </div>
+
+          {/* CHANGED: use theme variant instead of hard-coded bg */}
           <Button
             type="submit"
             size="lg"
-            className="bg-secure-orange font-bold"
+            variant="default"
+            className="font-bold"
           >
             Sign Up
           </Button>
@@ -107,15 +110,17 @@ export default function SignUpPage() {
             </span>
           </div>
 
+          {/* CHANGED: outline variant for neutral SSO buttons */}
           <Button
             onClick={googleSignin}
             size="lg"
-            className="bg-secure-light-blue font-bold"
+            variant="outline"
+            className="font-bold"
           >
             <img src={googleLogo} className="size-5"></img>
             Login with Google
           </Button>
-          <Button onClick={githubSignIn} size="lg">
+          <Button onClick={githubSignIn} size="lg" variant="outline">
             Login with GitHub
           </Button>
         </form>

@@ -48,7 +48,7 @@ export default function RenameSubmissionDialog({ submission }) {
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button type="submit" className="bg-secure-orange">
+            <Button type="submit" variant="default">
               Prepare for Analysis
             </Button>
           </DialogClose>

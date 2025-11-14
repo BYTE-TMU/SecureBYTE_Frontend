@@ -265,59 +265,63 @@ export default function ResizableCodeEditor({
   };
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="border rounded-lg min-w-0 w-full"
-    >
-      <ResizablePanel
-        defaultSize={20}
-        minSize={15}
-        maxSize={20}
-        className="min-w-0 overflow-x-hidden overflow-y-auto"
+    <div className="max-w-screen">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="border rounded-lg min-w-0 w-full"
       >
-        <div className="w-full overflow-x-auto">
-          <FileTree
-            tree={tree}
-            refetchSubmissions={refetchSubmissions}
-            onFileSelectFromFileTree={openNewFile}
-            onFileRenamed={handleFileRenamed}
+        <ResizablePanel
+          defaultSize={20}
+          minSize={15}
+          maxSize={20}
+          className="min-w-0 overflow-x-hidden overflow-y-auto"
+        >
+          <div className="w-full overflow-x-auto">
+            <FileTree
+              tree={tree}
+              refetchSubmissions={refetchSubmissions}
+              onFileSelectFromFileTree={openNewFile}
+              onFileRenamed={handleFileRenamed}
+            />
+          </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel
+          defaultSize={50}
+          maxSize={60}
+          className="min-h-0 max-w-140 "
+        >
+          <div className="h-screen">
+            <FileTabBar
+              openFiles={openFiles}
+              activeFile={activeFile}
+              onOpenFile={openNewFile}
+              onCloseFile={closeFile}
+              onSwitchTab={switchTab}
+              onReorderTabs={reorderTabs}
+              unsavedFiles={unsavedFiles}
+              onSaveAll={handleSaveAllFiles}
+            />
+            <FileTabContent
+              activeFile={activeFile}
+              isDarkTheme={false}
+              onEditorChange={updateFileContent}
+            />
+          </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel
+          defaultSize={20}
+          className="min-w-0 overflow-x-hidden overflow-y-auto"
+        >
+          <ReviewModal
+            activeFile={activeFile}
+            securityReview={securityReview}
+            projectId={projectId}
+            isSecReviewLoading={isSecReviewLoading}
           />
-        </div>
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel
-        defaultSize={50}
-        maxSize={60}
-        className="min-h-0 max-w-140"
-      >
-        <FileTabBar
-          openFiles={openFiles}
-          activeFile={activeFile}
-          onOpenFile={openNewFile}
-          onCloseFile={closeFile}
-          onSwitchTab={switchTab}
-          onReorderTabs={reorderTabs}
-          unsavedFiles={unsavedFiles}
-          onSaveAll={handleSaveAllFiles}
-        />
-        <FileTabContent
-          activeFile={activeFile}
-          isDarkTheme={false}
-          onEditorChange={updateFileContent}
-        />
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel
-        defaultSize={25}
-        className="min-w-0 overflow-x-hidden overflow-y-auto"
-      >
-        <ReviewModal
-          activeFile={activeFile}
-          securityReview={securityReview}
-          projectId={projectId}
-          isSecReviewLoading={isSecReviewLoading}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   );
 }

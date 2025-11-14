@@ -8,13 +8,13 @@ export default function ReviewModal({
   isSecReviewLoading,
 }) {
   return (
-    // <div className="flex flex-col w-full ">
-    <ReviewTabs
-      activeFile={activeFile}
-      securityReview={securityReview}
-      projectId={projectId}
-      isSecReviewLoading={isSecReviewLoading}
-    />
-    // </div>
+    <div className="w-full ">
+      <ReviewTabs
+        activeFile={activeFile}
+        securityReview={securityReview}
+        projectId={projectId}
+        isSecReviewLoading={isSecReviewLoading}
+      />
+    </div>
   );
 }

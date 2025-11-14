@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -30,7 +30,7 @@ export default function ResizableCodeEditor({
   const [unsavedFiles, setUnsavedFiles] = useState(new Set());
 
   // Track pending save operations for retry
-  const pendingSavesRef = React.useRef(new Map());
+  const pendingSavesRef = useRef(new Map());
 
   useEffect(() => {
     if (activeFile) {
@@ -278,7 +278,7 @@ export default function ResizableCodeEditor({
         <div className="w-full overflow-x-auto">
           <FileTree
             tree={tree}
-            refetchFileTree={refetchFileTree}
+            refetchSubmissions={refetchSubmissions}
             onFileSelectFromFileTree={openNewFile}
             onFileRenamed={handleFileRenamed}
           />

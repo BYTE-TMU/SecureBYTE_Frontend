@@ -160,7 +160,7 @@
   .active-settings-nav-button {
     @apply bg-white border-b font-semibold border-secure-orange p-2 text-center  text-secure-orange;
   }
-  
+}
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

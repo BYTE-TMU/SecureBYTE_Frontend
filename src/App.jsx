@@ -30,8 +30,7 @@ import AppHeader from './components/custom-components/AppHeader';
 import { Outlet, useNavigate } from 'react-router';
 import { useAuth } from './hooks/auth/AuthContext';
 import { ProjectProvider } from './hooks/project/ProjectContext';
-import { Toaster } from './components/ui/sonner'; 
-
+import { Toaster } from './components/ui/sonner';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -95,11 +94,11 @@ function App() {
         <SidebarProvider defaultOpen={true} name={'primary_sidebar'}>
           <NavigationBar isSignedIn={isSignUp} />
           <AppSidebar />
-            <main className="w-screen">
-              <AppHeader />
-              <Outlet />
-              <Toaster richColors />
-            </main>
+          <main className="w-screen">
+            <AppHeader />
+            <Outlet />
+            <Toaster richColors />
+          </main>
         </SidebarProvider>
       </ProjectProvider>
     );

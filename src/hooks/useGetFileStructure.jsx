@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
-import { useGetSubmissions } from './useGetSubmissions';
+import { useMemo, useState } from 'react';
 
-export function useGetFileStructure(projectId) {
-  const { submissions, error, loading, refetch } = useGetSubmissions(projectId);
+//TODO: turn this into a function that takes in the current structure backend output from PROJECTCONTEXT and creates a tree
+export function useGetFileStructure(submissions) {
+  const [loading, setLoading] = useState(false);
 
   const fileTree = useMemo(() => {
+    setLoading(true);
     console.time('[FILETREE] Build time');
     const tree = {};
 
@@ -48,8 +49,9 @@ export function useGetFileStructure(projectId) {
       });
     });
     console.timeEnd('[FILETREE] Build time');
+    setLoading(false);
     return tree;
   }, [submissions]);
 
-  return { tree: fileTree, loading, error, refetch };
+  return { tree: fileTree, loading };
 }

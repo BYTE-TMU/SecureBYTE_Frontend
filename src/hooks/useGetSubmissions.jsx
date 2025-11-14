@@ -9,6 +9,8 @@ export function useGetSubmissions(projectId) {
   const [loading, setLoading] = useState(true);
 
   const refetch = useCallback(async () => {
+    console.log('fetching submissions once');
+
     if (!user || !projectId) {
       console.log('[SUBMISSIONS] No user or projectId for refetch');
       setLoading(false);
@@ -20,7 +22,10 @@ export function useGetSubmissions(projectId) {
       console.time('[SUBMISSIONS] Fetch time');
       const response = await getSubmissions(user.uid, projectId);
       console.timeEnd('[SUBMISSIONS] Fetch time');
-      console.log(`[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`, response.data);
+      console.log(
+        `[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`,
+        response.data,
+      );
       setSubmissions(response.data);
       setError('');
     } catch (err) {

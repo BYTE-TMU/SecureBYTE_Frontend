@@ -44,7 +44,7 @@ export const getSecurityReview = (userId, projectId) =>
 export const getLogicReview = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/logic-review`,
-    activeFile, 
+    activeFile,
     {
       headers: { 'Content-Type': 'application/json' },
     },
@@ -53,7 +53,7 @@ export const getLogicReview = (userId, submissionId, activeFile) =>
 export const getTestCases = (userId, submissionId, activeFile) =>
   axios.post(
     `${API_URL}/users/${userId}/submissions/${submissionId}/testing-review`,
-    activeFile, 
+    activeFile,
     {
       headers: { 'Content-Type': 'application/json' },
     },
@@ -72,7 +72,6 @@ export const createSubmission = (userId, projectId, submission) =>
   );
 
 // File/folder movement API - updates submission filename (which includes folder path)
-// This is how folders work: they're implicit in the file path, not separate backend entities
 export const moveSubmission = (userId, submissionId, newFilename) =>
   axios.put(
     `${API_URL}/users/${userId}/submissions/${submissionId}`,

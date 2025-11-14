@@ -14,6 +14,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { updateProject } from '@/api';
+import { toast } from 'sonner';
 
 export default function EditProjectSheet({ project }) {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ export default function EditProjectSheet({ project }) {
   }, [user]);
 
   const editProject = async () => {
-    //TODO: in hte future, add an error
+    //TODO: in hte future, add an error specific to login??
     if (!editedProjectName.trim() || !user) return;
 
     try {
@@ -45,7 +46,6 @@ export default function EditProjectSheet({ project }) {
       setEditedProjectDesc('');
 
       //TODO: add in a page refresh here too
-      setError('');
     } catch (error) {
       console.error('Error editing project:', error);
       console.error('Error details:', error.response?.data); // More detailed error
@@ -54,6 +54,7 @@ export default function EditProjectSheet({ project }) {
           error.response?.data?.error || error.message
         }`,
       );
+      toast.error('Error edited file, try again later.');
     }
   };
   return (

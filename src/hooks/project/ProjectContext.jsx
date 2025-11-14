@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import {
   getProjects,
@@ -8,8 +8,8 @@ import {
   getProject,
   saveProject,
   updateProject,
+  getSubmissions,
 } from '@/api';
-import { toast } from 'sonner';
 
 const ProjectContext = createContext();
 
@@ -19,7 +19,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
   const [projects, setProjects] = useState([]);
   const [fetchError, setFetchError] = useState('');
   const [singleProject, setSingleProject] = useState('');
-  const [projectFiles, setProjectFiles] = useState({});
+  const [projectFiles, setProjectFiles] = useState([]);
 
   useEffect(() => {
     if (user && autoFetch) {
@@ -28,8 +28,6 @@ export function ProjectProvider({ children, autoFetch = false }) {
   }, [user, autoFetch]);
 
   const fetchProjects = async () => {
-    console.log('Fetching projects...');
-
     try {
       setLoading(true);
       const response = await getProjects(user.uid);
@@ -49,6 +47,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProject(user.uid, projectId);
+      console.log(response);
       setSingleProject(response.data);
       setFetchError('');
     } catch (err) {
@@ -179,7 +178,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
             testcases: [],
             reviewpdf: '',
           });
-        })
+        }),
       );
 
       console.log('all files uploaded');
@@ -205,43 +204,54 @@ export function ProjectProvider({ children, autoFetch = false }) {
       if (!user) {
         throw new Error('User not authenticated');
       }
-      
+
       // Get current project to read existing folders
       const projectResponse = await getProject(user.uid, projectId);
       const project = projectResponse.data;
-      
+
       // Get existing folders from project metadata or empty array
       const existingFolders = project.folders || [];
-      
+
       // Add new folder if it doesn't exist
       if (!existingFolders.includes(folderPath)) {
         const updatedFolders = [...existingFolders, folderPath];
-        
+
         // Update project with new folders array
         await updateProject(user.uid, projectId, {
           ...project,
-          folders: updatedFolders
+          folders: updatedFolders,
         });
-        
-        console.log(`✅ Folder "${folderPath}" saved to backend in project metadata`);
+
+        console.log(
+          `✅ Folder "${folderPath}" saved to backend in project metadata`,
+        );
       }
-      
+
       // Also update sessionStorage for immediate UI updates (cache)
-      const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
       const persisted = raw ? JSON.parse(raw) : {};
       persisted[folderPath] = { path: folderPath };
-      sessionStorage.setItem(`secureBYTE_custom_folders_${projectId}`, JSON.stringify(persisted));
-      
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(persisted),
+      );
+
       return { ok: true };
     } catch (err) {
       console.error('Failed to create folder:', err);
-      
+
       // Check if it's a rate limit error
       if (err.response?.status === 429) {
-        throw new Error('Server is busy (rate limited). Please wait 5-10 minutes before creating folders. Your folder was NOT saved.');
+        throw new Error(
+          'Server is busy (rate limited). Please wait 5-10 minutes before creating folders. Your folder was NOT saved.',
+        );
       }
-      
-      throw new Error('Failed to create folder: ' + (err.message || 'Unknown error'));
+
+      throw new Error(
+        'Failed to create folder: ' + (err.message || 'Unknown error'),
+      );
     }
   };
 
@@ -252,12 +262,12 @@ export function ProjectProvider({ children, autoFetch = false }) {
       // Get current project
       const projectResponse = await getProject(user.uid, projectId);
       const project = projectResponse.data;
-      
+
       // Get existing folders
       const existingFolders = project.folders || [];
-      
+
       // Replace old path with new path, and update any child folder paths
-      const updatedFolders = existingFolders.map(folder => {
+      const updatedFolders = existingFolders.map((folder) => {
         if (folder === oldPath) {
           return newPath;
         } else if (folder.startsWith(oldPath + '/')) {
@@ -266,17 +276,19 @@ export function ProjectProvider({ children, autoFetch = false }) {
         }
         return folder;
       });
-      
+
       // Update project
       await updateProject(user.uid, projectId, {
         ...project,
-        folders: updatedFolders
+        folders: updatedFolders,
       });
-      
+
       console.log(`✅ Folder renamed in backend: ${oldPath} → ${newPath}`);
-      
+
       // Also update sessionStorage
-      const raw = sessionStorage.getItem(`secureBYTE_custom_folders_${projectId}`);
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
       const persisted = raw ? JSON.parse(raw) : {};
       if (persisted[oldPath]) {
         const v = persisted[oldPath];
@@ -285,8 +297,11 @@ export function ProjectProvider({ children, autoFetch = false }) {
       } else {
         persisted[newPath] = { path: newPath };
       }
-      sessionStorage.setItem(`secureBYTE_custom_folders_${projectId}`, JSON.stringify(persisted));
-      
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(persisted),
+      );
+
       return { ok: true };
     } catch (err) {
       console.error('Failed to rename folder:', err);
@@ -304,24 +319,30 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       const projectResponse = await getProject(user.uid, projectId);
       const project = projectResponse.data;
-      
+
       const folders = project.folders || [];
-      
+
       if (folders.length > 0) {
-        console.log(`📂 Loading ${folders.length} folder(s) from backend:`, folders);
-        
+        console.log(
+          `📂 Loading ${folders.length} folder(s) from backend:`,
+          folders,
+        );
+
         // Convert array to object format for sessionStorage
         const foldersObj = {};
-        folders.forEach(folderPath => {
+        folders.forEach((folderPath) => {
           foldersObj[folderPath] = { path: folderPath };
         });
-        
+
         // Save to sessionStorage
-        sessionStorage.setItem(`secureBYTE_custom_folders_${projectId}`, JSON.stringify(foldersObj));
-        
+        sessionStorage.setItem(
+          `secureBYTE_custom_folders_${projectId}`,
+          JSON.stringify(foldersObj),
+        );
+
         return foldersObj;
       }
-      
+
       return {};
     } catch (err) {
       console.error('Failed to load folders from backend:', err);

@@ -31,6 +31,7 @@ import { Outlet, useNavigate } from 'react-router';
 import { useAuth } from './hooks/auth/AuthContext';
 import { ProjectProvider } from './hooks/project/ProjectContext';
 import { Toaster } from './components/ui/sonner';
+import { ThemeProvider } from './components/ui/theme-provider';
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
@@ -91,15 +92,17 @@ function App() {
   if (user) {
     return (
       <ProjectProvider autoFetch={true}>
-        <SidebarProvider defaultOpen={true} name={'primary_sidebar'}>
-          <NavigationBar isSignedIn={isSignUp} />
-          <AppSidebar />
-          <main className="w-screen">
-            <AppHeader />
-            <Outlet />
-            <Toaster richColors />
-          </main>
-        </SidebarProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <SidebarProvider defaultOpen={true} name={'primary_sidebar'}>
+            <NavigationBar isSignedIn={isSignUp} />
+            <AppSidebar />
+            <main className="w-screen">
+              <AppHeader />
+              <Outlet />
+              <Toaster richColors />
+            </main>
+          </SidebarProvider>
+        </ThemeProvider>
       </ProjectProvider>
     );
   }

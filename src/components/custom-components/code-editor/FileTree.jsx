@@ -9,20 +9,12 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from '../../ui/sidebar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-
 import {
   ContextMenu,
   ContextMenuContent,
@@ -35,7 +27,6 @@ import {
   ChevronRight,
   FileCode,
   FolderCode,
-  FolderPlus,
   Search,
   X,
 } from 'lucide-react';
@@ -44,18 +35,16 @@ import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
-import { moveSubmission } from '@/api';
+import { deleteSubmission, moveSubmission } from '@/api';
 import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import NewFolderDialog from '@/components/custom-components/NewFolderDialog';
-import { DeleteSubmissionAlert } from '../DeleteSubmissionAlert';
 
 import { useParams } from 'react-router';
-import { ContextMenuLabel } from '@radix-ui/react-context-menu';
 
 export default function FileTree({
   tree,
   onFileSelectFromFileTree,
-  refetchFileTree,
+  refetchSubmissions,
   onFileRenamed,
 }) {
   const { projectId } = useParams();
@@ -65,6 +54,7 @@ export default function FileTree({
     loadFoldersFromBackend,
   } = useProject();
   const { user } = useAuth();
+
   const [treeKey, setTreeKey] = useState(0); // For forcing re-render
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -293,8 +283,8 @@ export default function FileTree({
           `Folder moved to root${filesToMove.length > 0 ? ` with ${filesToMove.length} file(s)` : ''}`,
         );
 
-        if (refetchFileTree) {
-          await refetchFileTree();
+        if (refetchSubmissions) {
+          await refetchSubmissions();
         }
       } else if (draggedType === 'file') {
         // Move file to root level
@@ -309,8 +299,8 @@ export default function FileTree({
           console.log(`✅ Backend synced: File moved to root as ${fileName}`);
           toast.success('File moved to root');
 
-          if (refetchFileTree) {
-            await refetchFileTree();
+          if (refetchSubmissions) {
+            await refetchSubmissions();
           }
         } else {
           toast.error('Unable to move file - missing user or file ID');
@@ -374,7 +364,7 @@ export default function FileTree({
 
   return (
     <div
-      className="flex flex-col text-sm h-[90vh] relative"
+      className="flex flex-col text-sm h-full relative"
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
@@ -510,7 +500,7 @@ export default function FileTree({
                       persistFolders={persistFolders}
                       persistedFolders={persistedFolders}
                       user={user}
-                      refetchFileTree={refetchFileTree}
+                      refetchSubmissions={refetchSubmissions}
                       fullTree={mergedTree}
                       onFileRenamed={onFileRenamed}
                     />
@@ -521,7 +511,7 @@ export default function FileTree({
                       onFileSelect={onFileSelectFromFileTree}
                       projectId={projectId}
                       user={user}
-                      refetchFileTree={refetchFileTree}
+                      refetchSubmissions={refetchSubmissions}
                       onFileRenamed={onFileRenamed}
                     />
                   ),
@@ -544,7 +534,7 @@ function Folder({
   persistFolders,
   persistedFolders,
   user,
-  refetchFileTree,
+  refetchSubmissions,
   fullTree,
   onFileRenamed,
 }) {
@@ -732,8 +722,8 @@ function Folder({
         );
 
         // Refetch file tree to update UI
-        if (refetchFileTree) {
-          await refetchFileTree();
+        if (refetchSubmissions) {
+          await refetchSubmissions();
         }
       } else if (draggedType === 'file') {
         // Move file into this folder - need to update submission filename
@@ -750,8 +740,8 @@ function Folder({
           toast.success('File moved');
 
           // Refetch file tree to update UI
-          if (refetchFileTree) {
-            await refetchFileTree();
+          if (refetchSubmissions) {
+            await refetchSubmissions();
           }
         } else {
           toast.error('Unable to move file - missing user or file ID');
@@ -763,6 +753,57 @@ function Folder({
     }
   };
 
+  const handleDeleteFolder = async () => {
+    if (!user) return;
+
+    // Find all files in this folder from the tree
+    const filesToMove = [];
+    const findFilesInFolder = (node, currentFolderPath) => {
+      if (!node || !node.children) return;
+      Object.entries(node.children).forEach(([key, value]) => {
+        if (value.type === 'file') {
+          const filePath = value.path || `${currentFolderPath}/${value.name}`;
+          filesToMove.push({
+            id: value.id,
+            oldPath: filePath,
+            fileName: value.name,
+          });
+        } else if (value.type === 'folder') {
+          const folderSubPath =
+            value.path || `${currentFolderPath}/${value.name}`;
+          findFilesInFolder(value, folderSubPath);
+        }
+      });
+    };
+
+    findFilesInFolder(folder, folder.path);
+
+    if (filesToMove.length > 0) {
+      console.log(
+        `🔄 Deleting ${filesToMove.length} file(s) after from the folder ${folder}`,
+      );
+      await Promise.all(
+        filesToMove.map(async (file) => {
+          let relativePath;
+          if (file.oldPath.startsWith(currentPath + '/')) {
+            relativePath = file.oldPath.substring(currentPath.length + 1);
+          } else {
+            relativePath = file.fileName;
+          }
+          const newFilePath = `${newPath}/${relativePath}`;
+
+          try {
+            console.log(`about to delete with: ${user.uid}, ${file.id}`);
+            await deleteSubmission(user.uid, file.id);
+            console.log(`Successfully delete submission: ${file.id}`);
+          } catch (error) {
+            console.error('Error deleting submission:', error);
+            toast.error('Failed to delete the submission. Try again later.');
+          }
+        }),
+      );
+    }
+  };
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
@@ -865,7 +906,7 @@ function Folder({
                             persistFolders(updatedFolders);
 
                             // Move all files within this folder
-                            if (user && refetchFileTree) {
+                            if (user && refetchSubmissions) {
                               // Find all files in this folder from the tree
                               const filesToMove = [];
                               const findFilesInFolder = (
@@ -934,7 +975,7 @@ function Folder({
                                 );
                               }
 
-                              await refetchFileTree();
+                              await refetchSubmissions();
                             }
 
                             setRenaming(false);
@@ -966,6 +1007,12 @@ function Folder({
                     Rename Folder
                   </button>
                 </ContextMenuItem>
+                <ContextMenuItem
+                  className="text-destructive"
+                  onClick={handleDeleteFolder}
+                >
+                  Delete Folder
+                </ContextMenuItem>
               </ContextMenuContent>
             </div>
           </CollapsibleTrigger>
@@ -984,7 +1031,7 @@ function Folder({
                     persistFolders={persistFolders}
                     persistedFolders={persistedFolders}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     fullTree={fullTree}
                     onFileRenamed={onFileRenamed}
                   />
@@ -995,7 +1042,7 @@ function Folder({
                     onFileSelect={onFileSelect}
                     projectId={projectId}
                     user={user}
-                    refetchFileTree={refetchFileTree}
+                    refetchSubmissions={refetchSubmissions}
                     onFileRenamed={onFileRenamed}
                   />
                 )}
@@ -1013,7 +1060,7 @@ function File({
   onFileSelect,
   projectId,
   user,
-  refetchFileTree,
+  refetchSubmissions,
   onFileRenamed,
 }) {
   const [renaming, setRenaming] = useState(false);
@@ -1061,8 +1108,8 @@ function File({
       setRenaming(false);
 
       // Refetch file tree to update UI
-      if (refetchFileTree) {
-        await refetchFileTree();
+      if (refetchSubmissions) {
+        await refetchSubmissions();
       }
     } catch (err) {
       console.error('Failed to rename file', err);
@@ -1088,6 +1135,21 @@ function File({
     e.dataTransfer.setData('type', 'file');
     e.dataTransfer.setData('path', file.path || file.name);
     e.dataTransfer.setData('fileId', file.id);
+  };
+
+  const handleDeleteSubmission = async () => {
+    if (!user || !file.id) return;
+
+    try {
+      console.log(`about to delete with: ${user.uid}, ${file.id}`);
+      await deleteSubmission(user.uid, file.id);
+      console.log(`Successfully delete submission: ${file.id}`);
+      toast.success('Sucessfully deleted file');
+      // Navigate();
+    } catch (error) {
+      console.error('Error deleting submission:', error);
+      toast.error('Failed to delete the submission. Try again later.');
+    }
   };
 
   return (
@@ -1122,8 +1184,11 @@ function File({
           <ContextMenuItem onClick={() => setRenaming(true)}>
             Rename
           </ContextMenuItem>
-          <ContextMenuItem>
-            <DeleteSubmissionAlert submission={file} />
+          <ContextMenuItem
+            className="text-destructive"
+            onClick={handleDeleteSubmission}
+          >
+            Delete Submission
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

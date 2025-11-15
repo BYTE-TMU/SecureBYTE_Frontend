@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router';
 import './index.css';
 import App from './App.jsx';
 import DashboardPage from './components/pages/DashboardPage';
-import CodeEditorPage from './components/pages/CodeEditorPage';
 import IndividualProjectPage from './components/pages/IndividualProjectPage';
 import { AuthProvider } from './hooks/auth/AuthContext';
 import AuthLayout from './components/layouts/AuthLayout';
@@ -31,10 +30,6 @@ createRoot(document.getElementById('root')).render(
         {/* Protected routes for authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route element={<App />}>
-            <Route
-              path="/code-editor"
-              element={<CodeEditorPage className="overflow-y-hidden" />}
-            />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/settings" element={<SettingsLayout />}>
               <Route path="account" element={<AccountSection />} />

@@ -19,7 +19,6 @@ import { listGithubRepos, linkGithubRepo, importGithubRepo } from '@/api';
 import { useGetFileStructure } from '@/hooks/useGetFileStructure';
 import ResizableCodeEditor from '../custom-components/code-editor/ResizableCodeEditor';
 import GenerateSecurityReviewSheet from '../custom-components/GenerateSecurityReviewSheet';
-import { NewSubmissionDialog } from '../custom-components/NewSubmissionDialog';
 import LoadingPage from './LoadingPage';
 
 export default function IndividualProjectPage() {

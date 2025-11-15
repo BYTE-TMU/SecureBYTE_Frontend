@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { FileUploadInput } from './FileUploadInput';
 import { toast } from 'sonner';
 
-export function NewSubmissionDialog({ projectId, variant, refetchSubmissions, refetchFileTree, }) {
+export function NewSubmissionDialog({ projectId, variant, refetchSubmissions,}) {
   const { user } = useAuth();
   const { setFilesForProject } = useProject();
   const [error, setError] = useState('');
@@ -98,17 +98,12 @@ export function NewSubmissionDialog({ projectId, variant, refetchSubmissions, re
           });
         })
       );
-
-      setError('');
-
-      // trigger loading state so parent shows LoadingPage
+      
+      toast.success('Uploaded file(s) successfully');
 
       // refresh submissions (set submissionsLoading to true)
-      if (refetchSubmissions) await refetchSubmissions();
-      //refresh file tree so the new file appears in the sidebar
-      if (refetchFileTree) await refetchFileTree();
+      if (refetchSubmissions) await refetchSubmissions();  
 
-      toast('Uploaded file(s) successfully', { type: 'success' });
     } catch (error) {
       //TODO: figure out how to display a toast here because no point in sharing error messages directly with users as it wont help them unless there is a specific action they can take - [JOHAN]
       console.error('Error creating project:', error);

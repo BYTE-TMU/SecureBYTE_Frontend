@@ -5,7 +5,7 @@ import Breadcrumbs from './Breadcrumbs';
 
 export default function AppHeader() {
   return (
-    <header className="w-full flex h-10 items-center gap-2 border-b mt-16">
+    <header className="w-full flex h-10 items-center gap-2 border-b">
       <div className="flex items-center gap-1 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator

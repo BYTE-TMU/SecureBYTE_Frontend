@@ -8,13 +8,11 @@ export default function ReviewModal({
   isSecReviewLoading,
 }) {
   return (
-    <div className="w-full ">
-      <ReviewTabs
-        activeFile={activeFile}
-        securityReview={securityReview}
-        projectId={projectId}
-        isSecReviewLoading={isSecReviewLoading}
-      />
-    </div>
+    <ReviewTabs
+      activeFile={activeFile}
+      securityReview={securityReview}
+      projectId={projectId}
+      isSecReviewLoading={isSecReviewLoading}
+    />
   );
 }

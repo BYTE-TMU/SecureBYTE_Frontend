@@ -71,12 +71,12 @@ export default function NavUser({ profilePic }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <>
                   <Github className="h-4 w-4" />
                   <span>Integrate GitHub</span>
                 </>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
 
               <DropdownMenuItem>
                 <NavLink

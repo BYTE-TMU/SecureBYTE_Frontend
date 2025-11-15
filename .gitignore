@@ -27,3 +27,11 @@ dist-ssr
 *.sw?
 
 .cursorrules
+
+# Python cache (for backend)
+__pycache__/
+*.pyc
+
+# Firebase private credentials
+firebase.json
+firebase-*.json

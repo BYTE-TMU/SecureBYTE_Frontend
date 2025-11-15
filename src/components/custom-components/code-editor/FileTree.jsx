@@ -86,6 +86,7 @@ export default function FileTree({
     createFolderInProject,
     renameFolderInProject,
     loadFoldersFromBackend,
+    deleteFolderInProject,
   } = useProject();
   const { user } = useAuth();
 
@@ -416,7 +417,7 @@ export default function FileTree({
           <h2 className="font-medium">Project Name</h2>
           <div className="flex flex-row items-center gap-2">
             {/* <FilePlus className="size-4" /> */}
-            <NewSubmissionDialog variant={'icon'} projectId={projectId} />
+            <NewSubmissionDialog variant={'icon'} projectId={projectId} refetchSubmissions={refetchSubmissions}/>
             <NewFolderDialog
               variant="icon"
               onCreate={async (folderName) => {
@@ -537,6 +538,7 @@ export default function FileTree({
                       refetchSubmissions={refetchSubmissions}
                       fullTree={mergedTree}
                       onFileRenamed={onFileRenamed}
+                      deleteFolderInProject={deleteFolderInProject}
                     />
                   ) : (
                     <File
@@ -572,6 +574,7 @@ function Folder({
   refetchSubmissions,
   fullTree,
   onFileRenamed,
+  deleteFolderInProject,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -592,7 +595,7 @@ function Folder({
           inputRef.current.focus();
           inputRef.current.select();
         }
-      }, 100); // Increased delay
+      }, 60000); // Increased delay
     } else {
       isRenamingRef.current = false;
     }
@@ -794,9 +797,10 @@ function Folder({
 
   const handleDeleteFolder = async () => {
     if (!user) return;
-
-    // Find all files in this folder from the tree
+    
+    // Find and delete all files in this folder and subfolders
     const filesToMove = [];
+    // 1. Collect all files in this folder + subfolders
     const findFilesInFolder = (node, currentFolderPath) => {
       if (!node || !node.children) return;
       Object.entries(node.children).forEach(([key, value]) => {
@@ -816,13 +820,14 @@ function Folder({
     };
 
     findFilesInFolder(folder, folder.path);
-
+    // 2. Delete all files in backend
     if (filesToMove.length > 0) {
       console.log(
         `🔄 Deleting ${filesToMove.length} file(s) after from the folder ${folder}`,
       );
       await Promise.all(
         filesToMove.map(async (file) => {
+          {/*
           let relativePath;
           if (file.oldPath.startsWith(currentPath + '/')) {
             relativePath = file.oldPath.substring(currentPath.length + 1);
@@ -830,18 +835,37 @@ function Folder({
             relativePath = file.fileName;
           }
           const newFilePath = `${newPath}/${relativePath}`;
-
+          */}
           try {
-            console.log(`about to delete with: ${user.uid}, ${file.id}`);
+            console.log(`Deleting file: ${user.uid}, ${file.id}`);
             await deleteSubmission(user.uid, file.id);
-            console.log(`Successfully delete submission: ${file.id}`);
+            console.log(`Successfully deleted file: ${file.id}`);
           } catch (error) {
-            console.error('Error deleting submission:', error);
-            toast.error('Failed to delete the submission. Try again later.');
+            console.error('Error deleting file:', error);
+            toast.error('Failed to delete file. Try again later.');
           }
         }),
       );
     }
+     // 3. Delete folder metadata from backend (includes subfolders)
+     await deleteFolderInProject({ projectId, folderPath });
+
+    // 4. Remove folder from local persistedFolders/sessionStorage
+    const updatedFolders = {};
+    Object.keys(persistedFolders).forEach((path) => {
+      if (!path.startsWith(folderPath)) {
+        updatedFolders[path] = persistedFolders[path];
+      }
+    });
+
+    persistFolders(updatedFolders);
+
+    toast.success('Folder deleted successfully');
+
+    if (refetchSubmissions) {
+      await refetchSubmissions();
+    }
+
   };
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
@@ -1104,6 +1128,7 @@ function Folder({
                     refetchSubmissions={refetchSubmissions}
                     fullTree={fullTree}
                     onFileRenamed={onFileRenamed}
+                    deleteFolderInProject={deleteFolderInProject}
                   />
                 ) : (
                   <File
@@ -1232,7 +1257,7 @@ function File({
         if (isRenamingRef.current) {
           handleRename();
         }
-      }, 50);
+      }, 60000);
     }
   };
 
@@ -1252,7 +1277,11 @@ function File({
       await deleteSubmission(user.uid, file.id);
       console.log(`Successfully delete submission: ${file.id}`);
       toast.success('Sucessfully deleted file');
-      // Navigate();
+
+      // refetch → updates submissions & tree
+      if (refetchSubmissions) {
+        await refetchSubmissions();  
+      }
     } catch (error) {
       console.error('Error deleting submission:', error);
       toast.error('Failed to delete the submission. Try again later.');

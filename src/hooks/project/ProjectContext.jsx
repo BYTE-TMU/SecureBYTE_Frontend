@@ -309,6 +309,43 @@ export function ProjectProvider({ children, autoFetch = false }) {
     }
   };
 
+  // Delete folder (and its subfolders) from project metadata on the backend
+  const deleteFolderInProject = async ({ projectId, folderPath }) => {
+    try {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Get current project
+      const projectResponse = await getProject(user.uid, projectId);
+      const project = projectResponse.data;
+
+      // Existing folders array from backend
+      const existingFolders = project.folders || [];
+
+      // Remove this folder AND any of its child paths
+      const updatedFolders = existingFolders.filter(
+        (folder) =>
+          folder !== folderPath && !folder.startsWith(folderPath + '/'),
+      );
+
+      // Persist to backend
+      await updateProject(user.uid, projectId, {
+        ...project,
+        folders: updatedFolders,
+      });
+
+      console.log(
+        `🗑️ Folder deleted in backend: ${folderPath} (and subfolders removed)`,
+      );
+
+      return { ok: true };
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
+      throw new Error('Failed to delete folder');
+    }
+  };
+
   const getFilesFromProject = (projectId) => {
     return projectFiles[projectId] || [];
   };
@@ -387,6 +424,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         deleteProjectInBulk,
         createSubmissionForProject,
         saveProjectToBackend,
+        deleteFolderInProject,
       }}
     >
       {children}

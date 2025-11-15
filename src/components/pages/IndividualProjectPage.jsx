@@ -158,7 +158,7 @@ export default function IndividualProjectPage() {
   };
 
   return (
-    <main className="w-full min-h-screen flex flex-col p-5 overflow-hidden">
+    <main className="w-full min-h-screen flex flex-col p-5 overflow-hidden pr-10">
       <h1 className="font-bold text-4xl text-secure-blue">{`Project: ${projectName}`}</h1>
       <div className="my-3 flex gap-2">
         {hasGithubToken && (

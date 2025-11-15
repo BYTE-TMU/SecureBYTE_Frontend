@@ -31,7 +31,6 @@ import {
   X,
 } from 'lucide-react';
 
-import RenameSubmissionDialog from './file-tree/RenameSubmissionDialog';
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/project/ProjectContext';
 import { useAuth } from '@/hooks/auth/AuthContext';
@@ -40,43 +39,10 @@ import { NewSubmissionDialog } from '../NewSubmissionDialog';
 import NewFolderDialog from '@/components/custom-components/NewFolderDialog';
 
 import { useParams } from 'react-router';
+import { createRenameHandler } from '../../../hooks/createRenameHandler';
+import { useFolderSync } from '@/hooks/useFolderSync';
 
-
-// Helper function to collect all folder names from tree and persisted folders (excluding current folder)
-const collectAllFolderNames = (node, persistedFolders, currentFolderPath) => {
-  const names = [];
-  
-  // Get folder names from tree
-  const traverse = (n) => {
-    if (!n || !n.children) return;
-    
-    Object.values(n.children).forEach((child) => {
-      if (child.type === 'folder') {
-        const folderPath = child.path || child.name;
-        if (folderPath !== currentFolderPath) {
-          names.push(child.name);
-        }
-        traverse(child);
-      }
-    });
-  };
-  
-  traverse(node);
-  
-  // Also get folder names from persisted folders
-  Object.keys(persistedFolders).forEach((path) => {
-    if (path !== currentFolderPath) {
-      const folderName = path.split('/').pop();
-      if (!names.includes(folderName)) {
-        names.push(folderName);
-      }
-    }
-  });
-  
-  return names;
-};
-
-export default function FileTree({
+export default function FileTree2({
   tree,
   projectName,
   onFileSelectFromFileTree,
@@ -84,6 +50,8 @@ export default function FileTree({
   onFileRenamed,
 }) {
   const { projectId } = useParams();
+  const { queueFolderOperation, getPendingCount, isPaused, resumeSync } =
+    useFolderSync(projectId);
   const {
     createFolderInProject,
     renameFolderInProject,
@@ -97,7 +65,7 @@ export default function FileTree({
 
   const [persistedFolders, setPersistedFolders] = useState(() => {
     try {
-      const raw = sessionStorage.getItem(
+      const raw = localStorage.getItem(
         `secureBYTE_custom_folders_${projectId}`,
       );
       return raw ? JSON.parse(raw) : {};
@@ -106,7 +74,6 @@ export default function FileTree({
       return {};
     }
   });
-
   // Load folders from backend on mount
   useEffect(() => {
     if (projectId && loadFoldersFromBackend) {
@@ -119,10 +86,9 @@ export default function FileTree({
     }
   }, [projectId, loadFoldersFromBackend]);
 
-  // Helper to update persistedFolders state and sessionStorage
   const persistFolders = (next) => {
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         `secureBYTE_custom_folders_${projectId}`,
         JSON.stringify(next),
       );
@@ -213,10 +179,11 @@ export default function FileTree({
           newPath: folderName,
         });
 
-        // Update sessionStorage - move folder and all children to root
-        const raw = sessionStorage.getItem(
+        // Update localStoage - move folder and all children to root
+        const raw = localStorage.getItem(
           `secureBYTE_custom_folders_${projectId}`,
         );
+
         const persisted = raw ? JSON.parse(raw) : {};
 
         const updatedFolders = {};
@@ -399,13 +366,34 @@ export default function FileTree({
   };
 
   return (
-
     <div
       className="flex flex-col text-sm h-full relative"
       onDragOver={handleRootDragOver}
       onDragLeave={handleRootDragLeave}
       onDrop={handleRootDrop}
     >
+      {/* Show pending sync indicator */}
+      {getPendingCount() > 0 && (
+        <div className="px-2 py-1 bg-muted/50 border-b border-border">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">
+              {isPaused ? (
+                <>⏸️ Sync paused (rate limit) - {getPendingCount()} pending</>
+              ) : (
+                <>🔄 Syncing {getPendingCount()} operation(s)...</>
+              )}
+            </span>
+            {isPaused && (
+              <button
+                onClick={resumeSync}
+                className="text-primary hover:underline"
+              >
+                Resume now
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {/* Root drop indicator */}
       {isRootDragOver && (
         <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-primary bg-accent/10 z-10 flex items-center justify-center">
@@ -418,7 +406,7 @@ export default function FileTree({
         <div className="flex flex-row items-center justify-between">
           <h2 className="font-medium truncate" title={projectName}>
             {projectName || 'Project Name'}
-          </h2>          
+          </h2>
           <div className="flex flex-row items-center gap-2">
             {/* <FilePlus className="size-4" /> */}
             <NewSubmissionDialog variant={'icon'} projectId={projectId} />
@@ -533,6 +521,7 @@ export default function FileTree({
                     <Folder
                       folder={value}
                       key={key}
+                      queueFolderOperation={queueFolderOperation}
                       onFileSelect={onFileSelectFromFileTree}
                       projectId={projectId}
                       renameFolderInProject={renameFolderInProject}
@@ -567,6 +556,7 @@ export default function FileTree({
 
 function Folder({
   folder,
+  queueFolderOperation,
   index,
   onFileSelect,
   projectId,
@@ -644,9 +634,10 @@ function Folder({
         const newPath = `${targetFolderPath}/${folderName}`;
 
         // Check if folder with same name already exists in target
-        const rawStorage = sessionStorage.getItem(
+        const rawStorage = localStorage.getItem(
           `secureBYTE_custom_folders_${projectId}`,
         );
+
         const existingFolders = rawStorage ? JSON.parse(rawStorage) : {};
         if (existingFolders[newPath]) {
           toast.error(
@@ -800,14 +791,16 @@ function Folder({
   const handleDeleteFolder = async () => {
     if (!user) return;
 
+    const currentFolderPath = folder.path || folder.name; // Define the path
+
     // Find all files in this folder from the tree
-    const filesToMove = [];
+    const filesToDelete = []; // Changed variable name for clarity
     const findFilesInFolder = (node, currentFolderPath) => {
       if (!node || !node.children) return;
       Object.entries(node.children).forEach(([key, value]) => {
         if (value.type === 'file') {
           const filePath = value.path || `${currentFolderPath}/${value.name}`;
-          filesToMove.push({
+          filesToDelete.push({
             id: value.id,
             oldPath: filePath,
             fileName: value.name,
@@ -820,267 +813,195 @@ function Folder({
       });
     };
 
-    findFilesInFolder(folder, folder.path);
+    findFilesInFolder(folder, currentFolderPath);
 
-    if (filesToMove.length > 0) {
+    if (filesToDelete.length > 0) {
       console.log(
-        `🔄 Deleting ${filesToMove.length} file(s) after from the folder ${folder}`,
+        `🔄 Deleting ${filesToDelete.length} file(s) from the folder ${currentFolderPath}`,
       );
-      await Promise.all(
-        filesToMove.map(async (file) => {
-          let relativePath;
-          if (file.oldPath.startsWith(currentPath + '/')) {
-            relativePath = file.oldPath.substring(currentPath.length + 1);
-          } else {
-            relativePath = file.fileName;
-          }
-          const newFilePath = `${newPath}/${relativePath}`;
 
-          try {
-            console.log(`about to delete with: ${user.uid}, ${file.id}`);
-            await deleteSubmission(user.uid, file.id);
-            console.log(`Successfully delete submission: ${file.id}`);
-          } catch (error) {
-            console.error('Error deleting submission:', error);
-            toast.error('Failed to delete the submission. Try again later.');
+      try {
+        await Promise.all(
+          filesToDelete.map(async (file) => {
+            try {
+              console.log(`about to delete with: ${user.uid}, ${file.id}`);
+              await deleteSubmission(user.uid, file.id);
+              console.log(`Successfully deleted submission: ${file.id}`);
+            } catch (error) {
+              console.error('Error deleting submission:', error);
+              throw error; // Re-throw to be caught by outer try-catch
+            }
+          }),
+        );
+
+        toast.success(`Deleted ${filesToDelete.length} file(s) from folder`);
+
+        // Optionally: Remove the folder from localStorage
+        const raw = localStorage.getItem(
+          `secureBYTE_custom_folders_${projectId}`,
+        );
+        const persisted = raw ? JSON.parse(raw) : {};
+        const updatedFolders = {};
+
+        // Remove the deleted folder and its children
+        Object.keys(persisted).forEach((path) => {
+          if (
+            path !== currentFolderPath &&
+            !path.startsWith(currentFolderPath + '/')
+          ) {
+            updatedFolders[path] = persisted[path];
           }
-        }),
+        });
+
+        persistFolders(updatedFolders);
+
+        // Refetch to update UI
+        if (refetchSubmissions) {
+          await refetchSubmissions();
+        }
+      } catch (error) {
+        console.error('Error deleting files from folder:', error);
+        toast.error('Failed to delete some files. Try again later.');
+      }
+    } else {
+      // No files to delete, just remove the empty folder
+      const raw = localStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
       );
+      const persisted = raw ? JSON.parse(raw) : {};
+      const updatedFolders = {};
+
+      Object.keys(persisted).forEach((path) => {
+        if (
+          path !== currentFolderPath &&
+          !path.startsWith(currentFolderPath + '/')
+        ) {
+          updatedFolders[path] = persisted[path];
+        }
+      });
+
+      persistFolders(updatedFolders);
+      toast.success('Folder deleted');
+
+      if (refetchSubmissions) {
+        await refetchSubmissions();
+      }
     }
   };
+  const handleRename = createRenameHandler({
+    type: 'folder',
+    currentItem: folder,
+    renameValue,
+    isRenamingRef,
+    setRenaming,
+    setRenameValue,
+    user,
+    projectId,
+    fullTree,
+    persistedFolders,
+    persistFolders,
+    renameFolderInProject,
+    refetchSubmissions,
+    queueFolderOperation,
+  });
+
   return (
     <Collapsible key={index} defaultOpen={false} className="group/collapsible">
       <SidebarMenuItem>
         <ContextMenu>
-          <CollapsibleTrigger asChild onClick={() => setIsOpen(!isOpen)}>
-            <div
-              draggable
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={isDragOver ? 'bg-blue-100 dark:bg-blue-900' : ''}
-            >
-              <ContextMenuTrigger>
-                <SidebarMenuButton className="overflow-hidden">
-                  {isOpen ? (
-                    <ChevronDown className="stroke-secure-orange flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="stroke-secure-orange flex-shrink-0" />
-                  )}
-                  <FolderCode className="size-3 flex-shrink-0" />
+          <ContextMenuTrigger asChild>
+            <div>
+              <CollapsibleTrigger
+                asChild
+                disabled={renaming}
+                onClick={(e) => {
+                  if (renaming || isRenamingRef.current) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  setIsOpen(!isOpen);
+                }}
+              >
+                <div
+                  draggable={!renaming}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={(e) => {
+                    if (renaming || isRenamingRef.current) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                  className={isDragOver ? 'bg-blue-100 dark:bg-blue-900' : ''}
+                >
+                  <SidebarMenuButton className="overflow-hidden">
+                    {isOpen ? (
+                      <ChevronDown className="stroke-secure-orange flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="stroke-secure-orange flex-shrink-0" />
+                    )}
+                    <FolderCode className="size-3 flex-shrink-0" />
 
-                  {renaming ? (
-                    <input
-                      ref={inputRef}
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent folder toggle
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation(); // Prevent folder toggle
-                      }}
-                      onBlur={(e) => {
-                        // Handle blur after a delay to allow rename to complete
-                        if (isRenamingRef.current) {
-                          setTimeout(() => {
-                            if (isRenamingRef.current) {
-                              setRenaming(false);
-                              setRenameValue(folderName); // Reset to original name
-                            }
-                          }, 100);
-                        }
-                      }}
-                      onKeyDown={async (e) => {
-                        e.stopPropagation(); // Prevent event bubbling
-
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-
-                          const currentPath = folder.path || folder.name;
-                          const pathParts = currentPath.split('/');
-                          const parentPath = pathParts.slice(0, -1).join('/');
-                          const newPath = parentPath
-                            ? `${parentPath}/${renameValue}`
-                            : renameValue;
-
-                          // Validate: Check if new name is empty
-                          if (!renameValue.trim()) {
-                            toast.error('Folder name cannot be empty');
-                            setRenaming(false);
-                            setRenameValue(folderName);
-                            return;
-                          }
-
-                          // Validate: Cannot rename to any ancestor folder's name
-                          const ancestorNames = currentPath
-                            .split('/')
-                            .slice(0, -1); // All parts except current folder
-                          if (ancestorNames.includes(renameValue)) {
-                            toast.error(
-                              'Cannot rename to an ancestor folder name',
-                            );
-                            return;
-                          }
-
-                          // Validate: Check if another folder with this name already exists anywhere in the project
-                          const raw = sessionStorage.getItem(
-                            `secureBYTE_custom_folders_${projectId}`,
-                          );
-                          const persisted = raw ? JSON.parse(raw) : {};
-                          const allFolderNames = collectAllFolderNames(
-                            fullTree,
-                            persisted,
-                            currentPath,
-                          );
-                          if (allFolderNames.includes(renameValue)) {
-                            toast.error(
-                              'A folder with this name already exists in this project',
-                            );
-                            return;
-                          }
-
-                          try {
-                            await renameFolderInProject({
-                              projectId,
-                              oldPath: currentPath,
-                              newPath: newPath,
-                            });
-
-                            // Update session storage for this folder and all child folders
-                            const updatedFolders = {};
-                            Object.keys(persisted).forEach((path) => {
-                              if (path === currentPath) {
-                                // This is the folder being renamed
-                                updatedFolders[newPath] = {
-                                  ...persisted[path],
-                                  path: newPath,
-                                };
-                              } else if (path.startsWith(currentPath + '/')) {
-                                // This is a child folder - update its path too
-                                const childSuffix = path.substring(
-                                  currentPath.length,
-                                );
-                                const newChildPath = newPath + childSuffix;
-                                updatedFolders[newChildPath] = {
-                                  ...persisted[path],
-                                  path: newChildPath,
-                                };
-                              } else {
-                                // Keep other folders as-is
-                                updatedFolders[path] = persisted[path];
-                              }
-                            });
-
-                            // Note: do NOT persist updatedFolders yet — wait for backend refetch
-                            // Move all files within this folder
-                            if (user && refetchSubmissions) {
-                              // Find all files in this folder from the tree
-                              const filesToMove = [];
-                              const findFilesInFolder = (
-                                node,
-                                currentFolderPath,
-                              ) => {
-                                if (!node || !node.children) return;
-                                Object.entries(node.children).forEach(
-                                  ([key, value]) => {
-                                    if (value.type === 'file') {
-                                      const filePath =
-                                        value.path ||
-                                        `${currentFolderPath}/${value.name}`;
-                                      filesToMove.push({
-                                        id: value.id,
-                                        oldPath: filePath,
-                                        fileName: value.name,
-                                      });
-                                    } else if (value.type === 'folder') {
-                                      const folderSubPath =
-                                        value.path ||
-                                        `${currentFolderPath}/${value.name}`;
-                                      findFilesInFolder(value, folderSubPath);
-                                    }
-                                  },
-                                );
-                              };
-
-                              findFilesInFolder(folder, currentPath);
-
-                              // Update all file paths in the backend
-                              if (filesToMove.length > 0) {
-                                console.log(
-                                  `🔄 Moving ${filesToMove.length} file(s) after folder rename...`,
-                                );
-                                // Move files sequentially with a small delay to avoid rate limiting
-                                for (const file of filesToMove) {
-                                  let relativePath;
-                                  if (
-                                    file.oldPath.startsWith(currentPath + '/')
-                                  ) {
-                                    relativePath = file.oldPath.substring(
-                                      currentPath.length + 1,
-                                    );
-                                  } else {
-                                    relativePath = file.fileName;
-                                  }
-                                  const newFilePath = `${newPath}/${relativePath}`;
-
-                                  try {
-                                    await moveSubmission(
-                                      user.uid,
-                                      file.id,
-                                      newFilePath,
-                                    );
-                                    console.log(
-                                      `✅ Backend synced: ${file.oldPath} → ${newFilePath}`,
-                                    );
-                                    // Small delay to avoid rate limiting
-                                    await new Promise((resolve) =>
-                                      setTimeout(resolve, 100),
-                                    );
-                                  } catch (err) {
-                                    console.error(
-                                      `❌ Failed to move file ${file.oldPath} to ${newFilePath}`,
-                                      err,
-                                    );
-                                  }
+                    {renaming ? (
+                      <input
+                        ref={inputRef}
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onBlur={(e) => {
+                          if (isRenamingRef.current) {
+                            setTimeout(() => {
+                              if (isRenamingRef.current) {
+                                if (
+                                  renameValue.trim() &&
+                                  renameValue !== folderName
+                                ) {
+                                  handleRename();
+                                } else {
+                                  setRenaming(false);
+                                  setRenameValue(folderName);
                                 }
                               }
+                            }, 100);
+                          }
+                        }}
+                        onKeyDown={async (e) => {
+                          e.stopPropagation();
 
-                              await refetchSubmissions();
-                              // Persist updated folders only after backend confirms changes
-                              persistFolders(updatedFolders);
-                            }
-
-                            setRenaming(false);
-                            toast.success('Folder renamed');
-                          } catch (err) {
-                            console.error('Rename failed', err);
-                            toast.error('Failed to rename folder: A folder with this name already exists');
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            await handleRename();
+                          } else if (e.key === 'Escape') {
+                            e.preventDefault();
                             setRenaming(false);
                             setRenameValue(folderName);
                           }
-                        } else if (e.key === 'Escape') {
-                          e.preventDefault();
-                          setRenaming(false);
-                          setRenameValue(folderName);
-                        }
-                      }}
-                      className="bg-transparent border-b border-gray-400 text-sm mx-2 focus:outline-none focus:border-secure-orange"
-                    />
-                  ) : (
-                    <span className="truncate">{folder.name}</span>
-                  )}
-                </SidebarMenuButton>
-              </ContextMenuTrigger>
+                        }}
+                        className="bg-transparent border-b border-gray-400 text-sm mx-2 focus:outline-none focus:border-secure-orange"
+                      />
+                    ) : (
+                      <span className="truncate">{folder.name}</span>
+                    )}
+                  </SidebarMenuButton>
+                </div>
+              </CollapsibleTrigger>
+
               <ContextMenuContent className="min-w-[200px]">
                 <ContextMenuItem
-                    onClick={() => {
-                    setRenaming(true);
+                  onSelect={(e) => {
+                    setTimeout(() => setRenaming(true), 100);
                   }}
                   className="w-full text-left"
-                  >
-                    Rename Folder
+                >
+                  Rename Folder
                 </ContextMenuItem>
                 <ContextMenuItem
                   className="text-destructive"
@@ -1090,8 +1011,9 @@ function Folder({
                 </ContextMenuItem>
               </ContextMenuContent>
             </div>
-          </CollapsibleTrigger>
+          </ContextMenuTrigger>
         </ContextMenu>
+
         {isOpen &&
           Object.entries(folder.children).map(([key, value]) => (
             <CollapsibleContent key={key}>
@@ -1100,6 +1022,7 @@ function Folder({
                   <Folder
                     folder={value}
                     index={key}
+                    queueFolderOperation={queueFolderOperation}
                     onFileSelect={onFileSelect}
                     projectId={projectId}
                     renameFolderInProject={renameFolderInProject}
@@ -1160,62 +1083,19 @@ function File({
       isRenamingRef.current = false;
     }
   }, [renaming]);
-
-  const handleRename = async () => {
-    // Don't proceed if not actually renaming anymore
-    if (!isRenamingRef.current) return;
-    
-    if (!renameValue.trim() || renameValue === file.name) {
-      setRenaming(false);
-      setRenameValue(file.name);
-      return;
-    }
-
-    // Validate: Check if another file with this name exists in the same folder
-    if (parentFolder && parentFolder.children) {
-      const filesInSameFolder = Object.values(parentFolder.children).filter(
-        (child) => child.type === 'file' && child.id !== file.id
-      );
-      const duplicateFile = filesInSameFolder.find(
-        (f) => f.name === renameValue
-      );
-      if (duplicateFile) {
-        toast.error('A file with this name already exists in this folder');
-        return;
-      }
-    }
-
-    try {
-      // Preserve folder path when renaming
-      const filePath = file.path || file.name;
-      const pathParts = filePath.split('/');
-
-      // Replace just the filename (last part) with the new name
-      pathParts[pathParts.length - 1] = renameValue;
-      const newPath = pathParts.join('/');
-
-      // Update filename via backend API
-      await moveSubmission(user.uid, file.id, newPath);
-
-      // Notify parent component to update open tabs
-      if (onFileRenamed) {
-        onFileRenamed(file, renameValue, newPath);
-      }
-
-      toast.success('File renamed');
-      setRenaming(false);
-
-      // Refetch file tree to update UI
-      if (refetchSubmissions) {
-        await refetchSubmissions();
-      }
-    } catch (err) {
-      console.error('Failed to rename file', err);
-      toast.error('Failed to rename file');
-      setRenameValue(file.name);
-      setRenaming(false);
-    }
-  };
+  const handleRename = createRenameHandler({
+    type: 'file',
+    currentItem: file,
+    renameValue,
+    isRenamingRef,
+    setRenaming,
+    setRenameValue,
+    user,
+    projectId,
+    parentFolder,
+    refetchSubmissions,
+    onFileRenamed,
+  });
 
   const handleKeyDown = (e) => {
     e.stopPropagation(); // Prevent event bubbling
@@ -1228,14 +1108,19 @@ function File({
       setRenameValue(file.name);
     }
   };
-  
+
   const handleBlur = (e) => {
-    // Only process blur if we've been renaming for at least 200ms
-    // This prevents immediate blur from the context menu click
+    // Only try to rename if value actually changed
     if (isRenamingRef.current) {
       setTimeout(() => {
         if (isRenamingRef.current) {
-          handleRename();
+          if (renameValue.trim() && renameValue !== file.name) {
+            handleRename();
+          } else {
+            // Just exit rename mode without saving
+            setRenaming(false);
+            setRenameValue(file.name);
+          }
         }
       }, 50);
     }
@@ -1300,9 +1185,8 @@ function File({
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem
-            onSelect={() => {
-              // Delay enabling rename so the context menu finishes closing
-              setTimeout(() => setRenaming(true), 50);
+            onSelect={(e) => {
+              setTimeout(() => setRenaming(true), 100);
             }}
           >
             Rename

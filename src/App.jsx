@@ -94,7 +94,7 @@ function App() {
       <ProjectProvider autoFetch={true}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <SidebarProvider defaultOpen={true} name={'primary_sidebar'}>
-            <NavigationBar isSignedIn={isSignUp} />
+            {/* <NavigationBar isSignedIn={isSignUp} /> */}
             <AppSidebar />
             <main className="w-screen">
               <AppHeader />

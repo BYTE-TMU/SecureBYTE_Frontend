@@ -23,7 +23,7 @@ import LoadingView from '@/components/ui/loading-view';
 export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
   const { user } = useAuth();
   const [error, setError] = useState('');
-  const [testCases, setTestCases] = useState(new Set([]));
+  const [testCases, setTestCases] = useState({});
   const [testAvailable, setTestAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
   const { getUpdatedFiles, clearAllUpdates } = useUpdateFiles();
@@ -140,7 +140,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
         {testAvailable && (
           <div className="space-y-6 h-100 overflow-y-auto w-full overflow-x-hidden">
             {Object.entries(testCases).map(([testKey, testObj], fileIndex) => (
-              <div key={testKey} c>
+              <div key={testKey}>
                 {/* Separator between files */}
                 {fileIndex > 0 && <Separator className="my-6" />}
 
@@ -155,7 +155,7 @@ export default function TestCasesSuggestionPanel({ activeFile, projectId }) {
                         <CardTitle className="text-sm font-semibold">
                           Input:{' '}
                           <span className="font-mono text-primary">
-                            {test['input']}
+                            {JSON.stringify(test['input'], null, 2)}
                           </span>
                         </CardTitle>
                       )}

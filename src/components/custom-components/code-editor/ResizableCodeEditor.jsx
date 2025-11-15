@@ -266,8 +266,8 @@ export default function ResizableCodeEditor({
   };
 
   return (
-    <div className="max-w-screen">
-      <ResizablePanelGroup
+    <div className="w-full grid grid-cols-8 rounded-md border">
+      {/* <ResizablePanelGroup
         direction="horizontal"
         className="border rounded-lg min-w-0"
       >
@@ -323,7 +323,43 @@ export default function ResizableCodeEditor({
             isSecReviewLoading={isSecReviewLoading}
           />
         </ResizablePanel>
-      </ResizablePanelGroup>
+      </ResizablePanelGroup> */}
+
+      <div className="w-full overflow-x-auto col-span-2">
+        <FileTree
+          tree={tree}
+          projectName={projectName}
+          refetchSubmissions={refetchSubmissions}
+          onFileSelectFromFileTree={openNewFile}
+          onFileRenamed={handleFileRenamed}
+        />
+      </div>
+
+      <div className="h-screen col-span-4">
+        <FileTabBar
+          openFiles={openFiles}
+          activeFile={activeFile}
+          onOpenFile={openNewFile}
+          onCloseFile={closeFile}
+          onSwitchTab={switchTab}
+          onReorderTabs={reorderTabs}
+          unsavedFiles={unsavedFiles}
+          onSaveAll={handleSaveAllFiles}
+        />
+        <FileTabContent
+          activeFile={activeFile}
+          isDarkTheme={false}
+          onEditorChange={updateFileContent}
+        />
+      </div>
+      <div className="w-full col-span-2">
+        <ReviewModal
+          activeFile={activeFile}
+          securityReview={securityReview}
+          projectId={projectId}
+          isSecReviewLoading={isSecReviewLoading}
+        />
+      </div>
     </div>
   );
 }

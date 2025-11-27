@@ -8,8 +8,9 @@ import {
   getProject,
   saveProject,
   updateProject,
-  getSubmissions,
+  deleteProjects,
 } from '@/api';
+import { toast } from 'sonner';
 
 const ProjectContext = createContext();
 
@@ -31,10 +32,10 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProjects(user.uid);
-      setProjects(response.data);
+      setProjects(response.data.projects);
       setFetchError('');
     } catch (err) {
-      setFetchError(
+      toast.error(
         `Failed to load projects: ${err.response?.data?.error || err.message}`,
       );
       setProjects([]);
@@ -51,17 +52,15 @@ export function ProjectProvider({ children, autoFetch = false }) {
       setSingleProject(response.data);
       setFetchError('');
     } catch (err) {
-      console.error(
+      toast.error(
         `Failed to load project: ${err.response?.data?.error || err.message}`,
       );
-      throw new Error(`Failed to load project with id ${projectId}`);
     } finally {
       setLoading(false);
     }
   };
 
   const createNewProject = async ({ newProjectName, newProjectDesc }) => {
-    //TODO: in the future, add an error
     console.log('Create a new project from Provider');
     if (!newProjectName.trim() || !user) return;
 
@@ -80,12 +79,13 @@ export function ProjectProvider({ children, autoFetch = false }) {
 
       return response;
     } catch (err) {
-      setLoading(false);
-      throw new Error(
+      toast.error(
         `Failed to create a new project: ${
           err.response?.data?.error || err.message
         }`,
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,14 +101,29 @@ export function ProjectProvider({ children, autoFetch = false }) {
       setLoading(false);
       return true; // Successfully delete a project
     } catch (err) {
-      throw new Error(
+      toast.error(
         `Failed to delete project ${project.projectid}: ${
           err.response?.data?.error || err.message
         }`,
       );
+    } finally {
+      setLoading(false);
     }
   };
 
+  const deleteMultipleProjects = async ({ projectsToDelete }) => {
+    try {
+      setLoading(true);
+      const response = await deleteProjects(user.uid, projectsToDelete);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        `Failed to delete projects ${error.response?.data?.error || error.message}`,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   const deleteProjectInBulk = async ({ projectsToDelete }) => {
     try {
       setLoading(true);
@@ -139,6 +154,8 @@ export function ProjectProvider({ children, autoFetch = false }) {
       throw new Error(
         `Bulk delete project fail: ${err.response?.data?.error || err.message}`,
       );
+    } finally {
+      setLoading(false);
     }
   };
   const parseFileContent = async (file) => {
@@ -187,6 +204,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
       throw error;
     }
   };
+
   const setFilesForProject = ({ projectId, files }) => {
     console.log('Calling setFilesForProject');
     console.log(files);
@@ -194,6 +212,49 @@ export function ProjectProvider({ children, autoFetch = false }) {
       ...prev,
       [projectId]: [...(prev[projectId] || []), ...files],
     }));
+  };
+
+  const createFolderInProject2 = async ({ projectId, folderPath }) => {
+    try {
+      const existingFolders = singleProject.folders || [];
+      if (!existingFolders.includes(folderPath)) {
+        const updatedFolders = [...existingFolders, folderPath];
+        await updateProject(user.uid, projectId, {
+          ...singleProject,
+          folders: updatedFolders,
+        });
+
+        console.log(
+          `✅ Folder "${folderPath}" saved to backend in project metadata`,
+        );
+      }
+
+      // Also update sessionStorage for immediate UI updates (cache)
+      const raw = sessionStorage.getItem(
+        `secureBYTE_custom_folders_${projectId}`,
+      );
+      const persisted = raw ? JSON.parse(raw) : {};
+      persisted[folderPath] = { path: folderPath };
+      sessionStorage.setItem(
+        `secureBYTE_custom_folders_${projectId}`,
+        JSON.stringify(persisted),
+      );
+
+      return { ok: true };
+    } catch (err) {
+      console.error('Failed to create folder:', err);
+
+      // Check if it's a rate limit error
+      if (err.response?.status === 429) {
+        throw new Error(
+          'Server is busy (rate limited). Please wait 5-10 minutes before creating folders. Your folder was NOT saved.',
+        );
+      }
+
+      throw new Error(
+        'Failed to create folder: ' + (err.message || 'Unknown error'),
+      );
+    }
   };
 
   // Create folder persisted in sessionStorage (local only)
@@ -204,7 +265,6 @@ export function ProjectProvider({ children, autoFetch = false }) {
       if (!user) {
         throw new Error('User not authenticated');
       }
-
       // Get current project to read existing folders
       const projectResponse = await getProject(user.uid, projectId);
       const project = projectResponse.data;
@@ -385,6 +445,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
         loadFoldersFromBackend,
         deleteOneProject,
         deleteProjectInBulk,
+        deleteMultipleProjects,
         createSubmissionForProject,
         saveProjectToBackend,
       }}

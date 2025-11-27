@@ -19,6 +19,10 @@ export const updateProject = (userId, projectId, project) =>
   });
 export const deleteProject = (userId, projectId) =>
   axios.delete(`${API_URL}/users/${userId}/projects/${projectId}`);
+export const deleteProjects = (userId, project_ids) =>
+  axios.delete(`${API_URL}/users/${userId}/projects/`, project_ids, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 export const getProject = (userId, projectId) =>
   axios.get(`${API_URL}/users/${userId}/projects/${projectId}`);
 

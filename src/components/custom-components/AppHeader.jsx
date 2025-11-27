@@ -12,7 +12,7 @@ export default function AppHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4 "
         />
-        <Breadcrumbs />
+        {/* <Breadcrumbs /> */}
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import React, { useState,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -29,8 +29,8 @@ export default function ProjectsMasterTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
-  const { loading, deleteProjectInBulk } = useProject();
-
+  const { loading, deleteProjectInBulk, deleteMultipleProjects } = useProject();
+  console.log(data);
   const table = useReactTable({
     data,
     columns,
@@ -53,10 +53,22 @@ export default function ProjectsMasterTable({ columns, data }) {
   const hasSelectedRows = table.getFilteredSelectedRowModel().rows.length > 0;
 
   // Handle bulk selection function
+  // TODO: Integrate properly with backend
+  const handleBulkDelete2 = async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const projectsToDelete = selectedRows.map((row) => row.original);
+    console.log(projectsToDelete);
+    try {
+      const result = await deleteMultipleProjects({ projectsToDelete });
+      console.log('Bulk delete result:', result); // Debug
+    } catch (error) {
+      toast.error(`Failed to delete projects: ${error.message}`);
+    }
+  };
   const handleBulkDelete = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
     const projectsToDelete = selectedRows.map((row) => row.original);
-
+    console.log(projectsToDelete);
     console.log('Projects to delete:', projectsToDelete); // Debug
 
     try {
@@ -122,7 +134,8 @@ export default function ProjectsMasterTable({ columns, data }) {
           />
           {hasSelectedRows && (
             <Button variant="destructive" onClick={handleBulkDelete}>
-              Delete selected ({table.getFilteredSelectedRowModel().rows.length})
+              Delete selected ({table.getFilteredSelectedRowModel().rows.length}
+              )
             </Button>
           )}
         </div>

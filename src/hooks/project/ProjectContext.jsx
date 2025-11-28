@@ -32,7 +32,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
       const response = await getProjects(user.uid);
-      setProjects(response.data.projects);
+      setProjects(response.data.data);
       setFetchError('');
     } catch (err) {
       toast.error(
@@ -67,7 +67,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
     try {
       setLoading(true);
 
-      const response = await createProject(user.uid, {
+      const { data } = await createProject(user.uid, {
         project_name: newProjectName,
         project_desc: newProjectDesc || '',
         fileIds: [],
@@ -77,7 +77,7 @@ export function ProjectProvider({ children, autoFetch = false }) {
       await fetchProjects();
       setLoading(false);
 
-      return response;
+      return data;
     } catch (err) {
       toast.error(
         `Failed to create a new project: ${
@@ -113,9 +113,10 @@ export function ProjectProvider({ children, autoFetch = false }) {
 
   const deleteMultipleProjects = async ({ projectsToDelete }) => {
     try {
+      console.log(projectsToDelete);
       setLoading(true);
-      const response = await deleteProjects(user.uid, projectsToDelete);
-      return response.data;
+      const { data } = await deleteProjects(user.uid, projectsToDelete);
+      return data;
     } catch (error) {
       throw new Error(
         `Failed to delete projects ${error.response?.data?.error || error.message}`,

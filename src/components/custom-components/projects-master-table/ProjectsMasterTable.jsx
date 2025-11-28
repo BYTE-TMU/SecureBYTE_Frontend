@@ -30,7 +30,6 @@ export default function ProjectsMasterTable({ columns, data }) {
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const { loading, deleteProjectInBulk, deleteMultipleProjects } = useProject();
-  console.log(data);
   const table = useReactTable({
     data,
     columns,
@@ -53,59 +52,18 @@ export default function ProjectsMasterTable({ columns, data }) {
   const hasSelectedRows = table.getFilteredSelectedRowModel().rows.length > 0;
 
   // Handle bulk selection function
-  // TODO: Integrate properly with backend
-  const handleBulkDelete2 = async () => {
+  const handleBulkDelete = async () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const projectsToDelete = selectedRows.map((row) => row.original);
+    const projectsToDelete = selectedRows.map((row) => row.original.projectid);
     console.log(projectsToDelete);
     try {
       const result = await deleteMultipleProjects({ projectsToDelete });
-      console.log('Bulk delete result:', result); // Debug
+      console.log(result);
+      toast.success('Delete Successful', {
+        description: `${result.meta.message}`,
+      });
     } catch (error) {
       toast.error(`Failed to delete projects: ${error.message}`);
-    }
-  };
-  const handleBulkDelete = async () => {
-    const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const projectsToDelete = selectedRows.map((row) => row.original);
-    console.log(projectsToDelete);
-    console.log('Projects to delete:', projectsToDelete); // Debug
-
-    try {
-      const result = await deleteProjectInBulk({ projectsToDelete });
-
-      if (result?.successful?.length === projectsToDelete.length) {
-        toast.success('Delete Successful', {
-          description: `Successfully deleted ${result.successful.length} project(s)`,
-        });
-      }
-
-      if (result?.successful?.length === 0 && projectsToDelete.length > 0) {
-        toast.error('All Delete Failed', {
-          description: `Failed to delete ${projectsToDelete.length} projects. Please try again later`,
-        });
-      }
-
-      if (result?.successful?.length > 0 && result?.failed?.length > 0) {
-        const failedDelete = result.failed.map((r) => r.reason);
-
-        console.error('Failed to partially delete projects', failedDelete); // Debug
-
-        toast.error('Delete Failed', {
-          description: `Failed to delete ${failedDelete.length} projects. Please try again later`,
-        });
-      }
-    } catch (err) {
-      console.error(
-        `Error deleting projects in bulk:" ${
-          err.response?.data?.error || err.message
-        }`,
-      );
-      toast.error('Delete Failed', {
-        description: 'An unexpected error occurred. Please try again.',
-      });
-    } finally {
-      table.resetRowSelection(); // Clear all selected rows
     }
   };
 

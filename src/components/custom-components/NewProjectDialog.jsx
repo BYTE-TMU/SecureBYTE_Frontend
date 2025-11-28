@@ -21,31 +21,34 @@ export function NewProjectDialog() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
   const [error, setError] = useState('');
-  const { createNewProject } = useProject(); 
+  const { createNewProject } = useProject();
   const navigate = useNavigate();
 
   // Use ProjectProvider to create a new project and handle errors locally.
   const handleCreateProject = async () => {
     try {
-      const newProject = await createNewProject({ newProjectName, newProjectDesc}); 
-      
+      const newProject = await createNewProject({
+        newProjectName,
+        newProjectDesc,
+      });
       // Save project name before clearing form
       const savedProjectName = newProjectName;
       const projectId = newProject.data.projectid;
 
       // Show success message and navigate to the project page
       toast.success('Project created successfully');
-      
+
       // Navigate to the individual project page (LoadingPage will show while data loads)
       navigate(`/projects/${projectId}`, {
-        state: { projectName: savedProjectName }
+        state: { projectName: savedProjectName },
       });
-      
-      // Note: LoadingPage.jsx would be shown in IndividualProjectPage as it blocks rendering until submissionsLoading and treeLoading are complete
 
-    } catch(err) {
-      console.error('Error creating project:', err); 
-      setError(`Failed to create a new project: ${err.response?.data?.error || err.message}`); 
+      // Note: LoadingPage.jsx would be shown in IndividualProjectPage as it blocks rendering until submissionsLoading and treeLoading are complete
+    } catch (err) {
+      console.error('Error creating project:', err);
+      setError(
+        `Failed to create a new project: ${err.response?.data?.error || err.message}`,
+      );
     }
   };
 

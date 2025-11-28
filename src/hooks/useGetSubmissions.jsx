@@ -26,7 +26,7 @@ export function useGetSubmissions(projectId) {
         `[SUBMISSIONS] Got ${response.data?.length || 0} submissions:`,
         response.data,
       );
-      setSubmissions(response.data);
+      setSubmissions(response.data.data);
       setError('');
     } catch (err) {
       console.error('[SUBMISSIONS] Failed to fetch submissions:', err);
